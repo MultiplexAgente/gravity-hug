@@ -548,22 +548,11 @@ function Landing() {
                       className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.6] contrast-[1.05] transition-transform duration-1000 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-transparent pointer-events-none" />
-                    
-                    {/* Badge de Ato Flutuante Cinematográfico */}
-                    <div className="absolute top-5 left-5 z-20">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-[11px] font-semibold text-emerald-400 backdrop-blur-md">
-                        <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        ATO {item.step}
-                      </span>
-                    </div>
                   </InteractiveTiltCard>
                 </Reveal>
 
                 {/* Conteúdo Editorial com Alto Espaço Negativo */}
                 <Reveal delay={0.2} className="w-full lg:w-2/5 space-y-4">
-                  <span className="text-xs font-mono font-semibold tracking-widest text-emerald-400/90 uppercase block">
-                    ETAPA {item.step}
-                  </span>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-white leading-tight">
                     {item.title}
                   </h3>
