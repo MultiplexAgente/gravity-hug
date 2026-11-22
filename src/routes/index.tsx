@@ -614,7 +614,7 @@ function Landing() {
         SEÇÃO INTELIGÊNCIA ARTIFICIAL: Monólito de Vidro Escuro e Demonstração Real
         ========================================================================
       */}
-      <section id="inteligencia" className="relative min-h-[70vh] overflow-hidden flex items-center">
+      <section id="inteligencia" className="relative min-h-[75vh] overflow-hidden flex items-center py-20 sm:py-28">
         {/* Monólito de Vidro Escuro como Plano de Fundo Cinematográfico */}
         <motion.img
           src={monolith}
@@ -625,46 +625,70 @@ function Landing() {
           className="absolute inset-0 h-full w-full object-cover brightness-[0.7] contrast-[1.1] transition-transform duration-1000"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-[#03060a]" />
-        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-black/55" />
 
-        <div className="relative z-10 mx-auto max-w-[1400px] w-full px-6 py-16 sm:py-24 md:px-12">
+        {/* Ambient Glows Cinematográficos */}
+        <div className="pointer-events-none absolute right-1/4 top-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-emerald-500/10 rounded-full blur-[140px]" />
+        <div className="pointer-events-none absolute left-10 bottom-10 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[120px]" />
+
+        <div className="relative z-10 mx-auto max-w-[1400px] w-full px-6 md:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Texto de Apresentação */}
-            <Reveal className="space-y-5 max-w-xl">
+            <Reveal className="space-y-6 max-w-xl">
               <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.08] tracking-[-0.03em] text-white">
                 Você pede.
                 <br />
-                A HUG executa.
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+                  A HUG executa.
+                </span>
               </h2>
               <p className="text-base sm:text-lg leading-relaxed text-slate-300/90 font-light">
                 Esqueça relatórios complicados e comandos difíceis. Uma assistente conversacional
                 conectada diretamente aos dados reais da sua loja para tirar dúvidas e sugerir
                 respostas imediatas.
               </p>
-              <div className="pt-2">
+              <div className="pt-3">
                 <a
                   href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma demonstração executiva da inteligência HUG para meu negócio.")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 text-sm font-medium text-emerald-400 transition-all hover:text-emerald-300 hover:translate-x-1"
+                  className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-emerald-300/40 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 px-8 py-3.5 text-sm sm:text-base font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.3)] backdrop-blur-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_36px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
                 >
-                  <span>Falar com Especialista</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  {/* Brilho especular sutil na borda superior */}
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+                  {/* Reflexo luminoso dinâmico no hover */}
+                  <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
+                  
+                  <span className="relative z-10 tracking-tight">Falar com Especialista</span>
+                  <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-white transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none" />
                 </a>
               </div>
             </Reveal>
 
-            {/* Demonstração Visual Realista e Elegante da Conversa */}
+            {/* Demonstração Visual Realista e Elegante da Conversa (Terminal HUD Glass) */}
             <Reveal delay={0.25}>
-              <div className="rounded-3xl border border-white/20 bg-black/80 p-6 sm:p-9 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="relative group/terminal rounded-3xl border border-emerald-500/20 bg-[#04080e]/90 p-6 sm:p-9 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.95),0_0_40px_rgba(16,185,129,0.1)] space-y-6 overflow-hidden">
+                {/* Linha de luz especular superior */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
+                {/* Ambient corner glow */}
+                <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl" />
+                
+                {/* Cabeçalho do HUD / Terminal */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
                   <div className="flex items-center gap-3">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-xs font-mono text-slate-300 uppercase tracking-wider">
+                    <div className="relative flex h-2.5 w-2.5 items-center justify-center">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-200 uppercase tracking-widest">
                       Consulta Operacional em Tempo Real
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-emerald-400/80">Sincronizado</span>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-mono text-emerald-300">
+                      Sincronizado
+                    </span>
+                  </div>
                 </div>
 
                 {/* Pergunta do Lojista */}
@@ -673,12 +697,15 @@ function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.3 }}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left space-y-1.5"
+                  className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5 text-left space-y-2 backdrop-blur-sm shadow-inner transition-colors hover:border-white/20"
                 >
-                  <span className="text-[10px] font-mono text-muted-foreground uppercase">
-                    Lojista · Balcão de Vendas
-                  </span>
-                  <p className="text-sm text-white">
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                    <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+                      Lojista · Balcão de Vendas
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base text-slate-100 font-light leading-relaxed">
                     "Temos o blazer linho tamanho M em estoque central para entrega ainda hoje?"
                   </p>
                 </motion.div>
@@ -689,19 +716,38 @@ function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.6 }}
-                  className="rounded-2xl border border-emerald-500/35 bg-emerald-500/10 p-4 text-left space-y-2 relative overflow-hidden"
+                  className="relative rounded-2xl border border-emerald-500/35 bg-gradient-to-br from-emerald-950/40 via-[#061b15]/60 to-[#04120e]/80 p-5 sm:p-6 text-left space-y-3.5 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.12)] ring-1 ring-emerald-500/20 overflow-hidden"
                 >
+                  {/* Luz interna no topo do card da HUG */}
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase font-semibold">
-                      HUG Intelligence
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                      <span className="text-[11px] font-mono text-emerald-300 uppercase font-semibold tracking-wider">
+                        HUG Intelligence
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center rounded-md border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-mono text-emerald-300">
+                      0.4s
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400/70">0.4s</span>
                   </div>
-                  <p className="text-sm text-slate-100 leading-relaxed">
-                    "Localizado no estoque central: <strong>4 unidades disponíveis</strong>. Preço
-                    tabelado <strong>R$ 89,00</strong>. Deseja separar o pedido para retirada no balcão
-                    ou gerar link de pagamento?"
+
+                  <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-light">
+                    "Localizado no estoque central: <strong className="font-semibold text-emerald-300">4 unidades disponíveis</strong>. Preço tabelado <strong className="font-semibold text-white">R$ 89,00</strong>. Deseja separar o pedido para retirada no balcão ou gerar link de pagamento?"
                   </p>
+
+                  {/* Pílulas de Ação Rápida sugeridas pela IA */}
+                  <div className="pt-1 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-200">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      Separar no balcão
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
+                      Gerar link de pagamento
+                    </span>
+                  </div>
                 </motion.div>
               </div>
             </Reveal>
