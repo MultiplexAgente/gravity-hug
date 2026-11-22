@@ -354,7 +354,7 @@ function Landing() {
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
             <a href="#inteligencia" className="transition-colors hover:text-foreground relative group py-1">
-              Inteligência
+              I.A
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
             <a href="#segmentos" className="transition-colors hover:text-foreground relative group py-1">
