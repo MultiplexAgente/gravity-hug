@@ -72,7 +72,6 @@ const getBonaSoftWhatsAppUrl = (mensagem: string) =>
 // 1. Narrativa Contínua dos Três Pilares (Sem formato de cards, composições amplas)
 const NARRATIVE_PILLARS = [
   {
-    step: "01",
     title: "Venda em qualquer frente.",
     subtitle: "Do balcão físico ao catálogo online e canais de mensagem.",
     description:
@@ -86,7 +85,6 @@ const NARRATIVE_PILLARS = [
       "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    step: "02",
     title: "Controle absoluto em tempo real.",
     subtitle: "Estoque, clientes e faturamento sem planilhas soltas.",
     description:
@@ -100,7 +98,6 @@ const NARRATIVE_PILLARS = [
       "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    step: "03",
     title: "Inteligência que entende o seu negócio.",
     subtitle: "Uma assistente conectada à realidade dos seus dados.",
     description:
@@ -319,7 +316,6 @@ function Landing() {
   const fade = useTransform(smoothProgress, [0, 0.75], [1, 0]);
 
   const [selectedSector, setSelectedSector] = useState(COMMERCIAL_SECTORS[0]);
-  const [activePillarStep, setActivePillarStep] = useState("01");
 
   return (
     <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200 relative overflow-x-hidden">
@@ -486,8 +482,7 @@ function Landing() {
             const isReversed = idx % 2 === 1;
             return (
               <div
-                key={item.step}
-                onMouseEnter={() => setActivePillarStep(item.step)}
+                key={item.title}
                 className={`flex flex-col gap-8 lg:gap-16 items-center ${
                   isReversed ? "lg:flex-row-reverse" : "lg:flex-row"
                 }`}
