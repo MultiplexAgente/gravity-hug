@@ -163,14 +163,14 @@ const ECOSYSTEM_MODULES = [
 // 3. Segmentos Comerciais com Fotografia Editorial
 const COMMERCIAL_SECTORS = [
   {
-    id: "farmacia",
-    name: "Farmácias",
-    title: "Farmácias & Drogarias",
+    id: "materiais",
+    name: "Materiais",
+    title: "Materiais, Papelarias, Livrarias & Ferramentas",
     narrative:
-      "Rastreabilidade completa de lotes, controle de validades e retenção rigorosa de receituário.",
-    kpi: "Rastreio Unitário · 100% Auditado",
+      "Venda ágil no balcão e encomendas, busca instantânea por SKU, EAN ou ISBN, cálculo com conversão fracionada de unidades (m², kg, metro linear, resma, pacote, caixa), controle rigoroso de estoque e expedição com rotas de entrega.",
+    kpi: "Balcão & Encomendas · SKU, ISBN & Fracionado",
     image:
-      "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
   },
   {
     id: "mercado",
@@ -213,14 +213,14 @@ const COMMERCIAL_SECTORS = [
       "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    id: "materiais",
-    name: "Materiais",
-    title: "Materiais, Papelarias, Livrarias & Ferramentas",
+    id: "farmacia",
+    name: "Farmácias",
+    title: "Farmácias & Drogarias",
     narrative:
-      "Venda ágil no balcão e encomendas, busca instantânea por SKU, EAN ou ISBN, cálculo com conversão fracionada de unidades (m², kg, metro linear, resma, pacote, caixa), controle rigoroso de estoque e expedição com rotas de entrega.",
-    kpi: "Balcão & Encomendas · SKU, ISBN & Fracionado",
+      "Rastreabilidade completa de lotes, controle de validades e retenção rigorosa de receituário.",
+    kpi: "Rastreio Unitário · 100% Auditado",
     image:
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1600&q=85",
   },
 ];
 
