@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
@@ -19,7 +19,6 @@ import monolith from "@/assets/monolith.jpg";
 import hugLogo from "@/assets/hug-icon.jpg";
 import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 import { SmoothScroll } from "@/components/cinematic/SmoothScroll";
-import { CosmicBackdrop } from "@/components/cinematic/CosmicBackdrop";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -287,7 +286,7 @@ function Reveal({
 }
 
 /**
- * Cartão 3D com efeito de iluminação e profundidade interativa que segue o cursor
+ * Cartão de apresentação com acabamento sofisticado
  */
 function InteractiveTiltCard({
   children,
@@ -296,39 +295,10 @@ function InteractiveTiltCard({
   children: React.ReactNode;
   className?: string;
 }) {
-  const [coords, setCoords] = useState<{ x: number; y: number; active: boolean }>({
-    x: 0,
-    y: 0,
-    active: false,
-  });
-
-  const handleMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setCoords({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      active: true,
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setCoords((prev) => ({ ...prev, active: false }));
-  };
-
   return (
     <div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-3xl transition-transform duration-300 hover:scale-[1.015] ${className}`}
+      className={`relative overflow-hidden rounded-3xl ${className}`}
     >
-      {coords.active && (
-        <div
-          className="pointer-events-none absolute -inset-px z-10 rounded-3xl opacity-100 transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(400px circle at ${coords.x}px ${coords.y}px, rgba(16, 185, 129, 0.15), transparent 70%)`,
-          }}
-        />
-      )}
       {children}
     </div>
   );
@@ -341,34 +311,20 @@ function Landing() {
     offset: ["start start", "end start"],
   });
 
-  // Interpolações de câmera e profundidade no Hero
+  // Interpolações suaves de profundidade no Hero atreladas à rolagem vertical
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.8 });
   const imgY = useTransform(smoothProgress, [0, 1], ["0%", "24%"]);
   const imgScale = useTransform(smoothProgress, [0, 1], [1.02, 1.18]);
   const textY = useTransform(smoothProgress, [0, 1], ["0%", "-40%"]);
   const fade = useTransform(smoothProgress, [0, 0.75], [1, 0]);
 
-  // Parallax sutil com movimento do mouse no desktop
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-  const handleHeroMouseMove = (e: ReactMouseEvent<HTMLElement>) => {
-    if (window.innerWidth < 1024) return;
-    const { clientX, clientY } = e;
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    setMouseOffset({
-      x: (clientX - centerX) * 0.015,
-      y: (clientY - centerY) * 0.015,
-    });
-  };
-
   const [selectedSector, setSelectedSector] = useState(COMMERCIAL_SECTORS[0]);
   const [activePillarStep, setActivePillarStep] = useState("01");
 
   return (
     <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200 relative overflow-x-hidden">
-      {/* Sistema de rolagem suave Lenis e partículas profundas */}
+      {/* Sistema de rolagem suave Lenis */}
       <SmoothScroll />
-      <CosmicBackdrop />
 
       {/* 
         ========================================================================
@@ -435,10 +391,9 @@ function Landing() {
       */}
       <section
         ref={heroRef}
-        onMouseMove={handleHeroMouseMove}
-        className="relative min-h-[85vh] lg:min-h-[92vh] overflow-hidden flex flex-col justify-center perspective-[1200px]"
+        className="relative min-h-[85vh] lg:min-h-[92vh] overflow-hidden flex flex-col justify-center"
       >
-        {/* Imagem do Horizonte Planetário com Parallax Escala/Posição */}
+        {/* Imagem do Horizonte Planetário */}
         <motion.img
           src={horizon}
           alt="Horizonte de um planeta iluminado no espaço"
@@ -447,7 +402,6 @@ function Landing() {
           style={{
             y: imgY,
             scale: imgScale,
-            x: mouseOffset.x * 0.5,
           }}
           className="absolute inset-0 h-full w-full object-cover object-[50%_62%] brightness-[0.95] contrast-[1.1] will-change-transform"
         />
@@ -545,7 +499,7 @@ function Landing() {
                       src={item.image}
                       alt={item.title}
                       loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.6] contrast-[1.05] transition-transform duration-1000 group-hover:scale-105"
+                      className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.6] contrast-[1.05]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-transparent pointer-events-none" />
                   </InteractiveTiltCard>
