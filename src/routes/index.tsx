@@ -13,6 +13,7 @@ import {
   Laptop,
   Globe,
   Radio,
+  CheckCheck,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
@@ -302,71 +303,128 @@ function InteractiveTiltCard({
 }
 
 /**
- * Demonstração Cinematográfica da Conversa HUG I.A
+ * Demonstração Autêntica de Conversa com a HUG I.A
+ * Interface inspirada em mensageria corporativa moderna (estilo WhatsApp / Chat Real)
  */
 function HugChatConversationDemo() {
   return (
-    <div className="relative rounded-3xl border border-emerald-500/20 bg-[#04080e]/90 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.95),0_0_40px_rgba(16,185,129,0.1)] space-y-5 overflow-hidden text-left">
+    <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-emerald-500/20 bg-[#060c14]/95 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.95),0_0_40px_rgba(16,185,129,0.1)] overflow-hidden text-left">
       {/* Linha de luz especular superior */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
-      <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
 
-      {/* Cabeçalho do HUD / Terminal */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
-          </span>
-          <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-200 uppercase tracking-widest">
-            HUG I.A · Balcão de Vendas
-          </span>
+      {/* Cabeçalho da Janela de Conversa (estilo Chat Oficial) */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-[#04080e]/80">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <img
+              src={hugLogo}
+              alt="HUG I.A"
+              className="h-10 w-10 rounded-full object-cover ring-1 ring-emerald-500/40 shadow-sm"
+            />
+            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#04080e] bg-emerald-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-white tracking-tight">HUG I.A</span>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">
+                Oficial
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-light">
+              Online · Conectada ao seu ERP
+            </p>
+          </div>
         </div>
-        <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-mono text-emerald-300">
-          Sincronizado
-        </span>
+        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] font-mono text-slate-300">Tempo Real</span>
+        </div>
       </div>
 
-      {/* Mensagens da Conversa */}
-      <div className="space-y-4 pt-1">
-        {/* Balão do Lojista (Alinhado à Direita, como uma pergunta real) */}
-        <div className="flex flex-col items-end">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1 mr-1 font-semibold">
-            Lojista
+      {/* Área de Mensagens da Conversa */}
+      <div className="p-5 sm:p-6 space-y-4 bg-gradient-to-b from-[#060c14]/60 to-[#03060a]/90">
+        {/* Carimbo de data sutil */}
+        <div className="flex justify-center">
+          <span className="rounded-full bg-white/[0.04] border border-white/[0.06] px-3 py-0.5 text-[10px] font-mono text-slate-400">
+            Hoje · Balcão de Vendas
           </span>
-          <div className="max-w-[88%] sm:max-w-[82%] rounded-2xl rounded-tr-xs border border-white/10 bg-white/[0.06] p-4 text-left backdrop-blur-sm shadow-md">
-            <p className="text-sm sm:text-base text-slate-100 font-light leading-relaxed">
+        </div>
+
+        {/* 1. Mensagem do Lojista (Direita) */}
+        <div className="flex flex-col items-end space-y-1">
+          <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-emerald-900/30 border border-emerald-500/20 px-4 py-3 text-slate-100 shadow-md">
+            <p className="text-sm leading-relaxed">
               Temos o blazer linho tamanho M em estoque central para entrega ainda hoje?
             </p>
           </div>
+          <div className="flex items-center gap-1 pr-1 text-[10px] text-slate-400 font-mono">
+            <span>14:32</span>
+            <CheckCheck className="h-3.5 w-3.5 text-emerald-400" />
+          </div>
         </div>
 
-        {/* Balão da HUG I.A (Alinhado à Esquerda com Resposta Executiva) */}
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-1 ml-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-            <span className="text-[10px] font-mono text-emerald-300 uppercase tracking-wider font-semibold">
-              HUG I.A
-            </span>
-            <span className="inline-flex items-center rounded border border-emerald-500/30 bg-emerald-500/15 px-1.5 py-0.2 text-[9px] font-mono text-emerald-300">
-              0.4s
-            </span>
+        {/* 2. Resposta da HUG I.A (Esquerda) */}
+        <div className="flex items-start gap-2.5 max-w-[92%]">
+          <img
+            src={hugLogo}
+            alt="HUG"
+            className="h-7 w-7 rounded-full object-cover shrink-0 mt-1 ring-1 ring-emerald-500/30"
+          />
+          <div className="space-y-1">
+            <div className="rounded-2xl rounded-tl-xs bg-white/[0.05] border border-white/10 p-4 text-slate-100 shadow-md backdrop-blur-sm space-y-2">
+              <p className="text-sm leading-relaxed text-slate-200">
+                Temos sim! Encontrei <strong className="text-emerald-300 font-medium">4 unidades</strong> do blazer linho (tamanho M) no estoque central por <strong className="text-white font-medium">R$ 89,00</strong>.
+              </p>
+              <p className="text-sm leading-relaxed text-slate-300 font-light">
+                Deseja que eu reserve uma unidade para retirada imediata no balcão ou prefere enviar um link de pagamento?
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pl-1 text-[10px] text-slate-400 font-mono">
+              <span>HUG I.A</span>
+              <span>·</span>
+              <span>14:32</span>
+            </div>
           </div>
-          <div className="max-w-[95%] sm:max-w-[92%] rounded-2xl rounded-tl-xs border border-emerald-500/35 bg-gradient-to-br from-emerald-950/40 via-[#061b15]/60 to-[#04120e]/80 p-5 text-left space-y-3.5 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.12)] ring-1 ring-emerald-500/20">
-            <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-light">
-              Localizado no estoque central: <strong className="font-semibold text-emerald-300">4 unidades disponíveis</strong>. Preço tabelado <strong className="font-semibold text-white">R$ 89,00</strong>. Deseja separar o pedido para retirada no balcão ou gerar link de pagamento?
-            </p>
+        </div>
 
-            {/* Pílulas de Ação Rápida */}
-            <div className="pt-1 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Separar no balcão
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
-                Gerar link de pagamento
-              </span>
+        {/* 3. Réplica do Lojista (Direita) */}
+        <div className="flex flex-col items-end space-y-1">
+          <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-emerald-900/30 border border-emerald-500/20 px-4 py-3 text-slate-100 shadow-md">
+            <p className="text-sm leading-relaxed">
+              Gera o link de pagamento por gentileza.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 pr-1 text-[10px] text-slate-400 font-mono">
+            <span>14:33</span>
+            <CheckCheck className="h-3.5 w-3.5 text-emerald-400" />
+          </div>
+        </div>
+
+        {/* 4. Conclusão da HUG I.A (Esquerda) */}
+        <div className="flex items-start gap-2.5 max-w-[92%]">
+          <img
+            src={hugLogo}
+            alt="HUG"
+            className="h-7 w-7 rounded-full object-cover shrink-0 mt-1 ring-1 ring-emerald-500/30"
+          />
+          <div className="space-y-1">
+            <div className="rounded-2xl rounded-tl-xs bg-white/[0.05] border border-emerald-500/30 p-4 text-slate-100 shadow-md backdrop-blur-sm space-y-2">
+              <p className="text-sm leading-relaxed text-slate-200">
+                Link gerado com sucesso:
+              </p>
+              <div className="rounded-lg bg-emerald-950/40 border border-emerald-500/30 px-3 py-2 flex items-center justify-between text-xs font-mono text-emerald-300">
+                <span>bonasoft.link/pay/blazer-m-89</span>
+                <span className="text-[10px] uppercase tracking-wider text-emerald-400/80 font-sans">Pronto</span>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed font-light">
+                1 unidade reservada no estoque central e vinculada ao balcão.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pl-1 text-[10px] text-slate-400 font-mono">
+              <span>HUG I.A</span>
+              <span>·</span>
+              <span>14:33</span>
             </div>
           </div>
         </div>
