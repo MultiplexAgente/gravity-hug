@@ -372,8 +372,12 @@ function Landing() {
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma consultoria e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative group overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-xs font-semibold text-emerald-400 backdrop-blur-md transition-all duration-300 hover:border-emerald-400 hover:bg-emerald-500/25 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] shadow-sm"
+              className="relative group overflow-hidden rounded-full border border-emerald-400/40 bg-gradient-to-r from-emerald-600/90 to-teal-500/90 px-5 py-2 text-xs font-medium text-white shadow-[0_0_16px_rgba(16,185,129,0.22)] backdrop-blur-md transition-all duration-300 hover:from-emerald-500 hover:to-teal-400 hover:shadow-[0_0_24px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
+              {/* Brilho especular sutil na borda superior */}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              {/* Reflexo luminoso suave ao hover */}
+              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
               <span className="relative z-10">Falar com Especialista</span>
             </a>
           </div>
@@ -435,28 +439,41 @@ function Landing() {
             plataforma.
           </motion.p>
 
-          {/* Botões do Hero com Efeito Interativo Aprimorado */}
+          {/* Botões do Hero com Acabamento Premium Cinematográfico */}
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1, ease, delay: 0.95 }}
-            className="mt-8 flex w-full flex-col items-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
+            className="mt-8 sm:mt-10 flex w-full flex-col items-center justify-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4 px-4 sm:px-0"
           >
+            {/* CTA Principal: Falar com Especialista */}
             <a
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.06] px-8 py-4 text-sm font-medium text-white backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/80 hover:bg-white/[0.14] hover:shadow-[0_0_30px_rgba(16,185,129,0.25)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
+              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-300/40 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 px-8 py-4 sm:px-9 sm:py-4 text-sm sm:text-base font-medium text-white shadow-[0_0_28px_rgba(16,185,129,0.32)] backdrop-blur-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_42px_rgba(16,185,129,0.55)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
-              <span>Falar com Especialista</span>
-              <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
+              {/* Brilho especular sutil na borda superior */}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+              {/* Reflexo luminoso dinâmico no hover */}
+              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
+              
+              <span className="relative z-10 tracking-tight">Falar com Especialista</span>
+              <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-white transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none" />
             </a>
+
+            {/* CTA Secundário: Conhecer a plataforma */}
             <a
               href="#pilares"
-              className="group relative inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.04] px-8 py-4 text-sm font-medium text-white backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
+              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-500/30 bg-[#080d14]/70 px-8 py-4 sm:px-9 sm:py-4 text-sm sm:text-base font-medium text-slate-100 shadow-lg shadow-black/40 backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/60 hover:bg-[#0c1420]/80 hover:text-white hover:shadow-[0_0_28px_rgba(16,185,129,0.18)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
-              <span>Conhecer a plataforma</span>
-              <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
+              {/* Brilho especular sutil na borda superior */}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/35 to-transparent" />
+              {/* Gradiente interno sutil para profundidade glass */}
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+              
+              <span className="relative z-10 tracking-tight">Conhecer a plataforma</span>
+              <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-emerald-400 transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:text-emerald-300 motion-reduce:transform-none" />
             </a>
           </motion.div>
         </motion.div>
