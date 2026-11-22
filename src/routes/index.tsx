@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
+import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from "react";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
   ChevronRight,
@@ -12,11 +12,14 @@ import {
   Smartphone,
   Laptop,
   Globe,
+  Radio,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
 import hugLogo from "@/assets/hug-icon.jpg";
 import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
+import { SmoothScroll } from "@/components/cinematic/SmoothScroll";
+import { CosmicBackdrop } from "@/components/cinematic/CosmicBackdrop";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +43,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const ease = [0.22, 1, 0.36, 1] as const;
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const BONASOFT_WEBSITE_URL = "https://bonasoftmt.com";
 
@@ -272,14 +275,62 @@ function Reveal({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 35, filter: "blur(6px)" }}
+      initial={{ opacity: 0, y: 36, filter: "blur(8px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-12%" }}
+      viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 1.1, ease, delay }}
       className={className}
     >
       {children}
     </motion.div>
+  );
+}
+
+/**
+ * Cartão 3D com efeito de iluminação e profundidade interativa que segue o cursor
+ */
+function InteractiveTiltCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [coords, setCoords] = useState<{ x: number; y: number; active: boolean }>({
+    x: 0,
+    y: 0,
+    active: false,
+  });
+
+  const handleMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setCoords({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setCoords((prev) => ({ ...prev, active: false }));
+  };
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`relative overflow-hidden rounded-3xl transition-transform duration-300 hover:scale-[1.015] ${className}`}
+    >
+      {coords.active && (
+        <div
+          className="pointer-events-none absolute -inset-px z-10 rounded-3xl opacity-100 transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(400px circle at ${coords.x}px ${coords.y}px, rgba(16, 185, 129, 0.15), transparent 70%)`,
+          }}
+        />
+      )}
+      {children}
+    </div>
   );
 }
 
@@ -289,49 +340,78 @@ function Landing() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const imgScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.15]);
-  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-35%"]);
-  const fade = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+
+  // Interpolações de câmera e profundidade no Hero
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.8 });
+  const imgY = useTransform(smoothProgress, [0, 1], ["0%", "24%"]);
+  const imgScale = useTransform(smoothProgress, [0, 1], [1.02, 1.18]);
+  const textY = useTransform(smoothProgress, [0, 1], ["0%", "-40%"]);
+  const fade = useTransform(smoothProgress, [0, 0.75], [1, 0]);
+
+  // Parallax sutil com movimento do mouse no desktop
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const handleHeroMouseMove = (e: ReactMouseEvent<HTMLElement>) => {
+    if (window.innerWidth < 1024) return;
+    const { clientX, clientY } = e;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    setMouseOffset({
+      x: (clientX - centerX) * 0.015,
+      y: (clientY - centerY) * 0.015,
+    });
+  };
 
   const [selectedSector, setSelectedSector] = useState(COMMERCIAL_SECTORS[0]);
+  const [activePillarStep, setActivePillarStep] = useState("01");
 
   return (
-    <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200">
+    <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200 relative overflow-x-hidden">
+      {/* Sistema de rolagem suave Lenis e partículas profundas */}
+      <SmoothScroll />
+      <CosmicBackdrop />
+
       {/* 
         ========================================================================
-        NAVBAR: Minimalista, Fina e Elegante
+        NAVBAR: Minimalista, Fina, Fluida e Elegante
         ========================================================================
       */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#03060a]/70 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#03060a]/75 backdrop-blur-2xl transition-all duration-300">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6 sm:h-20 sm:px-10">
           <Link
             to="/"
-            className="flex items-center gap-2.5 text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-colors hover:text-white"
+            className="flex items-center gap-2.5 text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-all duration-300 hover:text-white group"
           >
             <img
               src={hugLogo}
               alt="HUG"
-              className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-emerald-500/40"
+              className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-emerald-500/40 transition-transform duration-300 group-hover:scale-105"
             />
-            <span>HUG</span>
+            <span className="relative">
+              HUG
+              <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
+            </span>
           </Link>
 
           <nav className="hidden items-center gap-9 text-xs tracking-wider uppercase text-muted-foreground/80 md:flex">
-            <a href="#pilares" className="transition-colors hover:text-foreground">
+            <a href="#pilares" className="transition-colors hover:text-foreground relative group py-1">
               Pilares
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
-            <a href="#ecossistema" className="transition-colors hover:text-foreground">
+            <a href="#ecossistema" className="transition-colors hover:text-foreground relative group py-1">
               Ecossistema
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
-            <a href="#inteligencia" className="transition-colors hover:text-foreground">
+            <a href="#inteligencia" className="transition-colors hover:text-foreground relative group py-1">
               Inteligência
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
-            <a href="#segmentos" className="transition-colors hover:text-foreground">
+            <a href="#segmentos" className="transition-colors hover:text-foreground relative group py-1">
               Segmentos
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
-            <a href="#planos" className="transition-colors hover:text-foreground">
+            <a href="#planos" className="transition-colors hover:text-foreground relative group py-1">
               Planos
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
           </nav>
 
@@ -340,9 +420,9 @@ function Landing() {
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma consultoria e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-xs font-semibold text-emerald-400 backdrop-blur-md transition hover:border-emerald-400 hover:bg-emerald-500/20 shadow-sm"
+              className="relative group overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-xs font-semibold text-emerald-400 backdrop-blur-md transition-all duration-300 hover:border-emerald-400 hover:bg-emerald-500/25 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] shadow-sm"
             >
-              Falar com Especialista
+              <span className="relative z-10">Falar com Especialista</span>
             </a>
           </div>
         </div>
@@ -350,68 +430,80 @@ function Landing() {
 
       {/* 
         ========================================================================
-        HERO: Planeta Iluminado, Universo Espacial e Cinematográfico
+        HERO: Planeta Iluminado, Universo Espacial e Abertura Cinematográfica
         ========================================================================
       */}
-      <section ref={heroRef} className="relative min-h-[82vh] lg:min-h-[88vh] overflow-hidden flex flex-col justify-center">
-        {/* Imagem do Horizonte Planetário */}
+      <section
+        ref={heroRef}
+        onMouseMove={handleHeroMouseMove}
+        className="relative min-h-[85vh] lg:min-h-[92vh] overflow-hidden flex flex-col justify-center perspective-[1200px]"
+      >
+        {/* Imagem do Horizonte Planetário com Parallax Escala/Posição */}
         <motion.img
           src={horizon}
           alt="Horizonte de um planeta iluminado no espaço"
           width={1920}
           height={1088}
-          style={{ y: imgY, scale: imgScale }}
-          className="absolute inset-0 h-full w-full object-cover object-[50%_62%] brightness-[0.95] contrast-[1.1]"
+          style={{
+            y: imgY,
+            scale: imgScale,
+            x: mouseOffset.x * 0.5,
+          }}
+          className="absolute inset-0 h-full w-full object-cover object-[50%_62%] brightness-[0.95] contrast-[1.1] will-change-transform"
         />
 
-        {/* Gradientes atmosféricos de profundidade e fusão */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-[#03060a]/20 to-[#03060a]/70 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,230,118,0.08),_transparent_65%)] pointer-events-none" />
+        {/* Gradientes atmosféricos de fusão espacial */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-[#03060a]/25 to-[#03060a]/75 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(16,185,129,0.12),_transparent_70%)] pointer-events-none" />
 
         {/* Conteúdo Central do Hero */}
         <motion.div
           style={{ y: textY, opacity: fade }}
-          className="relative z-10 flex flex-col items-center justify-center px-6 pt-24 pb-12 sm:pt-28 sm:pb-16 text-center"
+          className="relative z-10 flex flex-col items-center justify-center px-6 pt-28 pb-14 sm:pt-36 sm:pb-20 text-center max-w-5xl mx-auto"
         >
-          <motion.h1
-            initial={{ opacity: 0, y: 35, filter: "blur(12px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.6, ease, delay: 0.4 }}
-            className="max-w-5xl text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-medium leading-[1.08] sm:leading-[1.03] tracking-[-0.035em] text-white"
-          >
-            Seu negócio,
-            <br />
-            <span className="text-muted-foreground/80">em outra órbita.</span>
-          </motion.h1>
+          {/* Título com Abertura Tipográfica Cinematográfica */}
+          <div className="overflow-hidden py-1">
+            <motion.h1
+              initial={{ opacity: 0, y: 70, filter: "blur(14px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.5, ease, delay: 0.3 }}
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-medium leading-[1.08] sm:leading-[1.03] tracking-[-0.035em] text-white"
+            >
+              Seu negócio,
+              <br />
+              <span className="text-muted-foreground/80">em outra órbita.</span>
+            </motion.h1>
+          </div>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease, delay: 0.8 }}
-            className="mt-4 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-slate-300/90 font-light"
+            initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, ease, delay: 0.7 }}
+            className="mt-5 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-slate-300/90 font-light"
           >
             Vendas, estoque, gestão empresarial e inteligência comercial integrados em uma única
             plataforma.
           </motion.p>
 
+          {/* Botões do Hero com Efeito Interativo Aprimorado */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease, delay: 1 }}
-            className="mt-7 flex w-full flex-col items-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
+            transition={{ duration: 1.1, ease, delay: 0.95 }}
+            className="mt-8 flex w-full flex-col items-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
           >
             <a
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
+              className="group relative inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.06] px-8 py-4 text-sm font-medium text-white backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/80 hover:bg-white/[0.14] hover:shadow-[0_0_30px_rgba(16,185,129,0.25)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               <span>Falar com Especialista</span>
               <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
             <a
               href="#pilares"
-              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
+              className="group relative inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.04] px-8 py-4 text-sm font-medium text-white backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               <span>Conhecer a plataforma</span>
               <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
@@ -422,11 +514,11 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO PILARES: Narrativa Visual Contínua (SEM CARDS)
+        SEÇÃO PILARES: Narrativa Visual Contínua (Scroll Storytelling com Atos)
         ========================================================================
       */}
-      <section id="pilares" className="relative mx-auto max-w-[1400px] px-6 pt-8 pb-14 sm:pt-10 sm:pb-20 md:px-12">
-        <Reveal className="max-w-4xl mb-8 sm:mb-10">
+      <section id="pilares" className="relative mx-auto max-w-[1400px] px-6 pt-10 pb-16 sm:pt-14 sm:pb-24 md:px-12">
+        <Reveal className="max-w-4xl mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.12] sm:leading-[1.08] tracking-[-0.03em] text-white">
             Tudo que sua empresa precisa para vender.
             <br />
@@ -434,20 +526,21 @@ function Landing() {
           </h2>
         </Reveal>
 
-        {/* Narrativa em Atos Visuais com Grandes Imagens e Amplo Espaço Negativo */}
-        <div className="space-y-12 sm:space-y-16">
+        {/* Indicador de Atos e Narrativa em Sequência */}
+        <div className="space-y-16 sm:space-y-24">
           {NARRATIVE_PILLARS.map((item, idx) => {
             const isReversed = idx % 2 === 1;
             return (
               <div
                 key={item.step}
-                className={`flex flex-col gap-8 lg:gap-14 items-center ${
+                onMouseEnter={() => setActivePillarStep(item.step)}
+                className={`flex flex-col gap-8 lg:gap-16 items-center ${
                   isReversed ? "lg:flex-row-reverse" : "lg:flex-row"
                 }`}
               >
-                {/* Composição Visual Panorâmica */}
+                {/* Composição Visual Panorâmica com Efeito 3D Tilt */}
                 <Reveal className="w-full lg:w-3/5">
-                  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl group min-h-[320px] sm:min-h-[440px]">
+                  <InteractiveTiltCard className="border border-white/10 bg-black/50 shadow-2xl group min-h-[340px] sm:min-h-[460px]">
                     <img
                       src={item.image}
                       alt={item.title}
@@ -455,11 +548,22 @@ function Landing() {
                       className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.6] contrast-[1.05] transition-transform duration-1000 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-transparent pointer-events-none" />
-                  </div>
+                    
+                    {/* Badge de Ato Flutuante Cinematográfico */}
+                    <div className="absolute top-5 left-5 z-20">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-[11px] font-semibold text-emerald-400 backdrop-blur-md">
+                        <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        ATO {item.step}
+                      </span>
+                    </div>
+                  </InteractiveTiltCard>
                 </Reveal>
 
                 {/* Conteúdo Editorial com Alto Espaço Negativo */}
                 <Reveal delay={0.2} className="w-full lg:w-2/5 space-y-4">
+                  <span className="text-xs font-mono font-semibold tracking-widest text-emerald-400/90 uppercase block">
+                    ETAPA {item.step}
+                  </span>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-white leading-tight">
                     {item.title}
                   </h3>
@@ -470,12 +574,19 @@ function Landing() {
                     {item.description}
                   </p>
 
-                  <div className="pt-3 border-t border-white/10 space-y-2.5">
-                    {item.highlights.map((h) => (
-                      <div key={h} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300/90">
+                  <div className="pt-4 border-t border-white/10 space-y-2.5">
+                    {item.highlights.map((h, hIdx) => (
+                      <motion.div
+                        key={h}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 + hIdx * 0.1, duration: 0.6 }}
+                        className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300/90"
+                      >
                         <Check className="h-4 w-4 shrink-0 text-emerald-400" />
                         <span>{h}</span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </Reveal>
@@ -487,44 +598,55 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO ECOSSISTEMA: Apresentação Editorial dos 5 Módulos HUG
+        SEÇÃO ECOSSISTEMA: Apresentação Editorial das Cinco Frentes Conectadas
         ========================================================================
       */}
       <section
         id="ecossistema"
-        className="relative border-t border-white/[0.08] bg-[#020408] py-14 sm:py-18"
+        className="relative border-t border-white/[0.08] bg-[#020408] py-16 sm:py-24 overflow-hidden"
       >
-        <div className="mx-auto max-w-[1400px] px-6 md:px-12">
-          <Reveal className="max-w-3xl mb-8 sm:mb-10">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-12 relative z-10">
+          <Reveal className="max-w-3xl mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-white">
               Cinco frentes sincronizadas.
               <br />
               <span className="text-muted-foreground">Uma única operação comercial.</span>
             </h2>
-            <p className="mt-2.5 text-base sm:text-lg text-slate-400 leading-relaxed font-light">
+            <p className="mt-3 text-base sm:text-lg text-slate-400 leading-relaxed font-light">
               Toda a jornada da sua empresa — da retaguarda ao cliente final — conectada sob uma
               mesma base de dados e regras de negócio.
             </p>
           </Reveal>
 
-          {/* Lista Editorial Elegante dos 5 Módulos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 border-t border-white/10 pt-8 sm:pt-10">
+          {/* Linha de feixe ótico de sincronia conectando as 5 frentes */}
+          <div className="hidden lg:block relative w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent mb-10">
+            <div className="absolute inset-0 bg-emerald-400/60 blur-xs" />
+          </div>
+
+          {/* Grade Editorial dos 5 Módulos com InteractiveTiltCard */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 pt-2">
             {ECOSYSTEM_MODULES.map((mod, i) => {
               const Icon = mod.icon;
               return (
-                <Reveal key={mod.id} delay={i * 0.1} className="space-y-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-mono tracking-wider text-emerald-400/90 uppercase">
-                      {mod.label}
-                    </span>
-                    <h4 className="text-xl font-medium text-white mt-1">{mod.name}</h4>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    {mod.description}
-                  </p>
+                <Reveal key={mod.id} delay={i * 0.1}>
+                  <InteractiveTiltCard className="p-6 border border-white/10 bg-white/[0.02] backdrop-blur-md h-full flex flex-col justify-between group">
+                    <div className="space-y-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-sm transition-transform duration-300 group-hover:scale-110">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-mono tracking-wider text-emerald-400/90 uppercase block">
+                          {mod.label}
+                        </span>
+                        <h4 className="text-xl font-medium text-white mt-1 group-hover:text-emerald-300 transition-colors">
+                          {mod.name}
+                        </h4>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-light">
+                        {mod.description}
+                      </p>
+                    </div>
+                  </InteractiveTiltCard>
                 </Reveal>
               );
             })}
@@ -537,23 +659,23 @@ function Landing() {
         SEÇÃO INTELIGÊNCIA ARTIFICIAL: Monólito de Vidro Escuro e Demonstração Real
         ========================================================================
       */}
-      <section id="inteligencia" className="relative min-h-[65vh] overflow-hidden flex items-center">
+      <section id="inteligencia" className="relative min-h-[70vh] overflow-hidden flex items-center">
         {/* Monólito de Vidro Escuro como Plano de Fundo Cinematográfico */}
-        <img
+        <motion.img
           src={monolith}
           alt="Monólito de vidro escuro iluminado"
           loading="lazy"
           width={1920}
           height={1088}
-          className="absolute inset-0 h-full w-full object-cover brightness-[0.7] contrast-[1.1]"
+          className="absolute inset-0 h-full w-full object-cover brightness-[0.7] contrast-[1.1] transition-transform duration-1000"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-[#03060a]" />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/45" />
 
-        <div className="relative z-10 mx-auto max-w-[1400px] w-full px-6 py-14 sm:py-18 md:px-12">
+        <div className="relative z-10 mx-auto max-w-[1400px] w-full px-6 py-16 sm:py-24 md:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Texto de Apresentação */}
-            <Reveal className="space-y-4 max-w-xl">
+            <Reveal className="space-y-5 max-w-xl">
               <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.08] tracking-[-0.03em] text-white">
                 Você pede.
                 <br />
@@ -564,22 +686,22 @@ function Landing() {
                 conectada diretamente aos dados reais da sua loja para tirar dúvidas e sugerir
                 respostas imediatas.
               </p>
-              <div className="pt-1">
+              <div className="pt-2">
                 <a
                   href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma demonstração executiva da inteligência HUG para meu negócio.")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+                  className="group inline-flex items-center gap-2 text-sm font-medium text-emerald-400 transition-all hover:text-emerald-300 hover:translate-x-1"
                 >
                   <span>Falar com Especialista</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </div>
             </Reveal>
 
-            {/* Demonstração Visual Realista e Elegante (Sem dashboard poluído) */}
-            <Reveal delay={0.2}>
-              <div className="rounded-3xl border border-white/15 bg-black/75 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-6">
+            {/* Demonstração Visual Realista e Elegante da Conversa */}
+            <Reveal delay={0.25}>
+              <div className="rounded-3xl border border-white/20 bg-black/80 p-6 sm:p-9 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-white/10">
                   <div className="flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -591,17 +713,29 @@ function Landing() {
                 </div>
 
                 {/* Pergunta do Lojista */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left space-y-1">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left space-y-1.5"
+                >
                   <span className="text-[10px] font-mono text-muted-foreground uppercase">
                     Lojista · Balcão de Vendas
                   </span>
                   <p className="text-sm text-white">
                     "Temos o blazer linho tamanho M em estoque central para entrega ainda hoje?"
                   </p>
-                </div>
+                </motion.div>
 
                 {/* Resposta Sugerida da HUG Intelligence */}
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-left space-y-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  className="rounded-2xl border border-emerald-500/35 bg-emerald-500/10 p-4 text-left space-y-2 relative overflow-hidden"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono text-emerald-400 uppercase font-semibold">
                       HUG Intelligence
@@ -613,7 +747,7 @@ function Landing() {
                     tabelado <strong>R$ 89,00</strong>. Deseja separar o pedido para retirada no balcão
                     ou gerar link de pagamento?"
                   </p>
-                </div>
+                </motion.div>
               </div>
             </Reveal>
           </div>
@@ -622,21 +756,21 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO SEGMENTOS: Fotografia Editorial Ampla
+        SEÇÃO SEGMENTOS: Fotografia Editorial Ampla e Transições
         ========================================================================
       */}
-      <section id="segmentos" className="relative mx-auto max-w-[1400px] px-6 py-14 sm:py-18 md:px-12">
-        <Reveal className="max-w-3xl mb-8 sm:mb-10">
+      <section id="segmentos" className="relative mx-auto max-w-[1400px] px-6 py-16 sm:py-24 md:px-12">
+        <Reveal className="max-w-3xl mb-10 sm:mb-12">
           <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-white">
             Soluções especializadas para cada setor.
           </h2>
-          <p className="mt-2 text-base sm:text-lg text-slate-400 font-light">
+          <p className="mt-2.5 text-base sm:text-lg text-slate-400 font-light">
             Regras de negócio, termos comerciais e rotinas adaptadas à realidade de cada segmento.
           </p>
         </Reveal>
 
-        {/* Seletor Minimalista de Segmentos */}
-        <div className="flex flex-wrap gap-2 sm:gap-2.5 mb-7">
+        {/* Seletor Minimalista com Pill Fluido */}
+        <div className="flex flex-wrap gap-2 sm:gap-2.5 mb-8">
           {COMMERCIAL_SECTORS.map((sec) => {
             const isSelected = selectedSector.id === sec.id;
             return (
@@ -644,35 +778,42 @@ function Landing() {
                 key={sec.id}
                 type="button"
                 onClick={() => setSelectedSector(sec)}
-                className={`rounded-full px-5 py-2 text-xs sm:text-sm font-medium transition-all ${
+                className={`relative rounded-full px-5 py-2 text-xs sm:text-sm font-medium transition-colors ${
                   isSelected
-                    ? "bg-white text-black shadow-lg"
+                    ? "text-black"
                     : "border border-white/10 bg-white/5 text-muted-foreground hover:border-white/30 hover:text-white"
                 }`}
               >
-                {sec.name}
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeSectorPill"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    className="absolute inset-0 rounded-full bg-white shadow-lg"
+                  />
+                )}
+                <span className="relative z-10">{sec.name}</span>
               </button>
             );
           })}
         </div>
 
         {/* Quadro Panorâmico Cinematográfico do Segmento Ativo */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 min-h-[420px] sm:min-h-[500px] flex items-end p-6 sm:p-12">
+        <div className="relative overflow-hidden rounded-3xl border border-white/15 min-h-[440px] sm:min-h-[520px] flex items-end p-6 sm:p-12 shadow-2xl">
           <AnimatePresence mode="wait">
             <motion.img
               key={selectedSector.id}
               src={selectedSector.image}
               alt={selectedSector.title}
-              initial={{ opacity: 0, scale: 1.04 }}
+              initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.8, ease }}
               className="absolute inset-0 h-full w-full object-cover brightness-[0.45] contrast-[1.1]"
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent pointer-events-none" />
 
-          <div className="relative z-10 max-w-2xl space-y-3 text-left">
+          <div className="relative z-10 max-w-2xl space-y-3.5 text-left">
             <span className="inline-block rounded-full border border-white/20 bg-black/60 px-3.5 py-1 text-xs font-mono uppercase tracking-wider text-emerald-400 backdrop-blur-md">
               {selectedSector.kpi}
             </span>
@@ -688,19 +829,19 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO PLANOS: Apresentação Transparente e Sem Poluição (R$ 299,00, R$ 499,00, R$ 899,00)
+        SEÇÃO PLANOS: Apresentação Transparente (R$ 299,00, R$ 499,00, R$ 899,00)
         ========================================================================
       */}
       <section
         id="planos"
-        className="relative border-t border-white/[0.08] bg-[#020408] py-14 sm:py-18"
+        className="relative border-t border-white/[0.08] bg-[#020408] py-16 sm:py-24"
       >
         <div className="mx-auto max-w-[1400px] px-6 md:px-12">
-          <Reveal className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+          <Reveal className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-white">
               Planos objetivos. Sem letras miúdas.
             </h2>
-            <p className="mt-2.5 text-base sm:text-lg text-slate-400 font-light">
+            <p className="mt-3 text-base sm:text-lg text-slate-400 font-light">
               Valores mensais sem taxa oculta de implantação. Cancele ou altere a qualquer momento.
             </p>
           </Reveal>
@@ -708,59 +849,59 @@ function Landing() {
           {/* Grade Editorial dos 3 Planos */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {APPROVED_PLANS.map((plan, idx) => (
-              <Reveal
-                key={plan.name}
-                delay={idx * 0.15}
-                className={`flex flex-col justify-between rounded-3xl p-7 sm:p-8 transition-all ${
-                  plan.featured
-                    ? "border-2 border-emerald-500/50 bg-gradient-to-b from-emerald-950/30 via-black/80 to-black shadow-[0_0_40px_rgba(0,230,118,0.12)]"
-                    : "border border-white/10 bg-black/50"
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-medium text-white">{plan.name}</span>
-                    {plan.featured && (
-                      <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-0.5 text-[11px] font-mono text-emerald-400 uppercase tracking-wider">
-                        Recomendado
+              <Reveal key={plan.name} delay={idx * 0.15}>
+                <InteractiveTiltCard
+                  className={`flex flex-col justify-between rounded-3xl p-7 sm:p-9 transition-all h-full ${
+                    plan.featured
+                      ? "border-2 border-emerald-500/60 bg-gradient-to-b from-emerald-950/40 via-black/85 to-black shadow-[0_0_50px_rgba(16,185,129,0.18)]"
+                      : "border border-white/10 bg-black/60"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-medium text-white">{plan.name}</span>
+                      {plan.featured && (
+                        <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-0.5 text-[11px] font-mono text-emerald-400 uppercase tracking-wider">
+                          Recomendado
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-5 flex items-baseline gap-1.5">
+                      <span className="text-2xl font-light text-slate-400">R$</span>
+                      <span className="text-5xl font-medium text-white tracking-tight">
+                        {plan.price}
                       </span>
-                    )}
-                  </div>
-                  <div className="mt-5 flex items-baseline gap-1.5">
-                    <span className="text-2xl font-light text-slate-400">R$</span>
-                    <span className="text-5xl font-medium text-white tracking-tight">
-                      {plan.price}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400 uppercase">/ mês</span>
-                  </div>
-                  <p className="mt-3.5 text-sm text-slate-300/90 leading-relaxed font-light">
-                    {plan.tagline}
-                  </p>
+                      <span className="text-xs font-mono text-slate-400 uppercase">/ mês</span>
+                    </div>
+                    <p className="mt-3.5 text-sm text-slate-300/90 leading-relaxed font-light">
+                      {plan.tagline}
+                    </p>
 
-                  <div className="mt-6 pt-5 border-t border-white/10 space-y-2.5">
-                    {plan.features.map((f) => (
-                      <div key={f} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-4 w-4 shrink-0 text-emerald-400" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
+                    <div className="mt-6 pt-5 border-t border-white/10 space-y-2.5">
+                      {plan.features.map((f) => (
+                        <div key={f} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300">
+                          <Check className="h-4 w-4 shrink-0 text-emerald-400" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-8 pt-4">
-                  <a
-                    href={getBonaSoftWhatsAppUrl(`Olá, BonaSoft! Gostaria de falar com um especialista para contratar o plano ${plan.name} do HUG (R$ ${plan.price}/mês).`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`block w-full text-center rounded-full py-3.5 text-xs font-medium uppercase tracking-wider transition ${
-                      plan.featured
-                        ? "bg-white text-black hover:bg-emerald-400"
-                        : "border border-white/20 text-white hover:bg-white/10"
-                    }`}
-                  >
-                    Falar com Especialista • {plan.name}
-                  </a>
-                </div>
+                  <div className="mt-8 pt-4">
+                    <a
+                      href={getBonaSoftWhatsAppUrl(`Olá, BonaSoft! Gostaria de falar com um especialista para contratar o plano ${plan.name} do HUG (R$ ${plan.price}/mês).`)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`block w-full text-center rounded-full py-3.5 text-xs font-medium uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+                        plan.featured
+                          ? "bg-white text-black hover:bg-emerald-400 shadow-md"
+                          : "border border-white/20 text-white hover:bg-white/10"
+                      }`}
+                    >
+                      Falar com Especialista • {plan.name}
+                    </a>
+                  </div>
+                </InteractiveTiltCard>
               </Reveal>
             ))}
           </div>
@@ -774,10 +915,10 @@ function Landing() {
       */}
       <section
         id="comecar"
-        className="relative overflow-hidden px-6 py-16 text-center sm:py-20 border-t border-white/[0.08]"
+        className="relative overflow-hidden px-6 py-20 text-center sm:py-28 border-t border-white/[0.08]"
       >
         {/* Glow de fundo espacial */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[350px] w-[350px] sm:h-[500px] sm:w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[130px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] sm:h-[600px] sm:w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/12 blur-[140px]" />
 
         <Reveal>
           <h2 className="relative mx-auto max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] tracking-[-0.035em] text-white">
@@ -785,12 +926,12 @@ function Landing() {
             <br />
             <span className="text-muted-foreground">começa em outra órbita.</span>
           </h2>
-          <div className="mt-7 sm:mt-8 flex justify-center">
+          <div className="mt-8 sm:mt-10 flex justify-center">
             <a
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e levar a operação da minha empresa para a plataforma HUG.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
+              className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/70 hover:bg-white/[0.18] hover:shadow-[0_0_30px_rgba(16,185,129,0.25)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               Falar com Especialista
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -805,8 +946,8 @@ function Landing() {
         Direcionando para o site oficial (https://bonasoftmt.com)
         ========================================================================
       */}
-      <footer className="border-t border-white/[0.08] bg-[#020408] py-10 px-6">
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-center gap-5 text-center">
+      <footer className="border-t border-white/[0.08] bg-[#020408] py-12 px-6">
+        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-center gap-6 text-center">
           <a
             href={BONASOFT_WEBSITE_URL}
             onClick={openBonaSoftWebsite}
