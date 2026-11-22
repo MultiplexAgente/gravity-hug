@@ -148,8 +148,8 @@ const ECOSYSTEM_MODULES = [
   },
   {
     id: "intelligence",
-    name: "HUG Intelligence",
-    label: "Inteligência Artificial",
+    name: "HUG I.A.",
+    label: "I.A.",
     icon: MessageSquare,
     description:
       "Assistente para tirar dúvidas de clientes, consultar o catálogo em linguagem natural e apoiar o dia a dia do lojista.",
@@ -241,7 +241,7 @@ const APPROVED_PLANS = [
     features: [
       "Todos os recursos do Starter",
       "Operação multicanal (balcão + web)",
-      "Assistente HUG para consulta e respostas",
+      "Assistente HUG I.A. para consulta e respostas",
       "Controle de múltiplos caixas",
       "Relatórios detalhados de faturamento",
     ],
@@ -253,7 +253,7 @@ const APPROVED_PLANS = [
     features: [
       "Todos os recursos do Business",
       "Multi-filiais e estoques conectados",
-      "Acesso prioritário à inteligência HUG",
+      "Acesso prioritário ao HUG I.A.",
       "Auditoria avançada e conciliação",
       "Suporte técnico prioritário",
     ],
@@ -354,7 +354,7 @@ function Landing() {
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
             <a href="#inteligencia" className="transition-colors hover:text-foreground relative group py-1">
-              I.A
+              I.A.
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
             <a href="#segmentos" className="transition-colors hover:text-foreground relative group py-1">
