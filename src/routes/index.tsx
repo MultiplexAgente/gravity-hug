@@ -918,13 +918,10 @@ function Landing() {
               Módulo Especializado · HUG-AGRO
             </div>
             <h2 className="text-3xl sm:text-6xl font-medium tracking-tight text-white leading-[1.1]">
-              Inteligência artificial para administrar o agronegócio.
+              HUG-AGRO — Inteligência artificial para administrar o agronegócio.
             </h2>
             <p className="mt-5 text-lg sm:text-xl text-emerald-100/90 font-light leading-relaxed max-w-3xl mx-auto">
-              Gerencie fazendas, safras, operações agrícolas, armazéns e silos em uma única plataforma inteligente. O HUG-AGRO une gestão operacional, controle financeiro e inteligência artificial para transformar dados da sua operação rural em decisões mais eficientes.
-            </p>
-            <p className="mt-4 text-sm sm:text-base text-slate-400 font-light max-w-2xl mx-auto">
-              O HUG-AGRO é a solução especializada do HUG para a gestão completa de propriedades rurais e operações agrícolas. Controle fazendas, talhões, culturas, safras, máquinas, funcionários, insumos, armazéns, recebimento, classificação, pesagem, estoque e expedição de grãos. Consulte informações, acompanhe indicadores e utilize inteligência artificial para analisar sua operação e executar tarefas com mais agilidade.
+              Gerencie fazendas, propriedades rurais, safras, operações agrícolas, máquinas, insumos, armazéns e silos em uma única plataforma inteligente. O HUG-AGRO integra gestão operacional, controle financeiro e inteligência artificial para acompanhar toda a operação rural e transformar dados em decisões.
             </p>
           </Reveal>
 
@@ -1011,68 +1008,63 @@ function Landing() {
             </div>
           </div>
 
-          {/* Grade de 12 Recursos Oficiais do HUG-AGRO */}
+          {/* Grade Oficial dos Módulos do HUG-AGRO */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               {
                 icon: MapPinned,
-                title: "Gestão de Fazendas e Propriedades",
-                desc: "Cadastro multi-propriedade, delimitação geográfica, áreas de lavoura, pastagem, APP e reserva legal.",
+                title: "Gestão de Fazendas",
+                desc: "Cadastro multi-propriedade, matrículas, delimitação geográfica, áreas de lavoura, pastagem, APP e reserva legal.",
               },
               {
                 icon: CalendarDays,
-                title: "Planejamento de Safras e Culturas",
-                desc: "Previsão de plantio e colheita para soja, milho, algodão, feijão e sorgo com metas de produtividade.",
-              },
-              {
-                icon: Sprout,
-                title: "Controle de Talhões e Solo",
-                desc: "Geolocalização, tipos de solo, histórico de rotação de culturas e mapas de rendimento.",
+                title: "Talhões e Safras",
+                desc: "Previsão de plantio e colheita para soja, milho e algodão com metas de produtividade e rotação de culturas.",
               },
               {
                 icon: Tractor,
                 title: "Operações Agrícolas",
-                desc: "Apontamentos de preparo, plantio, adubação, pulverização e colheita com cálculo de custo/ha.",
+                desc: "Apontamentos de dessecação, semeadura, adubação, pulverização e colheita com cálculo de custo por hectare.",
+              },
+              {
+                icon: Users,
+                title: "Máquinas e Equipes",
+                desc: "Controle de tratores, colheitadeiras, horímetros, manutenções preventivas, escalas de operadores e agrônomos.",
               },
               {
                 icon: Package,
                 title: "Estoque de Insumos",
-                desc: "Gestão de sementes, adubos, defensivos e combustíveis com controle de lotes e alertas de reposição.",
+                desc: "Gestão de sementes tratadas, defensivos, fertilizantes NPK e diesel com controle de lotes e reposição.",
               },
               {
                 icon: Warehouse,
                 title: "Armazéns e Silos",
-                desc: "Monitoramento de capacidade, nível de ocupação, segregação de lotes e histórico por safra.",
+                desc: "Monitoramento de capacidade estática, nível de ocupação, termometria, aeração e histórico de armazenagem.",
               },
               {
                 icon: Truck,
-                title: "Recebimento e Classificação",
-                desc: "Registro de cargas, motoristas, medição de umidade, impurezas e descontos técnicos.",
+                title: "Recebimento e Expedição",
+                desc: "Gestão de escoamento, caminhões, transportadoras, contratos de frete e rastreabilidade para portos e indústrias.",
               },
               {
                 icon: Scale,
-                title: "Pesagem e Expedição",
-                desc: "Tickets de pesagem de entrada e saída, peso líquido e ordens de transporte para escoamento.",
-              },
-              {
-                icon: Tractor,
-                title: "Máquinas e Frota",
-                desc: "Controle de tratores, colheitadeiras, implementos, horímetro, consumo e manutenção preventiva.",
-              },
-              {
-                icon: ShoppingBag,
-                title: "Compras e Fornecedores",
-                desc: "Cotações de defensivos e insumos, pedidos de compra e faturamento automatizado.",
+                title: "Pesagem e Classificação",
+                desc: "Emissão de tickets de balança rodoviária, peso bruto, tara, líquido, medição de umidade e descontos de impureza.",
               },
               {
                 icon: Wallet,
-                title: "Gestão Financeira Rural",
-                desc: "Fluxo de caixa, centro de custos por talhão e safra, comercialização e liquidação de contratos.",
+                title: "Financeiro e Custos",
+                desc: "DRE rural por talhão, fluxo de caixa, custo de produção por saca e liquidação de contratos de comercialização.",
+              },
+              {
+                icon: FileText,
+                title: "Relatórios Inteligentes",
+                desc: "Laudos técnicos, livro caixa do produtor rural, indicadores agronômicos consolidados e exportação contábil.",
               },
               {
                 icon: MessageSquare,
-                title: "Assistente de IA Especializado",
-                desc: "Consulta a estoques, indicadores de produtividade, manutenções e alertas em linguagem natural.",
+                title: "Assistente de IA Agrícola",
+                desc: "Consulta instantânea a estoques nos silos, melhor produtividade, máquinas em alerta e custos em linguagem natural.",
               },
             ].map((feat) => (
               <div
