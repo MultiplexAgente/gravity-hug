@@ -26,6 +26,8 @@ import {
   FileText,
   CheckCircle2,
   ExternalLink,
+  Users,
+  Wallet,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
