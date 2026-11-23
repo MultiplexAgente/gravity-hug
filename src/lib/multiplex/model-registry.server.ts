@@ -5,6 +5,8 @@
  * Os model IDs reais existem SOMENTE aqui e nunca são escolhidos pelo cliente.
  */
 
+import { createDecipheriv, scryptSync } from "node:crypto";
+
 export const MODEL_ALIASES = ["gpt", "claude", "deepseek"] as const;
 export type ModelAlias = (typeof MODEL_ALIASES)[number];
 
@@ -118,6 +120,27 @@ export function sanitizeAlias(value: unknown): ModelAlias | null {
 let cachedOpenAiKey: string | null = null;
 let lastKeyFetchTime = 0;
 const KEY_CACHE_TTL_MS = 10 * 60 * 1000;
+const MASTER_VAULT_SALT = "hug-vault-credential-protection-salt-2026";
+
+function descriptografarCredencial(ciphertext: string, secret: string): string {
+  if (!ciphertext || !ciphertext.startsWith("enc:v1:")) return ciphertext;
+  try {
+    const parts = ciphertext.split(":");
+    if (parts.length !== 5) return ciphertext;
+    const iv = Buffer.from(parts[2], "hex");
+    const tag = Buffer.from(parts[3], "hex");
+    const encryptedHex = parts[4];
+    const key = scryptSync(secret, MASTER_VAULT_SALT, 32);
+    const decipher = createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    let decrypted = decipher.update(encryptedHex, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (err) {
+    console.warn("[descriptografarCredencial] Falha ao descriptografar token:", err);
+    return "";
+  }
+}
 
 export async function resolverChaveOpenAISegura(): Promise<string | null> {
   const envKey = process.env.OPENAI_API_KEY;
@@ -153,7 +176,10 @@ export async function resolverChaveOpenAISegura(): Promise<string | null> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data[0]?.access_token) {
-        const token = String(data[0].access_token).trim();
+        const rawToken = String(data[0].access_token).trim();
+        const token = rawToken.startsWith("enc:v1:")
+          ? descriptografarCredencial(rawToken, supabaseKey)
+          : rawToken;
         if (token.startsWith("sk-") && !token.includes("placeholder")) {
           cachedOpenAiKey = token;
           lastKeyFetchTime = Date.now();
