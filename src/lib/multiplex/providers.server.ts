@@ -70,8 +70,7 @@ export class OpenAIProvider implements AIProviderAdapter {
   provider: ProviderId = "openai";
   constructor(private apiKey: string) {}
   model(entry: RegistryEntry): LanguageModel {
-    // Modelos OpenAI de raciocínio usam a Responses API.
-    return createOpenAI({ apiKey: this.apiKey }).responses(entry.modelId);
+    return createOpenAI({ apiKey: this.apiKey })(entry.modelId);
   }
   requestOptions(entry: RegistryEntry, opts: { reasoning: boolean }): Record<string, unknown> {
     return {

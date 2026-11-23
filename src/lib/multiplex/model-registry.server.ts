@@ -43,30 +43,29 @@ export interface RegistryEntry {
 export const MODEL_REGISTRY: RegistryEntry[] = [
   // ---------- OPENAI (alias público: gpt) ----------
   {
-    alias: "gpt", provider: "openai", modelId: "gpt-6-astra", tier: "flagship", status: "active",
+    alias: "gpt", provider: "openai", modelId: "chatgpt-4o-latest", tier: "flagship", status: "active",
+    capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis", "vision"],
+    contextWindow: 128_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
+  },
+  {
+    alias: "gpt", provider: "openai", modelId: "gpt-4o", tier: "flagship", status: "active",
+    capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis", "vision"],
+    contextWindow: 128_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
+  },
+  {
+    alias: "gpt", provider: "openai", modelId: "o3-mini", tier: "balanced", status: "active",
     capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis"],
-    contextWindow: 400_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
+    contextWindow: 200_000, toolCalling: true, vision: false, reasoning: true, streaming: true, latencyClass: "fast",
   },
   {
-    alias: "gpt", provider: "openai", modelId: "gpt-5.6-sol", tier: "flagship", status: "active",
+    alias: "gpt", provider: "openai", modelId: "o1", tier: "flagship", status: "active",
     capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis"],
-    contextWindow: 400_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
+    contextWindow: 200_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
   },
   {
-    alias: "gpt", provider: "openai", modelId: "gpt-5.6-terra", tier: "balanced", status: "active",
-    capabilities: ["chat", "tools", "reasoning", "long_text", "analysis"],
-    contextWindow: 400_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
-  },
-  {
-    alias: "gpt", provider: "openai", modelId: "gpt-5.6-luna", tier: "fast", status: "active",
-    capabilities: ["chat", "tools", "long_text"],
-    contextWindow: 400_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "fast",
-  },
-  {
-    alias: "gpt", provider: "openai", modelId: "gpt-5.4-nano", tier: "light", status: "active",
-    capabilities: ["classification", "extraction", "summarization", "batch"],
-    contextWindow: 200_000, toolCalling: true, vision: false, reasoning: false, streaming: true,
-    latencyClass: "fast", auxiliaryOnly: true,
+    alias: "gpt", provider: "openai", modelId: "gpt-4o-mini", tier: "fast", status: "active",
+    capabilities: ["chat", "tools", "long_text", "vision", "classification", "extraction", "summarization", "batch"],
+    contextWindow: 128_000, toolCalling: true, vision: true, reasoning: false, streaming: true, latencyClass: "fast",
   },
 
   // ---------- ANTHROPIC (alias público: claude) ----------
