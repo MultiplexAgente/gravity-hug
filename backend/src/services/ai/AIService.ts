@@ -151,8 +151,9 @@ export class AIService {
           }))
         ];
 
+        const modelToUse = agent?.model && agent.model !== 'gpt-4o-mini' ? agent.model : (process.env.OPENAI_MODEL || 'gpt-4o');
         const completion = await this.openai.chat.completions.create({
-          model: agent?.model || 'gpt-4o-mini',
+          model: modelToUse,
           messages,
           tools: toolDefinitions,
           tool_choice: 'auto',
@@ -178,7 +179,7 @@ export class AIService {
 
           // Segunda chamada para gerar a resposta textual final com os resultados das tools
           const followUp = await this.openai.chat.completions.create({
-            model: agent?.model || 'gpt-4o-mini',
+            model: modelToUse,
             messages: [
               ...messages,
               choice.message,

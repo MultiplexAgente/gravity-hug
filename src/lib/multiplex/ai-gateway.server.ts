@@ -69,9 +69,50 @@ ${context.trim() ? `CONTEXTO / POLÍTICAS DA LOJA:\n"${context.trim()}"` : "Nenh
 
 Gere a resposta sugerida:`;
 
+  const coreUrl = process.env.HUG_IA_CORE_URL || "http://localhost:3000";
+
+  // 1. Chamada Central via HUG IA Core Gateway (Motor Único da BonaSoft)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+    const coreResp = await fetch(`${coreUrl}/api/v1/ia/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer hug-internal-hub-token-2026`,
+        "x-company-id": "1017",
+        "x-application-id": "multiplex_portal",
+      },
+      body: JSON.stringify({
+        companyId: "1017",
+        applicationId: "multiplex_portal",
+        incomingText: question,
+        systemPrompt,
+        context: { contextText: context, tone, companyName, segment },
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (coreResp.ok) {
+      const coreData = await coreResp.json();
+      if (coreData.success && coreData.text) {
+        return {
+          ok: true,
+          reply: coreData.text.trim(),
+          modelUsed: coreData.model || "gpt-4o",
+          viaGateway: true,
+        };
+      }
+    }
+  } catch {
+    // Continua para fallback se HUG IA Core Gateway offline
+  }
+
   const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_KEY;
 
-  // 1. Tentativa via AI Gateway oficial
+  // 2. Tentativa secundária via Vercel AI Gateway (se configurado)
   if (gatewayApiKey) {
     try {
       const gateway = createGateway({
