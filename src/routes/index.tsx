@@ -14,6 +14,18 @@ import {
   Globe,
   Radio,
   CheckCheck,
+  Sprout,
+  Tractor,
+  Warehouse,
+  Truck,
+  Scale,
+  MapPinned,
+  CalendarDays,
+  Package,
+  ShieldCheck,
+  FileText,
+  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
@@ -218,6 +230,16 @@ const COMMERCIAL_SECTORS = [
     kpi: "Rastreio Unitário · 100% Auditado",
     image:
       "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "agro",
+    name: "Agro & Fazendas",
+    title: "HUG-AGRO · Fazendas, Safras, Armazéns & Silos",
+    narrative:
+      "Gerencie fazendas, safras, operações agrícolas, armazéns e silos em uma única plataforma inteligente. O HUG-AGRO une gestão operacional, controle financeiro e inteligência artificial para transformar dados da sua operação rural em decisões mais eficientes.",
+    kpi: "Campo ao Armazém · Rastreabilidade Integral",
+    image:
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85",
   },
 ];
 
@@ -874,6 +896,196 @@ function Landing() {
             <p className="text-base sm:text-lg text-slate-300 font-light leading-relaxed">
               {selectedSector.narrative}
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 
+        ========================================================================
+        SEÇÃO HUG-AGRO: Gestão Agrícola Integrada & Inteligência Artificial
+        ========================================================================
+      */}
+      <section
+        id="hug-agro"
+        className="relative border-t border-white/[0.08] bg-gradient-to-b from-[#03060a] via-[#05130d] to-[#020408] py-20 sm:py-28 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.15),rgba(255,255,255,0))] pointer-events-none" />
+
+        <div className="mx-auto max-w-[1400px] px-6 md:px-12 relative z-10">
+          <Reveal className="max-w-4xl mx-auto text-center mb-14 sm:mb-20">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-4 py-1.5 text-xs font-mono uppercase tracking-wider text-emerald-400 mb-6 backdrop-blur-md">
+              <Sprout size={15} />
+              Módulo Especializado · HUG-AGRO
+            </div>
+            <h2 className="text-3xl sm:text-6xl font-medium tracking-tight text-white leading-[1.1]">
+              Inteligência artificial para administrar o agronegócio.
+            </h2>
+            <p className="mt-5 text-lg sm:text-xl text-emerald-100/90 font-light leading-relaxed max-w-3xl mx-auto">
+              Gerencie fazendas, safras, operações agrícolas, armazéns e silos em uma única plataforma inteligente. O HUG-AGRO une gestão operacional, controle financeiro e inteligência artificial para transformar dados da sua operação rural em decisões mais eficientes.
+            </p>
+            <p className="mt-4 text-sm sm:text-base text-slate-400 font-light max-w-2xl mx-auto">
+              O HUG-AGRO é a solução especializada do HUG para a gestão completa de propriedades rurais e operações agrícolas. Controle fazendas, talhões, culturas, safras, máquinas, funcionários, insumos, armazéns, recebimento, classificação, pesagem, estoque e expedição de grãos. Consulte informações, acompanhe indicadores e utilize inteligência artificial para analisar sua operação e executar tarefas com mais agilidade.
+            </p>
+          </Reveal>
+
+          {/* Destaque Visual Panorâmico do HUG-AGRO */}
+          <div className="relative mb-16 overflow-hidden rounded-3xl border border-emerald-500/25 bg-black/80 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12">
+              <div className="lg:col-span-7 space-y-6 text-left">
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-md border border-emerald-500/30 bg-emerald-950/70 px-2.5 py-1 text-xs font-medium text-emerald-300">
+                    Propriedades & Lavoura
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-300">
+                    Silos & Armazenagem
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-300">
+                    Pesagem & Balança
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-300">
+                    HUG I.A. Rural
+                  </span>
+                </div>
+                <h3 className="text-2xl sm:text-4xl font-medium text-white tracking-tight">
+                  Do planejamento de safras à expedição nos armazéns.
+                </h3>
+                <p className="text-slate-300 text-sm sm:text-base font-light leading-relaxed">
+                  Sem silos de dados ou planilhas desconectadas. Todos os apontamentos de campo, pesagens de caminhões, estoques de insumos e contratos futuros de venda alimentam o mesmo ecossistema integrado em tempo real.
+                </p>
+
+                {/* Benefícios Estratégicos */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {[
+                    "Administração centralizada multi-fazenda",
+                    "Visão completa da operação rural",
+                    "Controle de talhões, APP e lavoura",
+                    "Rastreabilidade integral de grãos",
+                    "Cálculo de custos e produtividade por hectare",
+                    "Informações acessíveis por meio da IA",
+                    "Mais agilidade na tomada de decisões",
+                  ].map((ben) => (
+                    <div key={ben} className="flex items-center gap-2 text-xs sm:text-sm text-slate-200">
+                      <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                      <span>{ben}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 flex flex-wrap gap-4 items-center">
+                  <a
+                    href="https://hug-fazenda.lovable.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-emerald-500 px-7 py-3 text-sm font-semibold text-black transition-all hover:bg-emerald-400 shadow-lg hover:shadow-emerald-500/25"
+                  >
+                    <span>Acessar Painel HUG-AGRO</span>
+                    <ArrowRight size={16} />
+                  </a>
+                  <span className="text-xs text-slate-400">
+                    Integrado à sua empresa e login oficial do HUG
+                  </span>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 relative">
+                <div className="overflow-hidden rounded-2xl border border-white/15 shadow-2xl relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"
+                    alt="HUG-AGRO Gestão de Fazendas e Armazéns"
+                    className="w-full h-[360px] sm:h-[420px] object-cover brightness-[0.75] contrast-[1.1]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-5 left-5 right-5 p-4 rounded-xl border border-white/10 bg-black/80 backdrop-blur-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                        Assistente HUG I.A. Rural
+                      </span>
+                      <span className="text-[10px] text-slate-400">Online · Supabase Realtime</span>
+                    </div>
+                    <p className="text-xs text-slate-200 font-mono">
+                      "Temos 4.250 toneladas de soja armazenadas no Silo 02 da Fazenda Primavera com umidade de 13,2%."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grade de 12 Recursos Oficiais do HUG-AGRO */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              {
+                icon: MapPinned,
+                title: "Gestão de Fazendas e Propriedades",
+                desc: "Cadastro multi-propriedade, delimitação geográfica, áreas de lavoura, pastagem, APP e reserva legal.",
+              },
+              {
+                icon: CalendarDays,
+                title: "Planejamento de Safras e Culturas",
+                desc: "Previsão de plantio e colheita para soja, milho, algodão, feijão e sorgo com metas de produtividade.",
+              },
+              {
+                icon: Sprout,
+                title: "Controle de Talhões e Solo",
+                desc: "Geolocalização, tipos de solo, histórico de rotação de culturas e mapas de rendimento.",
+              },
+              {
+                icon: Tractor,
+                title: "Operações Agrícolas",
+                desc: "Apontamentos de preparo, plantio, adubação, pulverização e colheita com cálculo de custo/ha.",
+              },
+              {
+                icon: Package,
+                title: "Estoque de Insumos",
+                desc: "Gestão de sementes, adubos, defensivos e combustíveis com controle de lotes e alertas de reposição.",
+              },
+              {
+                icon: Warehouse,
+                title: "Armazéns e Silos",
+                desc: "Monitoramento de capacidade, nível de ocupação, segregação de lotes e histórico por safra.",
+              },
+              {
+                icon: Truck,
+                title: "Recebimento e Classificação",
+                desc: "Registro de cargas, motoristas, medição de umidade, impurezas e descontos técnicos.",
+              },
+              {
+                icon: Scale,
+                title: "Pesagem e Expedição",
+                desc: "Tickets de pesagem de entrada e saída, peso líquido e ordens de transporte para escoamento.",
+              },
+              {
+                icon: Tractor,
+                title: "Máquinas e Frota",
+                desc: "Controle de tratores, colheitadeiras, implementos, horímetro, consumo e manutenção preventiva.",
+              },
+              {
+                icon: ShoppingBag,
+                title: "Compras e Fornecedores",
+                desc: "Cotações de defensivos e insumos, pedidos de compra e faturamento automatizado.",
+              },
+              {
+                icon: Wallet,
+                title: "Gestão Financeira Rural",
+                desc: "Fluxo de caixa, centro de custos por talhão e safra, comercialização e liquidação de contratos.",
+              },
+              {
+                icon: MessageSquare,
+                title: "Assistente de IA Especializado",
+                desc: "Consulta a estoques, indicadores de produtividade, manutenções e alertas em linguagem natural.",
+              },
+            ].map((feat) => (
+              <div
+                key={feat.title}
+                className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:border-emerald-500/40 hover:bg-emerald-950/20 transition-all text-left"
+              >
+                <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black transition-colors mb-4">
+                  <feat.icon size={22} />
+                </div>
+                <h4 className="text-base font-semibold text-white mb-2">{feat.title}</h4>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-light">{feat.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
