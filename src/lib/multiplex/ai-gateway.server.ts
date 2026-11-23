@@ -148,20 +148,19 @@ Gere a resposta sugerida:`;
   if (openAiKey) {
     try {
       const openai = createOpenAI({ apiKey: openAiKey });
-      const model = openai("gpt-4o-mini");
+      const model = openai("gpt-6.2-astra");
 
       const result = await generateText({
         model,
         system: systemPrompt,
         prompt: userPrompt,
-        temperature: 0.5,
       });
 
       if (result.text && result.text.trim().length > 0) {
         return {
           ok: true,
           reply: result.text.trim(),
-          modelUsed: "gpt-4o-mini",
+          modelUsed: "gpt-6.2-astra",
           viaGateway: false,
         };
       }

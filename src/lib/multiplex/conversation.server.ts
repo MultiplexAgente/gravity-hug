@@ -250,7 +250,7 @@ async function generateConversationTitle(
     const { streamText } = await import("ai");
     const openai = createOpenAI({ apiKey });
     const result = streamText({
-      model: openai.responses("gpt-5.4-nano"),
+      model: openai.responses("gpt-6.2-astra"),
       system:
         "Gere um título curto em português (2 a 5 palavras, sem aspas, sem ponto final) que resuma o assunto real da conversa.",
       prompt: transcript,

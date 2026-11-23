@@ -50,6 +50,7 @@ export type Complexity = "baixa" | "media" | "alta";
 
 /** Modelos reais confirmados na conta OpenAI conectada. */
 export const MODEL_CATALOG = [
+  { id: "gpt-6.2-astra", tier: "quality", reasoning: "max" },
   { id: "gpt-5.6-sol", tier: "quality", reasoning: "medium" },
   { id: "gpt-5.6-terra", tier: "balanced", reasoning: "low" },
   { id: "gpt-5.6-luna", tier: "fast", reasoning: "low" },
