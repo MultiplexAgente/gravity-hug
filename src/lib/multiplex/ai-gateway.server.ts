@@ -8,7 +8,7 @@
 import { createGateway } from "@ai-sdk/gateway";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { providerApiKey } from "./model-registry.server";
+import { providerApiKey, resolverChaveOpenAISegura } from "./model-registry.server";
 
 export interface CustomerReplyOptions {
   question: string;
@@ -144,7 +144,7 @@ Gere a resposta sugerida:`;
   }
 
   // 2. Fallback via OpenAI Provider nativo
-  const openAiKey = providerApiKey("openai") || process.env.OPENAI_API_KEY;
+  const openAiKey = providerApiKey("openai") || process.env.OPENAI_API_KEY || (await resolverChaveOpenAISegura());
   if (openAiKey) {
     try {
       const openai = createOpenAI({ apiKey: openAiKey });

@@ -115,8 +115,65 @@ export function sanitizeAlias(value: unknown): ModelAlias | null {
   return MODEL_ALIASES.includes(value as ModelAlias) ? (value as ModelAlias) : null;
 }
 
+let cachedOpenAiKey: string | null = null;
+let lastKeyFetchTime = 0;
+const KEY_CACHE_TTL_MS = 10 * 60 * 1000;
+
+export async function resolverChaveOpenAISegura(): Promise<string | null> {
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey && !envKey.includes("placeholder") && !envKey.includes("invalid") && envKey.startsWith("sk-")) {
+    return envKey;
+  }
+  const g = globalThis as any;
+  if (g?.__env__?.OPENAI_API_KEY?.startsWith("sk-")) {
+    return g.__env__.OPENAI_API_KEY;
+  }
+  if (cachedOpenAiKey && Date.now() - lastKeyFetchTime < KEY_CACHE_TTL_MS) {
+    return cachedOpenAiKey;
+  }
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || "https://mbjqzjipiuwtgmoxsqfu.supabase.co";
+    const supabaseKey =
+      process.env.MULTIPLEX_SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      "";
+    if (!supabaseKey) return null;
+
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/channel_credentials?account_id=eq.hug_prod_oficial_openai&select=access_token`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]?.access_token) {
+        const token = String(data[0].access_token).trim();
+        if (token.startsWith("sk-") && !token.includes("placeholder")) {
+          cachedOpenAiKey = token;
+          lastKeyFetchTime = Date.now();
+          return token;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[resolverChaveOpenAISegura] Falha ao recuperar credencial do Supabase:", err);
+  }
+  return cachedOpenAiKey;
+}
+
 export function providerApiKey(provider: ProviderId): string | null {
-  return process.env[PROVIDER_KEY_ENV[provider]] ?? null;
+  const direct = process.env[PROVIDER_KEY_ENV[provider]];
+  if (direct && !direct.includes("placeholder") && !direct.includes("invalid")) return direct;
+  const g = globalThis as any;
+  if (g?.__env__?.[PROVIDER_KEY_ENV[provider]]) return g.__env__[PROVIDER_KEY_ENV[provider]];
+  if (provider === "openai" && cachedOpenAiKey) return cachedOpenAiKey;
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -173,7 +230,10 @@ export async function getProviderAvailability(
   const cached = availabilityCache.get(provider);
   if (!options?.refresh && cached && Date.now() - cached.checkedAt < AVAILABILITY_TTL_MS) return cached;
 
-  const apiKey = providerApiKey(provider);
+  let apiKey = providerApiKey(provider);
+  if (!apiKey && provider === "openai") {
+    apiKey = await resolverChaveOpenAISegura();
+  }
   if (!apiKey) {
     const missing: ProviderAvailability = {
       provider, ok: false, models: [], listed: false,
