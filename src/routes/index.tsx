@@ -594,7 +594,7 @@ function HugAiHeroTester() {
                       {msg.text}
                     </div>
 
-                    {/* Barra de ações discretas abaixo da resposta */}
+                    {/* Barra de ações discretas abaixo da resposta (Estilo ChatGPT: apenas Copiar e Thumbs) */}
                     <div className="mt-3 flex items-center gap-2 text-[#8e8e8e]">
                       {/* Botão Copiar */}
                       <button
@@ -631,19 +631,6 @@ function HugAiHeroTester() {
                       >
                         <ThumbsDown className="h-4 w-4" />
                       </button>
-
-                      {/* CTA Especialista */}
-                      <a
-                        href={getBonaSoftWhatsAppUrl(
-                          `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-auto inline-flex items-center gap-1 text-xs text-[#00D6A0] hover:underline font-medium transition-colors"
-                      >
-                        <span>Falar com especialista</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </a>
                     </div>
                   </div>
                 </div>
