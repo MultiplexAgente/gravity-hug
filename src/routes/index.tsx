@@ -794,7 +794,7 @@ function HugChatConversationDemo() {
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-light">
-              Online · Conectada ao seu ERP
+              Conectada ao seu ERP
             </p>
           </div>
         </div>
