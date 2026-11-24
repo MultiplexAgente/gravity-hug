@@ -720,33 +720,6 @@ function HugAiHeroTester() {
           </div>
         </div>
       </div>
-
-      {/* 
-        CHIPS DE SUGESTÃO ESTILO CHATGPT
-        Aparecem apenas no estado inicial antes do primeiro envio
-      */}
-      <AnimatePresence>
-        {!isConversando && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-3 sm:mt-4 flex flex-wrap justify-center gap-2 overflow-hidden px-1"
-          >
-            {exemplos.slice(0, 3).map((ex) => (
-              <button
-                key={ex}
-                type="button"
-                onClick={() => handleEnviar(ex)}
-                className="inline-flex items-center rounded-full border border-[#333333] bg-[#1a1a1a]/95 hover:bg-[#262626] hover:border-[#4d4d4d] px-3.5 py-1.5 text-xs text-[#a0a0a0] hover:text-[#ececec] transition-all duration-200 shadow-sm active:scale-95"
-              >
-                <span>{ex}</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
