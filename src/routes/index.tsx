@@ -580,8 +580,37 @@ function HugAiHeroTester() {
       return "No módulo Agro, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
     }
 
-    // Fallback conversacional elegante e dinâmico (sem frases repetitivas de máquina)
+    // Fallback conversacional elegante e dinâmico de segurança
     return `Entendido! Sobre "${query.trim()}": a plataforma HUG unifica toda a retaguarda, frente de caixa (PDV) e estoque físico da sua empresa sob uma única base de dados inteligente em tempo real.\n\nCaso queira conhecer os valores dos planos (a partir de R$ 99/mês), tirar dúvidas operacionais ou agendar uma demonstração, clique em 'Falar com especialista' abaixo!`;
+  }
+
+  async function consultarGptOuFallback(query: string, historicoAtual: ChatMessage[]): Promise<string> {
+    try {
+      const payloadHistory = historicoAtual.slice(-6).map((m) => ({
+        role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
+        content: m.text,
+      }));
+
+      const res = await fetch("/api/ai/public-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: query,
+          history: payloadHistory,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.reply && data.reply.trim().length > 0) {
+          return data.reply.trim();
+        }
+      }
+    } catch (err) {
+      console.warn("[HUG I.A / GPT Fetch Warning]:", err);
+    }
+
+    return gerarRespostaIa(query);
   }
 
   function handleEnviar(textoCustom?: string) {
@@ -595,7 +624,8 @@ function HugAiHeroTester() {
       timestamp: getHoraAtual(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const novoHistorico = [...messages, userMsg];
+    setMessages(novoHistorico);
     setPergunta("");
     setCarregando(true);
 
@@ -603,8 +633,8 @@ function HugAiHeroTester() {
       textareaRef.current.style.height = "auto";
     }
 
-    setTimeout(() => {
-      const respostaTexto = gerarRespostaIa(textoFinal);
+    // Chama o GPT em tempo real através da rota oficial /api/ai/public-chat
+    consultarGptOuFallback(textoFinal, messages).then((respostaTexto) => {
       const hugMsg: ChatMessage = {
         id: `hug-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         sender: "hug",
@@ -614,7 +644,7 @@ function HugAiHeroTester() {
 
       setMessages((prev) => [...prev, hugMsg]);
       setCarregando(false);
-    }, 600);
+    });
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
