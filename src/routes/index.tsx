@@ -525,28 +525,32 @@ function HugAiHeroTester() {
       </AnimatePresence>
 
       {/* 
-        ÁREA DE CONVERSA PRINCIPAL (Estilo ChatGPT Dark - 100% Opaco e Fundo Escuro)
+        ÁREA DE CONVERSA PRINCIPAL (100% Preto Sólido, Zero Transparência, Alto Contraste)
       */}
       {isConversando && (
         <div
-          className="mb-3 sm:mb-4 rounded-3xl border border-[#262626] bg-[#0c0c0c] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.98)] overflow-hidden flex flex-col"
+          className="mb-3 sm:mb-4 rounded-3xl border border-[#262626] bg-[#000000] shadow-[0_24px_60px_-12px_rgba(0,0,0,1)] overflow-hidden flex flex-col"
+          style={{ backgroundColor: "#000000", opacity: 1 }}
         >
           {/* Cabeçalho minimalista da conversa (sem badge Online) */}
-          <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-[#212121] bg-[#0c0c0c]">
+          <div
+            className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-[#1c1c1c] bg-[#000000]"
+            style={{ backgroundColor: "#000000" }}
+          >
             <div className="flex items-center gap-2.5">
               <img
                 src={hugLogo}
                 alt="HUG I.A"
                 className="h-6 w-6 rounded-full object-cover"
               />
-              <span className="text-sm font-medium text-[#ececec] tracking-tight">HUG I.A</span>
+              <span className="text-sm font-medium text-white tracking-tight">HUG I.A</span>
             </div>
 
             {/* Ação de Reiniciar/Limpar conversa */}
             <button
               type="button"
               onClick={handleLimparConversa}
-              className="inline-flex items-center gap-1.5 text-xs text-[#a0a0a0] hover:text-[#ececec] transition-colors px-2.5 py-1.5 rounded-lg hover:bg-[#212121] active:scale-95"
+              className="inline-flex items-center gap-1.5 text-xs text-[#a0a0a0] hover:text-white transition-colors px-2.5 py-1.5 rounded-lg hover:bg-[#1a1a1a] active:scale-95"
               title="Iniciar uma nova conversa"
             >
               <RotateCcw className="h-3.5 w-3.5" />
@@ -554,13 +558,13 @@ function HugAiHeroTester() {
             </button>
           </div>
 
-          {/* Lista de Mensagens estilo ChatGPT com fundo 100% escuro sólido */}
+          {/* Lista de Mensagens estilo ChatGPT com fundo 100% preto sólido */}
           <div
             ref={chatContainerRef}
             onScroll={handleChatScroll}
             data-lenis-prevent="true"
-            style={{ overscrollBehavior: "contain", backgroundColor: "#0c0c0c" }}
-            className="max-h-[420px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain"
+            style={{ overscrollBehavior: "contain", backgroundColor: "#000000", opacity: 1 }}
+            className="max-h-[420px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain bg-[#000000]"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
@@ -571,7 +575,7 @@ function HugAiHeroTester() {
                     key={msg.id}
                     className="flex justify-end"
                   >
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#212121] border border-[#303030] px-4.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-[#ececec] shadow-sm">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#1f1f1f] border border-[#333333] px-4.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-white shadow-sm">
                       <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
                     </div>
                   </div>
@@ -589,8 +593,8 @@ function HugAiHeroTester() {
                     className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-cover shrink-0 mt-0.5"
                   />
                   <div className="flex-1 min-w-0 max-w-[95%] text-left">
-                    {/* Texto direto sem caixa fechada, idêntico à experiência ChatGPT */}
-                    <div className="text-[#ececec] text-sm sm:text-[15px] leading-relaxed select-text font-normal whitespace-pre-line">
+                    {/* Texto puro em branco de alto contraste direto no fundo preto */}
+                    <div className="text-white text-sm sm:text-[15px] leading-relaxed select-text font-normal whitespace-pre-line">
                       {msg.text}
                     </div>
 
@@ -600,7 +604,7 @@ function HugAiHeroTester() {
                       <button
                         type="button"
                         onClick={() => handleCopiar(msg.id, msg.text)}
-                        className="p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors"
+                        className="p-1.5 rounded-md hover:bg-[#1f1f1f] hover:text-white transition-colors"
                         title="Copiar resposta"
                       >
                         {copiedId === msg.id ? (
@@ -614,7 +618,7 @@ function HugAiHeroTester() {
                       <button
                         type="button"
                         onClick={() => handleFeedback(msg.id, true)}
-                        className={`p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors ${
+                        className={`p-1.5 rounded-md hover:bg-[#1f1f1f] hover:text-white transition-colors ${
                           msg.liked === true ? "text-[#00D6A0]" : ""
                         }`}
                         title="Boa resposta"
@@ -624,7 +628,7 @@ function HugAiHeroTester() {
                       <button
                         type="button"
                         onClick={() => handleFeedback(msg.id, false)}
-                        className={`p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors ${
+                        className={`p-1.5 rounded-md hover:bg-[#1f1f1f] hover:text-white transition-colors ${
                           msg.liked === false ? "text-rose-400" : ""
                         }`}
                         title="Resposta ruim"
@@ -658,10 +662,13 @@ function HugAiHeroTester() {
       )}
 
       {/* 
-        COMPOSER ESTILO CHATGPT (Capsule única, 100% Opaco, sem caixas internas)
+        COMPOSER ESTILO CHATGPT (Capsule única, 100% Preto Sólido, sem caixas internas)
       */}
       <div className="relative w-full">
-        <div className="relative rounded-full border border-[#383838] bg-[#212121] shadow-[0_12px_40px_rgba(0,0,0,0.9)] transition-all duration-200 focus-within:border-[#555555] px-3 sm:px-4 py-2 sm:py-2.5">
+        <div
+          className="relative rounded-full border border-[#333333] bg-[#141414] shadow-[0_12px_40px_rgba(0,0,0,0.95)] transition-all duration-200 focus-within:border-[#555555] px-3 sm:px-4 py-2 sm:py-2.5"
+          style={{ backgroundColor: "#141414", opacity: 1 }}
+        >
           {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio Circular */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Botão de Adicionar (+) Estilo ChatGPT */}
@@ -676,7 +683,7 @@ function HugAiHeroTester() {
               }}
               title="Inserir pergunta de exemplo"
               aria-label="Inserir pergunta de teste"
-              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#2f2f2f] hover:bg-[#383838] text-[#b4b4b4] hover:text-white transition-colors"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#262626] hover:bg-[#333333] text-[#b4b4b4] hover:text-white transition-colors"
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
             </button>
@@ -1030,10 +1037,12 @@ function Landing() {
               <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-emerald-400 transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:text-emerald-300 motion-reduce:transform-none" />
             </a>
           </motion.div>
-
-          {/* Campo Interativo estilo ChatGPT para testar a HUG I.A no Hero */}
-          <HugAiHeroTester />
         </motion.div>
+
+        {/* Campo Interativo HUG I.A: 100% Opaco, Sólido, Fundo Preto Permanente */}
+        <div className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 sm:pb-16">
+          <HugAiHeroTester />
+        </div>
       </section>
 
       {/* 
