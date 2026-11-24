@@ -248,7 +248,7 @@ const COMMERCIAL_SECTORS = [
   },
   {
     id: "agro",
-    name: "Agro & Fazendas",
+    name: "HUG-AGRO",
     title: "HUG-AGRO · Fazendas, Safras, Armazéns & Silos",
     narrative:
       "Gerencie fazendas, safras, operações agrícolas, armazéns e silos em uma única plataforma inteligente. O HUG-AGRO une gestão operacional, controle financeiro e inteligência artificial para transformar dados da sua operação rural em decisões mais eficientes.",
@@ -869,6 +869,8 @@ function Landing() {
                 className={`relative rounded-full px-5 py-2 text-xs sm:text-sm font-medium transition-colors ${
                   isSelected
                     ? "text-black"
+                    : sec.id === "agro"
+                    ? "border border-emerald-500/40 bg-emerald-950/40 text-emerald-300 hover:border-emerald-400 hover:text-white"
                     : "border border-white/10 bg-white/5 text-muted-foreground hover:border-white/30 hover:text-white"
                 }`}
               >
@@ -911,6 +913,25 @@ function Landing() {
             <p className="text-base sm:text-lg text-slate-300 font-light leading-relaxed">
               {selectedSector.narrative}
             </p>
+            {selectedSector.id === "agro" && (
+              <div className="pt-2 flex flex-wrap gap-3 items-center">
+                <a
+                  href="https://hug-fazenda.lovable.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-2.5 text-xs sm:text-sm font-semibold text-black transition-all hover:bg-emerald-400 shadow-lg hover:shadow-emerald-500/25"
+                >
+                  <span>Acessar Painel HUG-AGRO</span>
+                  <ArrowRight size={15} />
+                </a>
+                <a
+                  href="#hug-agro"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 underline underline-offset-4"
+                >
+                  Conhecer Módulos do HUG-AGRO
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </section>
