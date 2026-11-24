@@ -134,15 +134,16 @@ export async function verificarDisponibilidadeCoreGateway(): Promise<{ ok: boole
     if (res.ok) {
       return { ok: true, models: ["gpt-6.2-astra", "gpt-4o", "o3-mini", "o1"] };
     }
-  } catch {}
+  } catch { }
 
   // 2. Verificação In-Process via Módulo Oficial HUG IA Core
   try {
-    const core = await import("file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js");
+    const coreModuleUrl = "file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js";
+    const core: any = await import(/* @vite-ignore */ coreModuleUrl);
     if (core && typeof core.processarRequisicaoGateway === "function") {
       return { ok: true, models: ["gpt-6.2-astra", "gpt-4o", "o3-mini", "o1"] };
     }
-  } catch {}
+  } catch { }
 
   return {
     ok: false,
@@ -187,9 +188,9 @@ async function fetchProviderModels(provider: ProviderId, apiKey: string): Promis
         : provider === "deepseek"
           ? { url: "https://api.deepseek.com/models", headers: { Authorization: `Bearer ${apiKey}` } }
           : {
-              url: "https://api.anthropic.com/v1/models?limit=100",
-              headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-            };
+            url: "https://api.anthropic.com/v1/models?limit=100",
+            headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+          };
 
     const response = await fetch(request.url, { headers: request.headers });
     const payload = (await response.json().catch(() => null)) as

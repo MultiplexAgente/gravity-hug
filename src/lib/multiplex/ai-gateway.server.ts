@@ -114,7 +114,8 @@ Gere a resposta sugerida:`;
 
   // 2. Invocação In-Process via Módulo Oficial HUG IA Core
   try {
-    const { processarRequisicaoGateway } = await import("file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js");
+    const coreModuleUrl = "file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js";
+    const { processarRequisicaoGateway }: any = await import(/* @vite-ignore */ coreModuleUrl);
     const coreResult = await processarRequisicaoGateway({
       companyId: "1017",
       applicationId: "multiplex_portal",
@@ -134,7 +135,7 @@ Gere a resposta sugerida:`;
         viaGateway: true,
       };
     }
-  } catch {}
+  } catch { }
 
   const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_KEY;
 
@@ -213,7 +214,7 @@ function buildLocalContextualReply(
 ): string {
   const store = companyName ? companyName : "nossa equipe";
   const greeting = tone === "direto" ? "Olá!" : "Olá! Tudo bem? Agradecemos pelo contato!";
-  
+
   let body = "";
   if (context.trim()) {
     body = `Em relação à sua dúvida ("${question.trim()}"), confirmamos que: ${context.trim()}.`;
@@ -225,8 +226,8 @@ function buildLocalContextualReply(
     tone === "comercial"
       ? "Podemos já reservar o seu pedido ou prefere que eu envie mais fotos e opções? Fico no seu aguardo!"
       : tone === "direto"
-      ? "Qualquer outra dúvida, estamos à disposição."
-      : "Se precisar de mais alguma coisa ou quiser fechar o seu pedido, é só me avisar por aqui. Estamos à disposição!";
+        ? "Qualquer outra dúvida, estamos à disposição."
+        : "Se precisar de mais alguma coisa ou quiser fechar o seu pedido, é só me avisar por aqui. Estamos à disposição!";
 
   return `${greeting}\n\n${body}\n\n${closing}`;
 }
