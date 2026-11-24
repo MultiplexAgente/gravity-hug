@@ -57,12 +57,17 @@ body.light {
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
   color: var(--text-main);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
   background-image: var(--bg-gradient);
   transition: background-color 0.3s ease, color 0.3s ease;
 }

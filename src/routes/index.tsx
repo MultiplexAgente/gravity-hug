@@ -370,6 +370,9 @@ interface ChatMessage {
   images?: ImagemAnexada[];
   audio?: AudioAnexado;
   transcription?: string;
+  images?: ImagemAnexada[];
+  audio?: AudioAnexado;
+  transcription?: string;
 }
 
 function HugAiHeroTester() {
@@ -817,13 +820,12 @@ function HugAiHeroTester() {
             </button>
           </div>
 
-          {/* Lista de Mensagens estilo ChatGPT com fundo 100% preto sólido */}
+          {/* Lista de Mensagens estilo ChatGPT com fundo 100% preto sólido e rolagem encadeada fluida */}
           <div
             ref={chatContainerRef}
             onScroll={handleChatScroll}
-            data-lenis-prevent="true"
-            style={{ overscrollBehavior: "contain", backgroundColor: "#000000", opacity: 1 }}
-            className="max-h-[420px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain bg-[#000000]"
+            style={{ overscrollBehavior: "auto", overscrollBehaviorY: "auto", backgroundColor: "#000000", opacity: 1 }}
+            className="max-h-[420px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#262626] bg-[#000000]"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
@@ -1299,7 +1301,7 @@ function Landing() {
   const [selectedSector, setSelectedSector] = useState(COMMERCIAL_SECTORS[0]);
 
   return (
-    <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200 relative overflow-x-hidden">
+    <div className="dark min-h-screen bg-[#03060a] font-sans text-foreground antialiased selection:bg-emerald-500/25 selection:text-emerald-200 relative overflow-x-clip">
       {/* Sistema de rolagem suave Lenis */}
       <SmoothScroll />
 
