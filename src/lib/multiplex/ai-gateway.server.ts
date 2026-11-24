@@ -8,7 +8,7 @@
 import { createGateway } from "@ai-sdk/gateway";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { providerApiKey, resolverChaveOpenAISegura } from "./model-registry.server";
+import { providerApiKey } from "./model-registry.server";
 
 export interface CustomerReplyOptions {
   question: string;
@@ -69,17 +69,18 @@ ${context.trim() ? `CONTEXTO / POLÍTICAS DA LOJA:\n"${context.trim()}"` : "Nenh
 
 Gere a resposta sugerida:`;
 
-  const coreUrl = process.env.HUG_IA_CORE_URL || "http://localhost:3000";
+  const coreUrl = process.env.HUG_CORE_GATEWAY_URL || process.env.HUG_IA_CORE_URL || "http://127.0.0.1:5055";
 
-  // 1. Chamada Central via HUG IA Core Gateway (Motor Único da BonaSoft)
+  // 1. Chamada Central via HUG IA Core Gateway HTTP (Motor Único da BonaSoft)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const coreResp = await fetch(`${coreUrl}/api/v1/ia/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-Hug-Application-Key": "hug_core_internal_sec_2026",
         Authorization: `Bearer hug-internal-hub-token-2026`,
         "x-company-id": "1017",
         "x-application-id": "multiplex_portal",
@@ -90,6 +91,7 @@ Gere a resposta sugerida:`;
         incomingText: question,
         systemPrompt,
         context: { contextText: context, tone, companyName, segment },
+        modelAlias: "gpt-6.2-astra",
       }),
       signal: controller.signal,
     });
@@ -97,22 +99,46 @@ Gere a resposta sugerida:`;
 
     if (coreResp.ok) {
       const coreData = await coreResp.json();
-      if (coreData.success && coreData.text) {
+      if (coreData.success && (coreData.text || coreData.texto)) {
         return {
           ok: true,
-          reply: coreData.text.trim(),
-          modelUsed: coreData.model || "gpt-4o",
+          reply: (coreData.text || coreData.texto).trim(),
+          modelUsed: coreData.model || coreData.modelo || "gpt-6.2-astra",
           viaGateway: true,
         };
       }
     }
   } catch {
-    // Continua para fallback se HUG IA Core Gateway offline
+    // Continua para fallback in-process se HUG IA Core Gateway HTTP offline
   }
+
+  // 2. Invocação In-Process via Módulo Oficial HUG IA Core
+  try {
+    const { processarRequisicaoGateway } = await import("file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js");
+    const coreResult = await processarRequisicaoGateway({
+      companyId: "1017",
+      applicationId: "multiplex_portal",
+      incomingText: question,
+      systemPrompt,
+      context: { contextText: context, tone, companyName, segment },
+      modelAlias: "gpt-6.2-astra",
+    }, {
+      "x-hug-core-key": "hug_core_internal_sec_2026",
+    });
+
+    if (coreResult.success && coreResult.texto) {
+      return {
+        ok: true,
+        reply: coreResult.texto.trim(),
+        modelUsed: coreResult.modelo || "gpt-6.2-astra",
+        viaGateway: true,
+      };
+    }
+  } catch {}
 
   const gatewayApiKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_KEY;
 
-  // 2. Tentativa secundária via Vercel AI Gateway (se configurado)
+  // 3. Tentativa secundária via Vercel AI Gateway (se configurado)
   if (gatewayApiKey) {
     try {
       const gateway = createGateway({
@@ -143,8 +169,8 @@ Gere a resposta sugerida:`;
     }
   }
 
-  // 2. Fallback via OpenAI Provider nativo
-  const openAiKey = providerApiKey("openai") || process.env.OPENAI_API_KEY || (await resolverChaveOpenAISegura());
+  // 4. Fallback direto se houver OPENAI_API_KEY no ambiente local
+  const openAiKey = providerApiKey("openai") || process.env.OPENAI_API_KEY;
   if (openAiKey) {
     try {
       const openai = createOpenAI({ apiKey: openAiKey });
