@@ -20,6 +20,16 @@ import {
   RotateCcw,
   ThumbsUp,
   ThumbsDown,
+  Image as ImageIcon,
+  Camera,
+  Mic,
+  MicOff,
+  Trash2,
+  Play,
+  Pause,
+  Square,
+  X,
+  Paperclip,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
@@ -341,12 +351,28 @@ function InteractiveTiltCard({
  * - Composer fixo na parte inferior com textarea expansível e gradiente de fundo
  * - Estado inicial limpo com "como posso te ajudar?" e "vamos começar"
  */
+interface ImagemAnexada {
+  id: string;
+  name: string;
+  type: string;
+  dataUrl: string;
+}
+
+interface AudioAnexado {
+  dataUrl: string;
+  mimeType: string;
+  durationSeconds: number;
+}
+
 interface ChatMessage {
   id: string;
   sender: "user" | "hug";
   text: string;
   timestamp: string;
   liked?: boolean | null;
+  images?: ImagemAnexada[];
+  audio?: AudioAnexado;
+  transcription?: string;
 }
 
 function HugAiHeroTester() {
@@ -354,8 +380,24 @@ function HugAiHeroTester() {
   const [pergunta, setPergunta] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Estados multimodais (Imagens e Áudio)
+  const [imagens, setImagens] = useState<ImagemAnexada[]>([]);
+  const [menuAnexosAberto, setMenuAnexosAberto] = useState(false);
+  const [gravandoAudio, setGravandoAudio] = useState(false);
+  const [tempoGravacao, setTempoGravacao] = useState(0);
+  const [audioGravado, setAudioGravado] = useState<AudioAnexado | null>(null);
+  const [audioTocandoId, setAudioTocandoId] = useState<string | null>(null);
+
+  // Refs de controle
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerGravacaoRef = useRef<any>(null);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const isAtBottomRef = useRef(true);
 
   const exemplos = [
@@ -386,7 +428,7 @@ function HugAiHeroTester() {
     if (typeof window !== "undefined") {
       (window as any).__enviarHugPergunta = handleEnviar;
     }
-  }, [handleEnviar]);
+  }, [pergunta, imagens, audioGravado, carregando]);
 
   // Ajusta dinamicamente a altura do textarea conforme o usuário digita
   useEffect(() => {
@@ -396,13 +438,186 @@ function HugAiHeroTester() {
     }
   }, [pergunta]);
 
+  // Limpa o timer de gravação se desmontar
+  useEffect(() => {
+    return () => {
+      if (timerGravacaoRef.current) clearInterval(timerGravacaoRef.current);
+    };
+  }, []);
+
   function getHoraAtual() {
     const agora = new Date();
     return agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  // Consulta exclusivamente o HUG IA Core sem fallbacks mockados ou simulações estáticas
-  async function consultarHugIaCore(query: string, historicoAtual: ChatMessage[]): Promise<string> {
+  function formatarSegundos(segundos: number) {
+    const mins = Math.floor(segundos / 60);
+    const secs = segundos % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  // Manipulação de arquivos de imagem
+  function handleSelectFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setMenuAnexosAberto(false);
+
+    const arquivosArray = Array.from(files);
+    arquivosArray.forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (!dataUrl) return;
+
+        setImagens((prev) => [
+          ...prev,
+          {
+            id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            name: file.name,
+            type: file.type,
+            dataUrl,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reseta inputs para permitir selecionar o mesmo arquivo novamente se quiser
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
+  function handleRemoverImagem(id: string) {
+    setImagens((prev) => prev.filter((img) => img.id !== id));
+  }
+
+  // Gravação de Áudio via MediaRecorder
+  async function handleIniciarGravacao() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Seu navegador não suporta gravação de áudio.");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : "";
+
+      const options = mimeType ? { mimeType } : undefined;
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        // Encerra todas as faixas do microfone para liberar o hardware
+        stream.getTracks().forEach((track) => track.stop());
+
+        const finalMime = mediaRecorder.mimeType || "audio/webm";
+        const audioBlob = new Blob(audioChunksRef.current, { type: finalMime });
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string;
+          if (dataUrl) {
+            setAudioGravado({
+              dataUrl,
+              mimeType: finalMime,
+              durationSeconds: tempoGravacao,
+            });
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+      };
+
+      mediaRecorder.start(200); // Coleta a cada 200ms
+      setGravandoAudio(true);
+      setTempoGravacao(0);
+
+      if (timerGravacaoRef.current) clearInterval(timerGravacaoRef.current);
+      timerGravacaoRef.current = setInterval(() => {
+        setTempoGravacao((prev) => prev + 1);
+      }, 1000);
+    } catch (err: any) {
+      console.error("[Erro ao acessar microfone]:", err);
+      alert("Permissão de microfone necessária para gravar áudio.");
+    }
+  }
+
+  function handlePararGravacao() {
+    if (timerGravacaoRef.current) {
+      clearInterval(timerGravacaoRef.current);
+      timerGravacaoRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setGravandoAudio(false);
+  }
+
+  function handleCancelarGravacao() {
+    if (timerGravacaoRef.current) {
+      clearInterval(timerGravacaoRef.current);
+      timerGravacaoRef.current = null;
+    }
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.ondataavailable = null;
+      mediaRecorderRef.current.onstop = null;
+      if (mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      mediaRecorderRef.current.stream?.getTracks().forEach((t) => t.stop());
+    }
+    audioChunksRef.current = [];
+    setGravandoAudio(false);
+    setTempoGravacao(0);
+  }
+
+  function handleDescartarAudioGravado() {
+    setAudioGravado(null);
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+    }
+  }
+
+  // Reprodução de áudio gravado (preview ou na mensagem)
+  function handleToggleAudio(audioUrl: string, id: string) {
+    if (audioTocandoId === id) {
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+      setAudioTocandoId(null);
+    } else {
+      if (!audioPlayerRef.current) {
+        audioPlayerRef.current = new Audio();
+        audioPlayerRef.current.onended = () => setAudioTocandoId(null);
+      }
+      audioPlayerRef.current.src = audioUrl;
+      audioPlayerRef.current.play().then(() => {
+        setAudioTocandoId(id);
+      }).catch((e) => console.error("Erro ao tocar áudio:", e));
+    }
+  }
+
+  // Consulta multimodal ao HUG IA Core
+  async function consultarHugIaCore(
+    query: string,
+    historicoAtual: ChatMessage[],
+    imagensEnviar: ImagemAnexada[],
+    audioEnviar: AudioAnexado | null
+  ): Promise<{ reply: string; transcription?: string }> {
     try {
       const payloadHistory = historicoAtual.slice(-8).map((m) => ({
         role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
@@ -415,39 +630,70 @@ function HugAiHeroTester() {
         body: JSON.stringify({
           message: query,
           history: payloadHistory,
+          images: imagensEnviar.map((img) => ({
+            name: img.name,
+            type: img.type,
+            dataUrl: img.dataUrl,
+          })),
+          audio: audioEnviar
+            ? {
+                dataUrl: audioEnviar.dataUrl,
+                mimeType: audioEnviar.mimeType,
+              }
+            : undefined,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
         if (data.ok && data.reply && data.reply.trim().length > 0) {
-          return data.reply.trim();
+          return {
+            reply: data.reply.trim(),
+            transcription: data.transcription,
+          };
         }
         if (data.error) {
-          return `Não foi possível obter resposta da HUG I.A: ${data.error}`;
+          return { reply: `Não foi possível obter resposta da HUG I.A: ${data.error}` };
         }
       }
     } catch (err: any) {
       console.error("[HUG I.A Core Gateway Error]:", err);
     }
 
-    return "Não foi possível conectar ao motor HUG IA Core no momento. Por favor, tente novamente em instantes.";
+    return {
+      reply: "Não foi possível conectar ao motor HUG IA Core no momento. Por favor, tente novamente em instantes.",
+    };
   }
 
   function handleEnviar(textoCustom?: string) {
     const textoFinal = (textoCustom || pergunta).trim();
-    if (!textoFinal || carregando) return;
+    const temImagens = imagens.length > 0;
+    const temAudio = !!audioGravado;
+
+    if ((!textoFinal && !temImagens && !temAudio) || carregando) return;
+
+    // Se estiver gravando áudio no momento, interrompe para envio
+    if (gravandoAudio) {
+      handlePararGravacao();
+    }
+
+    const imagensParaEnviar = [...imagens];
+    const audioParaEnviar = audioGravado ? { ...audioGravado } : null;
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       sender: "user",
-      text: textoFinal,
+      text: textoFinal || (temAudio ? "Mensagem em áudio" : "Imagem anexada"),
       timestamp: getHoraAtual(),
+      images: temImagens ? imagensParaEnviar : undefined,
+      audio: audioParaEnviar || undefined,
     };
 
     const novoHistorico = [...messages, userMsg];
     setMessages(novoHistorico);
     setPergunta("");
+    setImagens([]);
+    setAudioGravado(null);
     setCarregando(true);
     isAtBottomRef.current = true;
 
@@ -462,12 +708,13 @@ function HugAiHeroTester() {
       textareaRef.current.style.height = "auto";
     }
 
-    // Chama o HUG IA Core em tempo real através da rota oficial /api/ai/public-chat
-    consultarHugIaCore(textoFinal, messages).then((respostaTexto) => {
+    // Chama o HUG IA Core em tempo real através da rota multimodal oficial /api/ai/public-chat
+    consultarHugIaCore(textoFinal, messages, imagensParaEnviar, audioParaEnviar).then((resultado) => {
       const hugMsg: ChatMessage = {
         id: `hug-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         sender: "hug",
-        text: respostaTexto,
+        text: resultado.reply,
+        transcription: resultado.transcription,
         timestamp: getHoraAtual(),
       };
 
@@ -499,13 +746,34 @@ function HugAiHeroTester() {
   function handleLimparConversa() {
     setMessages([]);
     setPergunta("");
+    setImagens([]);
+    setAudioGravado(null);
     setCarregando(false);
   }
 
   const isConversando = messages.length > 0;
+  const podeEnviar = !carregando && (pergunta.trim().length > 0 || imagens.length > 0 || audioGravado !== null);
 
   return (
     <div className="w-full max-w-2xl sm:max-w-3xl mx-auto mt-6 sm:mt-12 px-2 sm:px-3">
+      {/* Inputs Ocultos para Upload de Arquivos e Câmera */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/jpg"
+        multiple
+        className="hidden"
+        onChange={(e) => handleSelectFiles(e.target.files)}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => handleSelectFiles(e.target.files)}
+      />
+
       {/* 
         ESTADO INICIAL: Título limpo e convidativo
         Desaparece suavemente quando o usuário inicia a conversa
@@ -571,12 +839,46 @@ function HugAiHeroTester() {
 
               if (isUser) {
                 return (
-                  <div
-                    key={msg.id}
-                    className="flex justify-end"
-                  >
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#1f1f1f] border border-[#333333] px-4.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-white shadow-sm">
-                      <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
+                  <div key={msg.id} className="flex justify-end">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#1f1f1f] border border-[#333333] px-4.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-white shadow-sm space-y-2">
+                      {/* Imagens anexadas pelo usuário */}
+                      {msg.images && msg.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pb-1">
+                          {msg.images.map((img) => (
+                            <img
+                              key={img.id}
+                              src={img.dataUrl}
+                              alt={img.name}
+                              className="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-xl border border-white/10"
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Áudio anexado pelo usuário */}
+                      {msg.audio && (
+                        <div className="flex items-center gap-2.5 bg-[#2a2a2a] px-3 py-1.5 rounded-full border border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => msg.audio && handleToggleAudio(msg.audio.dataUrl, msg.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-colors"
+                          >
+                            {audioTocandoId === msg.id ? (
+                              <Pause className="h-3.5 w-3.5" />
+                            ) : (
+                              <Play className="h-3.5 w-3.5 ml-0.5" />
+                            )}
+                          </button>
+                          <span className="text-xs text-white/80 font-mono">
+                            {formatarSegundos(msg.audio.durationSeconds || 0)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Texto digitado */}
+                      {msg.text && (
+                        <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
+                      )}
                     </div>
                   </div>
                 );
@@ -593,6 +895,13 @@ function HugAiHeroTester() {
                     className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-cover shrink-0 mt-0.5"
                   />
                   <div className="flex-1 min-w-0 max-w-[95%] text-left">
+                    {/* Exibe transcrição de áudio se retornada */}
+                    {msg.transcription && (
+                      <div className="mb-2 text-xs text-[#00D6A0] bg-[#00D6A0]/10 border border-[#00D6A0]/20 px-2.5 py-1 rounded-md inline-block">
+                        Áudio ouvido: "{msg.transcription}"
+                      </div>
+                    )}
+
                     {/* Texto puro em branco de alto contraste direto no fundo preto */}
                     <div className="text-white text-sm sm:text-[15px] leading-relaxed select-text font-normal whitespace-pre-line">
                       {msg.text}
@@ -656,75 +965,217 @@ function HugAiHeroTester() {
                 </div>
               </div>
             )}
-
           </div>
         </div>
       )}
 
       {/* 
-        COMPOSER ESTILO CHATGPT (Capsule única, 100% Preto Sólido, sem caixas internas)
+        COMPOSER MULTIMODAL ESTILO CHATGPT (100% Preto Sólido, Zero Transparência)
       */}
       <div className="relative w-full">
+        {/* Menu Flutuante de Anexos (+) */}
+        <AnimatePresence>
+          {menuAnexosAberto && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute bottom-full left-0 mb-3 z-30 w-52 rounded-2xl border border-[#333333] bg-[#1a1a1a] p-1.5 shadow-[0_16px_36px_rgba(0,0,0,0.9)]"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuAnexosAberto(false);
+                  fileInputRef.current?.click();
+                }}
+                className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white hover:bg-[#262626] transition-colors"
+              >
+                <ImageIcon className="h-4 w-4 text-[#a0a0a0]" />
+                <span>Fotos e Imagens</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuAnexosAberto(false);
+                  cameraInputRef.current?.click();
+                }}
+                className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white hover:bg-[#262626] transition-colors"
+              >
+                <Camera className="h-4 w-4 text-[#a0a0a0]" />
+                <span>Tirar Foto / Câmera</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Prévia de Imagens Anexadas antes do Envio */}
+        {imagens.length > 0 && (
+          <div className="mb-2 flex items-center gap-2.5 overflow-x-auto px-2 py-1 scrollbar-none">
+            {imagens.map((img) => (
+              <div key={img.id} className="relative group shrink-0">
+                <img
+                  src={img.dataUrl}
+                  alt={img.name}
+                  className="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-2xl border border-[#444444]"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoverImagem(img.id)}
+                  title="Remover imagem"
+                  className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/90 text-white border border-[#444444] hover:bg-rose-600 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Prévia de Áudio Gravado antes do Envio */}
+        {audioGravado && !gravandoAudio && (
+          <div className="mb-2.5 flex items-center justify-between rounded-2xl border border-[#333333] bg-[#1a1a1a] px-4 py-2">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleToggleAudio(audioGravado.dataUrl, "preview-audio")}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-colors"
+              >
+                {audioTocandoId === "preview-audio" ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4 ml-0.5" />
+                )}
+              </button>
+              <div className="text-left">
+                <p className="text-xs font-medium text-white">Áudio gravado</p>
+                <p className="text-[11px] text-[#8e8e8e] font-mono">
+                  {formatarSegundos(audioGravado.durationSeconds)}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDescartarAudioGravado}
+              title="Descartar áudio"
+              className="p-1.5 text-[#8e8e8e] hover:text-rose-400 transition-colors rounded-lg"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Barra de Composição Principal */}
         <div
           className="relative rounded-full border border-[#333333] bg-[#141414] shadow-[0_12px_40px_rgba(0,0,0,0.95)] transition-all duration-200 focus-within:border-[#555555] px-3 sm:px-4 py-2 sm:py-2.5"
           style={{ backgroundColor: "#141414", opacity: 1 }}
         >
-          {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio Circular */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Botão de Adicionar (+) Estilo ChatGPT */}
-            <button
-              type="button"
-              onClick={() => {
-                const sorteado = exemplos[Math.floor(Math.random() * exemplos.length)]!;
-                setPergunta(sorteado);
-                if (textareaRef.current) {
-                  textareaRef.current.focus({ preventScroll: true });
-                }
-              }}
-              title="Inserir pergunta de exemplo"
-              aria-label="Inserir pergunta de teste"
-              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#262626] hover:bg-[#333333] text-[#b4b4b4] hover:text-white transition-colors"
-            >
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
-            </button>
+          {gravandoAudio ? (
+            /* Modo Ativo de Gravação de Áudio com Timer e Cancelar/Concluir */
+            <div className="flex items-center justify-between w-full h-8 sm:h-9 px-1">
+              <div className="flex items-center gap-2.5">
+                <span className="h-3 w-3 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-xs sm:text-sm font-medium text-white">Gravando áudio...</span>
+                <span className="text-xs sm:text-sm font-mono text-[#00D6A0] font-semibold">
+                  {formatarSegundos(tempoGravacao)}
+                </span>
+              </div>
 
-            {/* Campo Textarea Expansível SEM caixa interna ou bordas herdadas */}
-            <div className="relative flex-1 min-w-0 flex items-center px-1">
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                value={pergunta}
-                onChange={(e) => setPergunta(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Pergunte à HUG I.A..."
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  boxShadow: "none",
-                  padding: "0",
-                  borderRadius: "0",
-                }}
-                className="w-full resize-none !bg-transparent !border-0 !border-none !outline-none !shadow-none !p-0 !rounded-none text-sm sm:text-base text-white placeholder:text-[#8e8e8e] leading-relaxed max-h-36 overflow-y-auto focus:!ring-0 focus:!outline-none focus:!border-none"
-              />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelarGravacao}
+                  title="Cancelar gravação"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#262626] text-[#b4b4b4] hover:bg-rose-950 hover:text-rose-400 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePararGravacao}
+                  title="Concluir áudio"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00D6A0] text-black hover:bg-[#00D6A0]/90 font-medium transition-colors"
+                >
+                  <Check className="h-4 w-4 stroke-[2.5]" />
+                </button>
+              </div>
             </div>
+          ) : (
+            /* Modo Normal de Composição: Botão (+), Botão Imagem, Textarea, Microfone e Enviar */
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Botão de Anexos (+) Estilo ChatGPT */}
+              <button
+                type="button"
+                onClick={() => setMenuAnexosAberto((prev) => !prev)}
+                title="Adicionar fotos, câmera ou arquivos"
+                aria-label="Opções de anexo"
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  menuAnexosAberto
+                    ? "bg-white text-black"
+                    : "bg-[#262626] hover:bg-[#333333] text-[#b4b4b4] hover:text-white"
+                }`}
+              >
+                <Plus className={`h-4 w-4 sm:h-5 sm:w-5 stroke-[2] transition-transform ${menuAnexosAberto ? "rotate-45" : ""}`} />
+              </button>
 
-            {/* Botão de Envio Circular Estilo ChatGPT (Branco quando ativo, cinza quando desabilitado) */}
-            <button
-              type="button"
-              onClick={() => handleEnviar()}
-              disabled={carregando || !pergunta.trim()}
-              title="Enviar mensagem à HUG I.A"
-              aria-label="Enviar mensagem"
-              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 font-medium transition-all duration-200 active:scale-95 disabled:bg-[#343434] disabled:text-[#676767] disabled:cursor-not-allowed"
-            >
-              {carregando ? (
-                <span className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
-              )}
-            </button>
-          </div>
+              {/* Botão Direto de Selecionar Imagem */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Anexar imagem"
+                className="hidden sm:flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#262626] hover:bg-[#333333] text-[#b4b4b4] hover:text-white transition-colors"
+              >
+                <ImageIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+              </button>
+
+              {/* Campo Textarea Expansível SEM caixa interna ou bordas herdadas */}
+              <div className="relative flex-1 min-w-0 flex items-center px-1">
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  value={pergunta}
+                  onChange={(e) => setPergunta(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Pergunte à HUG I.A..."
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "none",
+                    padding: "0",
+                    borderRadius: "0",
+                  }}
+                  className="w-full resize-none !bg-transparent !border-0 !border-none !outline-none !shadow-none !p-0 !rounded-none text-sm sm:text-base text-white placeholder:text-[#8e8e8e] leading-relaxed max-h-36 overflow-y-auto focus:!ring-0 focus:!outline-none focus:!border-none"
+                />
+              </div>
+
+              {/* Botão de Gravar Áudio (Microfone) Estilo ChatGPT */}
+              <button
+                type="button"
+                onClick={handleIniciarGravacao}
+                title="Gravar mensagem de voz"
+                aria-label="Gravar áudio"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#262626] hover:bg-[#333333] text-[#b4b4b4] hover:text-white transition-colors"
+              >
+                <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+
+              {/* Botão de Envio Circular Estilo ChatGPT */}
+              <button
+                type="button"
+                onClick={() => handleEnviar()}
+                disabled={!podeEnviar}
+                title="Enviar mensagem à HUG I.A"
+                aria-label="Enviar mensagem"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 font-medium transition-all duration-200 active:scale-95 disabled:bg-[#343434] disabled:text-[#676767] disabled:cursor-not-allowed"
+              >
+                {carregando ? (
+                  <span className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

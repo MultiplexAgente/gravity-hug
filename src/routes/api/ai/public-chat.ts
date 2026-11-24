@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
 import { providerApiKey } from "@/lib/multiplex/model-registry.server";
 
 const BodySchema = z.object({
-  message: z.string().min(1, "A mensagem não pode estar vazia.").max(4000),
+  message: z.string().max(4000).optional().default(""),
   history: z
     .array(
       z.object({
@@ -13,8 +11,27 @@ const BodySchema = z.object({
         content: z.string().max(4000),
       })
     )
-    .optional(),
+    .optional()
+    .default([]),
   conversationId: z.string().optional(),
+  images: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        type: z.string().optional().default("image/jpeg"),
+        dataUrl: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
+  audio: z
+    .object({
+      dataUrl: z.string(),
+      mimeType: z.string().optional().default("audio/webm"),
+      name: z.string().optional(),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const HUG_INSTITUCIONAL_SYSTEM_PROMPT = `Você é a HUG I.A., a assistente de inteligência artificial oficial do ecossistema HUG, desenvolvida pela BonaSoft (bonasoftmt.com).
@@ -22,8 +39,8 @@ export const HUG_INSTITUCIONAL_SYSTEM_PROMPT = `Você é a HUG I.A., a assistent
 IDENTIDADE E PROPÓSITO:
 - Quem te desenvolveu: Fui desenvolvida pela BonaSoft, empresa de tecnologia e inteligência corporativa sediada no Mato Grosso.
 - O que é o HUG: É uma plataforma integrada de gestão empresarial e inteligência comercial que unifica todas as pontas da empresa: retaguarda, frente de caixa (PDV), estoque físico e digital, faturamento, loja virtual e inteligência operacional em tempo real.
-- Natureza da sua inteligência: Você é uma inteligência artificial generativa real, conectada ao HUG IA Core, com capacidade de raciocínio avançado, interpretação de intenção, processamento de contexto em linguagem natural e integração a ferramentas operacionais.
-- Nível de processamento: Opera no motor central de inteligência artificial da HUG configurado com raciocínio avançado (reasoning effort máximo), permitindo respostas rápidas para dúvidas diretas e análises aprofundadas para cenários complexos.
+- Natureza da sua inteligência: Você é uma inteligência artificial generativa multimodal real, conectada ao HUG IA Core, com capacidade de raciocínio avançado, visão computacional para análise de fotos, documentos, notas fiscais, códigos de barras, produtos e estoques, processamento de áudio/voz e integração a ferramentas operacionais.
+- Nível de processamento: Opera no motor central de inteligência artificial da HUG configurado com raciocínio avançado e capacidade de visão e áudio.
 - Diferença entre você e um chatbot tradicional: Um chatbot tradicional segue fluxos rígidos de perguntas e respostas pré-programadas com palavras-chave estáticas. Você é uma IA generativa que compreende intenções, mantém contexto em múltiplos turnos de conversa, raciocina sobre problemas de negócios e adapta respostas dinamicamente.
 - Diferença entre você e o ChatGPT: O ChatGPT é um modelo de linguagem generalista de uso amplo. A HUG I.A. é um agente especializado no ecossistema empresarial HUG, desenhado para rotinas comerciais, regras tributárias, frente de caixa, estoque e governança corporativa da plataforma.
 
@@ -32,7 +49,7 @@ ECOSSISTEMA HUG E MÓDULOS:
 2. HUG POS (Ponto de Venda): PDV ultrarrápido com emissão fiscal (NFC-e e NF-e em menos de 1s), suporte a leitor de código de barras, teclado de atalhos e múltiplos caixas simultâneos.
 3. HUG Mobile: Aplicativo móvel para atendimento no salão, consulta ágil de preços no balcão e conferência de inventário pelo smartphone.
 4. HUG Store: Catálogo público online sincronizado instantaneamente ao estoque físico para pedidos com entrega ou retirada no balcão.
-5. HUG I.A.: Assistente inteligente em linguagem natural para apoio à decisão, consulta rápida e automação operacional.
+5. HUG I.A.: Assistente inteligente em linguagem natural e multimodal para apoio à decisão, consulta rápida e automação operacional.
 
 SEGMENTOS ATENDIDOS E REGRAS DE NEGÓCIO:
 - Materiais, Papelarias e Ferramentas: Busca instantânea por SKU/EAN/ISBN, conversão de unidades fracionadas (m², kg, metro linear, resma, caixa) e expedição por rotas.
@@ -48,6 +65,10 @@ PLANOS E PREÇOS OFICIAIS (100% TRANSPARENTES, SEM FIDELIDADE E SEM TAXA OCULTA)
 - Business: R$ 199,00/mês (Recomendado) — Para operações em crescimento (todos os recursos do Starter + multicanal balcão/web, assistente HUG I.A., múltiplos caixas e relatórios detalhados).
 - Premium: R$ 399,00/mês — Para operações corporativas e redes (todos os recursos do Business + múltiplas filiais conectadas, acesso prioritário ao HUG I.A., auditoria avançada e suporte prioritário).
 
+PROCESSAMENTO MULTIMODAL:
+- Quando o usuário enviar imagens: analise detalhadamente o conteúdo visual (leia textos, etiquetas, valores de notas fiscais, identifique produtos, marcas, embalagens ou itens) e relacione com os processos do ecossistema HUG ou com a dúvida feita pelo usuário.
+- Quando o usuário enviar áudio: o sistema transcreve o áudio para você; responda diretamente ao que foi falado de maneira natural.
+
 DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 1. Converse de forma natural, humana, segura, direta e profissional.
 2. NUNCA comece suas respostas com frases robóticas ou templates repetitivos (como "Com base nos registros operacionais...").
@@ -57,6 +78,51 @@ DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 6. Não invente capacidades que não existem; se não souber ou se o assunto estiver fora do ecossistema, responda com honestidade.
 7. Mantenha o contexto da conversa: use o histórico para entender referências a mensagens anteriores.
 8. É TERMINANTEMENTE PROIBIDO usar ícones de IA, estrelas, faíscas ou sparkles (como ✨, ⭐ ou qualquer símbolo similar).`;
+
+async function transcreverAudioWhisper(
+  audioDataUrl: string,
+  apiKey: string,
+  mimeType = "audio/webm"
+): Promise<string> {
+  try {
+    const base64Index = audioDataUrl.indexOf("base64,");
+    const rawBase64 = base64Index !== -1 ? audioDataUrl.slice(base64Index + 7) : audioDataUrl;
+    const buffer = Buffer.from(rawBase64, "base64");
+
+    const extension = mimeType.includes("mp4")
+      ? "mp4"
+      : mimeType.includes("wav")
+      ? "wav"
+      : mimeType.includes("ogg")
+      ? "ogg"
+      : "webm";
+
+    const file = new File([buffer], `audio_input.${extension}`, { type: mimeType });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("model", "whisper-1");
+    formData.append("language", "pt");
+
+    const resp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: formData,
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      return (data.text || "").trim();
+    } else {
+      const errText = await resp.text();
+      console.warn("[Whisper Audio Transcription Failed]:", errText);
+    }
+  } catch (error) {
+    console.error("[Whisper Error]:", error);
+  }
+  return "";
+}
 
 export const Route = createFileRoute("/api/ai/public-chat")({
   server: {
@@ -73,11 +139,48 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             );
           }
 
-          const { message, history = [], conversationId } = parsed.data;
+          const { message, history = [], conversationId, images = [], audio } = parsed.data;
           const convId = conversationId || `conv_pub_${Date.now().toString(36)}`;
           const modelTarget = "gpt-6.2-astra";
 
-          // 1. TENTATIVA VIA HUG IA CORE GATEWAY HTTP
+          const openAiKey =
+            providerApiKey("openai") ||
+            process.env.OPENAI_API_KEY ||
+            process.env.VITE_OPENAI_API_KEY;
+
+          // 1. Processamento de áudio se enviado
+          let audioTranscription = "";
+          if (audio && audio.dataUrl && openAiKey) {
+            audioTranscription = await transcreverAudioWhisper(
+              audio.dataUrl,
+              openAiKey,
+              audio.mimeType || "audio/webm"
+            );
+          }
+
+          // Monta a mensagem textual combinada
+          let combinedMessage = message.trim();
+          if (audioTranscription) {
+            if (combinedMessage) {
+              combinedMessage = `${combinedMessage}\n\n[Mensagem em áudio enviada pelo usuário: "${audioTranscription}"]`;
+            } else {
+              combinedMessage = audioTranscription;
+            }
+          }
+
+          if (!combinedMessage && images.length === 0) {
+            return Response.json(
+              { ok: false, error: "Nenhuma mensagem, imagem ou áudio foi fornecido." },
+              { status: 400 }
+            );
+          }
+
+          // Se só tem imagem sem texto explícito
+          if (!combinedMessage && images.length > 0) {
+            combinedMessage = "Por favor, analise a(s) imagem(ns) enviada(s) e me dê detalhes ou informações relevantes.";
+          }
+
+          // 2. TENTATIVA VIA HUG IA CORE GATEWAY HTTP
           const coreUrl =
             process.env.HUG_CORE_GATEWAY_URL ||
             process.env.HUG_IA_CORE_URL ||
@@ -99,10 +202,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               body: JSON.stringify({
                 companyId: "1017",
                 applicationId: "hug_institucional",
-                incomingText: message,
+                incomingText: combinedMessage,
                 systemPrompt: HUG_INSTITUCIONAL_SYSTEM_PROMPT,
                 conversationId: convId,
                 history,
+                images,
                 modelAlias: modelTarget,
               }),
               signal: controller.signal,
@@ -115,6 +219,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 return Response.json({
                   ok: true,
                   reply: (coreData.texto || coreData.text).trim(),
+                  transcription: audioTranscription || undefined,
                   modelUsed: coreData.modelo || modelTarget,
                   requestId: coreData.requestId,
                   conversationId: coreData.conversaId || convId,
@@ -126,7 +231,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             // Continua para o módulo in-process oficial do HUG IA Core
           }
 
-          // 2. IN-PROCESS HUG IA CORE GATEWAY
+          // 3. IN-PROCESS HUG IA CORE GATEWAY
           try {
             const coreModuleUrl = "file:///D:/Desenvolvimento/Projetos/hug-ia-core/dist/index.js";
             const { processarRequisicaoGateway }: any = await import(/* @vite-ignore */ coreModuleUrl);
@@ -135,10 +240,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               {
                 companyId: "1017",
                 applicationId: "hug_institucional",
-                incomingText: message,
+                incomingText: combinedMessage,
                 systemPrompt: HUG_INSTITUCIONAL_SYSTEM_PROMPT,
                 conversationId: convId,
                 history,
+                images,
                 modelAlias: modelTarget,
                 context: {
                   canal: "web_institucional",
@@ -155,6 +261,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               return Response.json({
                 ok: true,
                 reply: coreResult.texto.trim(),
+                transcription: audioTranscription || undefined,
                 modelUsed: coreResult.modelo || modelTarget,
                 requestId: coreResult.requestId,
                 conversationId: coreResult.conversaId || convId,
@@ -162,47 +269,103 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               });
             }
           } catch {
-            // Continua para o fallback de conexão direta de contingência
+            // Continua para a conexão direta com o modelo central aprovado
           }
 
-          // 3. CONEXÃO CONTINGENCIAL DIRETA COM O MODELO CENTRAL APROVADO
-          const openAiKey =
-            providerApiKey("openai") ||
-            process.env.OPENAI_API_KEY ||
-            process.env.VITE_OPENAI_API_KEY;
-
+          // 4. CONEXÃO CONTINGENCIAL DIRETA COM O MODELO CENTRAL (COM SUPORTE TOTAL A VISÃO)
           if (openAiKey) {
-            const openai = createOpenAI({ apiKey: openAiKey });
-            const model = openai(modelTarget);
+            // Se houver imagens, utilizamos modelo com suporte a visão garantido (gpt-4o)
+            const visionOrChatModel = images.length > 0 ? "gpt-4o" : (process.env.OPENAI_MODEL || "gpt-4o");
 
-            const conversationMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
-            for (const item of history.slice(-6)) {
-              conversationMessages.push({
-                role: item.role,
-                content: item.content,
+            // Monta payload de mensagens para chat/vision completions
+            const userContentParts: Array<
+              | { type: "text"; text: string }
+              | { type: "image_url"; image_url: { url: string; detail?: string } }
+            > = [{ type: "text", text: combinedMessage }];
+
+            for (const img of images) {
+              const url = img.dataUrl.startsWith("data:")
+                ? img.dataUrl
+                : `data:${img.type || "image/jpeg"};base64,${img.dataUrl}`;
+              userContentParts.push({
+                type: "image_url",
+                image_url: { url, detail: "auto" },
               });
             }
-            conversationMessages.push({
-              role: "user",
-              content: message,
+
+            const apiMessages: Array<{
+              role: "system" | "user" | "assistant";
+              content: any;
+            }> = [
+              { role: "system", content: HUG_INSTITUCIONAL_SYSTEM_PROMPT },
+              ...history.slice(-8).map((item) => ({
+                role: item.role as "user" | "assistant",
+                content: item.content,
+              })),
+              {
+                role: "user",
+                content: images.length > 0 ? userContentParts : combinedMessage,
+              },
+            ];
+
+            const payloadBody: any = {
+              model: visionOrChatModel,
+              messages: apiMessages,
+            };
+
+            // Modelos de raciocínio como gpt-6.2-astra, o1 e o3 não aceitam temperature customizada
+            const isReasoning =
+              visionOrChatModel.includes("astra") ||
+              visionOrChatModel.startsWith("o1") ||
+              visionOrChatModel.startsWith("o3");
+
+            if (!isReasoning) {
+              payloadBody.temperature = 0.5;
+            }
+
+            let openAiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${openAiKey}`,
+              },
+              body: JSON.stringify(payloadBody),
             });
 
-            const result = await generateText({
-              model,
-              system: HUG_INSTITUCIONAL_SYSTEM_PROMPT,
-              messages: conversationMessages,
-              temperature: 0.5,
-            });
-
-            if (result.text && result.text.trim().length > 0) {
-              return Response.json({
-                ok: true,
-                reply: result.text.trim(),
-                modelUsed: modelTarget,
-                requestId: `dir_${Date.now().toString(36)}`,
-                conversationId: convId,
-                viaGateway: false,
+            // Se o modelo especificado falhar (ex: não suportado ou erro de parâmetro), fallback transparente para gpt-4o
+            if (!openAiResp.ok && visionOrChatModel !== "gpt-4o") {
+              const errBody = await openAiResp.text();
+              console.warn(`[OpenAI Direct: modelo ${visionOrChatModel} falhou, tentando gpt-4o]:`, errBody);
+              payloadBody.model = "gpt-4o";
+              payloadBody.temperature = 0.5;
+              openAiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${openAiKey}`,
+                },
+                body: JSON.stringify(payloadBody),
               });
+            }
+
+            if (openAiResp.ok) {
+              const openAiJson = await openAiResp.json();
+              const replyText = openAiJson.choices?.[0]?.message?.content?.trim();
+
+              if (replyText) {
+                return Response.json({
+                  ok: true,
+                  reply: replyText,
+                  transcription: audioTranscription || undefined,
+                  modelUsed: visionOrChatModel,
+                  requestId: `comp_${Date.now().toString(36)}`,
+                  conversationId: convId,
+                  viaGateway: false,
+                });
+              }
+            } else {
+              const errBody = await openAiResp.text();
+              console.error("[OpenAI Direct Fallback Error]:", errBody);
             }
           }
 
