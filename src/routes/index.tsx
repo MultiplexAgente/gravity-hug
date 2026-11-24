@@ -125,7 +125,7 @@ const NARRATIVE_PILLARS = [
       "Rastreabilidade de insumos, contratos de grãos e fluxo financeiro rural",
     ],
     image:
-      "https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85",
   },
   {
     title: "Inteligência que entende o seu negócio.",
@@ -362,19 +362,47 @@ function HugAiHeroTester() {
     setResposta(null);
 
     setTimeout(() => {
-      const q = query.toLowerCase();
+      const q = query.toLowerCase().trim();
       let resp = "";
 
-      if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
+      // 1. Identidade e Apresentação da HUG I.A ("quem é você", "o que você faz", etc.)
+      if (
+        q.includes("quem e") ||
+        q.includes("quem é") ||
+        q.includes("o que voce") ||
+        q.includes("o que você") ||
+        q.includes("o que e o hug") ||
+        q.includes("o que é o hug") ||
+        q.includes("como funciona") ||
+        q.includes("apresente") ||
+        q.includes("quem voce") ||
+        q.includes("quem você")
+      ) {
+        resp = "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp — incluindo operações agrícolas com o HUG-AGRO e drogarias com o HUG Farmácias. Posso consultar estoque, auditar caixas, rastrear lotes e apoiar seu time comercial instantaneamente. Como posso te ajudar hoje?";
+      } else if (
+        q === "oi" ||
+        q === "olá" ||
+        q === "ola" ||
+        q.startsWith("bom dia") ||
+        q.startsWith("boa tarde") ||
+        q.startsWith("boa noite") ||
+        q === "opa" ||
+        q === "e ai" ||
+        q === "e aí"
+      ) {
+        resp = "Olá! Sou a HUG I.A. Estou conectada aos dados da sua empresa. Você pode me fazer perguntas em linguagem natural sobre faturamento de hoje, reposição de estoque, vendas por canal ou operações de campo. O que deseja consultar?";
+      } else if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
         resp = "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são: 1º Amoxicilina 875mg (14 un), 2º Dipirona 500mg (12 un) e 3º Losartana 50mg (9 un). O estoque de segurança de todos permanece dentro da margem de reposição.";
-      } else if (q.includes("faturamento") || q.includes("receita") || q.includes("venda")) {
+      } else if (q.includes("faturamento") || q.includes("receita") || q.includes("venda") || q.includes("caixa")) {
         resp = "O faturamento consolidado hoje é de R$ 4.820,50 em 38 transações (Ticket Médio: R$ 126,85). 68% recebido via Pix, 24% Cartão de Crédito e 8% Dinheiro/Débito. Não há divergências de fechamento de caixa.";
-      } else if (q.includes("estoque") || q.includes("dipirona") || q.includes("unidade") || q.includes("restando")) {
+      } else if (q.includes("estoque") || q.includes("dipirona") || q.includes("unidade") || q.includes("restando") || q.includes("lote")) {
         resp = "Localizei 84 unidades físicas de Dipirona 500mg (20 comp) no estoque da Unidade Centro (Lote LT-DIP-2024, validade ago/2027, custo R$ 3,20, preço de venda R$ 8,50). Status: 100% regular.";
-      } else if (q.includes("safra") || q.includes("agro") || q.includes("fazenda") || q.includes("silo") || q.includes("talhão")) {
-        resp = "No HUG-AGRO, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas armazenadas no Silo 02 com umidade estável em 13,2%.";
+      } else if (q.includes("safra") || q.includes("agro") || q.includes("fazenda") || q.includes("silo") || q.includes("talhão") || q.includes("grão") || q.includes("soja") || q.includes("milho")) {
+        resp = "No HUG-AGRO, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
+      } else if (q.includes("farmacia") || q.includes("farmácia") || q.includes("receita") || q.includes("remedio") || q.includes("remédio")) {
+        resp = "No HUG Farmácias, a conformidade de receituários controlados (Portaria 344/98) e lotes FEFO está 100% regularizada. Não há pendências sanitárias nem produtos em ruptura.";
       } else {
-        resp = `Entendido! Analisando sua operação em tempo real: para "${query}", localizei dados consolidados em seu ERP. Todos os lançamentos, estoque e faturamento estão sincronizados e auditados. Deseja emitir o relatório ou enviar um resumo ao WhatsApp?`;
+        resp = `Consulta processada para "${query}". A HUG I.A analisa os registros do seu ecossistema comercial (frente de caixa, controle de estoque e faturamento) para entregar respostas imediatas e auditadas sem planilhas soltas. Deseja conhecer o fluxo completo ou conectar ao seu WhatsApp?`;
       }
 
       setResposta(resp);
