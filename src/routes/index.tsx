@@ -18,8 +18,6 @@ import {
   CheckCheck,
   Copy,
   RotateCcw,
-  ThumbsUp,
-  ThumbsDown,
   Image as ImageIcon,
   Camera,
   Mic,
@@ -369,7 +367,6 @@ interface ChatMessage {
   sender: "user" | "hug";
   text: string;
   timestamp: string;
-  liked?: boolean | null;
   images?: ImagemAnexada[];
   audio?: AudioAnexado;
   transcription?: string;
@@ -737,12 +734,6 @@ function HugAiHeroTester() {
     });
   }
 
-  function handleFeedback(msgId: string, tipo: boolean) {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === msgId ? { ...m, liked: m.liked === tipo ? null : tipo } : m))
-    );
-  }
-
   function handleLimparConversa() {
     setMessages([]);
     setPergunta("");
@@ -907,8 +898,8 @@ function HugAiHeroTester() {
                       {msg.text}
                     </div>
 
-                    {/* Barra de ações discretas abaixo da resposta (Estilo ChatGPT: apenas Copiar e Thumbs) */}
-                    <div className="mt-3 flex items-center gap-2 text-[#8e8e8e]">
+                    {/* Barra de ações discretas abaixo da resposta: apenas Copiar */}
+                    <div className="mt-2.5 flex items-center gap-2 text-[#8e8e8e]">
                       {/* Botão Copiar */}
                       <button
                         type="button"
@@ -921,28 +912,6 @@ function HugAiHeroTester() {
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
-                      </button>
-
-                      {/* Feedback Thumbs */}
-                      <button
-                        type="button"
-                        onClick={() => handleFeedback(msg.id, true)}
-                        className={`p-1.5 rounded-md hover:bg-[#1f1f1f] hover:text-white transition-colors ${
-                          msg.liked === true ? "text-[#00D6A0]" : ""
-                        }`}
-                        title="Boa resposta"
-                      >
-                        <ThumbsUp className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleFeedback(msg.id, false)}
-                        className={`p-1.5 rounded-md hover:bg-[#1f1f1f] hover:text-white transition-colors ${
-                          msg.liked === false ? "text-rose-400" : ""
-                        }`}
-                        title="Resposta ruim"
-                      >
-                        <ThumbsDown className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
