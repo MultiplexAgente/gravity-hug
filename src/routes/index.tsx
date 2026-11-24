@@ -525,47 +525,42 @@ function HugAiHeroTester() {
       </AnimatePresence>
 
       {/* 
-        ÁREA DE CONVERSA PRINCIPAL (Chat Histórico)
-        Fundo 100% preto opaco sólido, sem transparência sobre o planeta
+        ÁREA DE CONVERSA PRINCIPAL (Estilo ChatGPT Dark - 100% Opaco e Fundo Escuro)
       */}
       {isConversando && (
         <div
-          className="mb-4 rounded-3xl border border-[#202B30] bg-[#030506] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col"
+          className="mb-4 rounded-3xl border border-[#262626] bg-[#0c0c0c] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.98)] overflow-hidden flex flex-col"
         >
-          {/* Cabeçalho preto sólido da conversa */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#202B30] bg-[#080D0F]">
+          {/* Cabeçalho minimalista da conversa (sem badge Online) */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#212121] bg-[#0c0c0c]">
             <div className="flex items-center gap-2.5">
               <img
                 src={hugLogo}
                 alt="HUG I.A"
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-[#00D6A0]/40"
+                className="h-6 w-6 rounded-full object-cover"
               />
-              <span className="text-xs sm:text-sm font-medium text-[#F4F7F8] tracking-tight">HUG I.A</span>
-              <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#00D6A0] bg-[#00D6A0]/10 border border-[#00D6A0]/25 px-2 py-0.5 rounded-full">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#00D6A0] animate-pulse" />
-                Online
-              </span>
+              <span className="text-sm font-medium text-[#ececec] tracking-tight">HUG I.A</span>
             </div>
 
             {/* Ação de Reiniciar/Limpar conversa */}
             <button
               type="button"
               onClick={handleLimparConversa}
-              className="inline-flex items-center gap-1.5 text-xs text-[#AAB8BE] hover:text-[#F4F7F8] transition-colors px-2.5 py-1 rounded-lg hover:bg-[#101719] active:scale-95"
+              className="inline-flex items-center gap-1.5 text-xs text-[#a0a0a0] hover:text-[#ececec] transition-colors px-2.5 py-1.5 rounded-lg hover:bg-[#212121] active:scale-95"
               title="Iniciar uma nova conversa"
             >
-              <RotateCcw className="h-3 w-3" />
+              <RotateCcw className="h-3.5 w-3.5" />
               <span>Nova conversa</span>
             </button>
           </div>
 
-          {/* Lista de Mensagens com fundo sólido e rolagem vertical independente */}
+          {/* Lista de Mensagens estilo ChatGPT com fundo 100% escuro sólido */}
           <div
             ref={chatContainerRef}
             onScroll={handleChatScroll}
             data-lenis-prevent="true"
-            style={{ overscrollBehavior: "contain", backgroundColor: "#05090B" }}
-            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-4 scrollbar-thin scrollbar-thumb-[#202B30] overscroll-contain"
+            style={{ overscrollBehavior: "contain", backgroundColor: "#0c0c0c" }}
+            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-6 space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
@@ -576,11 +571,8 @@ function HugAiHeroTester() {
                     key={msg.id}
                     className="flex justify-end"
                   >
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-sm bg-[#073A34] border border-[#202B30] px-4 py-3 text-sm sm:text-[15px] text-[#F4F7F8] shadow-sm">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#212121] border border-[#303030] px-4.5 py-3 text-sm sm:text-[15px] text-[#ececec] shadow-sm">
                       <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
-                      <div className="mt-1 text-right text-[10px] font-mono text-[#AAB8BE]">
-                        {msg.timestamp}
-                      </div>
                     </div>
                   </div>
                 );
@@ -589,99 +581,87 @@ function HugAiHeroTester() {
               return (
                 <div
                   key={msg.id}
-                  className="flex items-start gap-3 justify-start"
+                  className="flex items-start gap-3.5 justify-start"
                 >
                   <img
                     src={hugLogo}
                     alt="HUG I.A"
-                    className="h-7 w-7 rounded-full object-cover ring-1 ring-[#00D6A0]/40 shrink-0 mt-0.5"
+                    className="h-7 w-7 rounded-full object-cover shrink-0 mt-0.5"
                   />
-                  <div className="flex-1 min-w-0 max-w-[92%] sm:max-w-[88%]">
-                    {/* Bloco de resposta com fundo escuro sólido e borda de alto contraste */}
-                    <div className="rounded-2xl rounded-tl-sm bg-[#0C1417] border border-[#202B30] p-4 text-[#F4F7F8] text-sm sm:text-[15px] leading-relaxed whitespace-pre-line select-text font-normal text-left shadow-sm">
+                  <div className="flex-1 min-w-0 max-w-[95%] text-left">
+                    {/* Texto direto sem caixa fechada, idêntico à experiência ChatGPT */}
+                    <div className="text-[#ececec] text-sm sm:text-[15px] leading-relaxed select-text font-normal whitespace-pre-line">
                       {msg.text}
+                    </div>
 
-                      {/* Barra de ações discretas da mensagem */}
-                      <div className="mt-3.5 pt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-[#202B30] text-[11px] text-[#AAB8BE]">
-                        <div className="flex items-center gap-3">
-                          {/* Botão Copiar */}
-                          <button
-                            type="button"
-                            onClick={() => handleCopiar(msg.id, msg.text)}
-                            className="inline-flex items-center gap-1 hover:text-[#F4F7F8] transition-colors"
-                            title="Copiar resposta"
-                          >
-                            {copiedId === msg.id ? (
-                              <>
-                                <Check className="h-3 w-3 text-[#00D6A0]" />
-                                <span className="text-[#00D6A0]">Copiado!</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="h-3 w-3" />
-                                <span>Copiar</span>
-                              </>
-                            )}
-                          </button>
+                    {/* Barra de ações discretas abaixo da resposta */}
+                    <div className="mt-3 flex items-center gap-2 text-[#8e8e8e]">
+                      {/* Botão Copiar */}
+                      <button
+                        type="button"
+                        onClick={() => handleCopiar(msg.id, msg.text)}
+                        className="p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors"
+                        title="Copiar resposta"
+                      >
+                        {copiedId === msg.id ? (
+                          <Check className="h-4 w-4 text-[#00D6A0]" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
 
-                          {/* Feedback Thumbs */}
-                          <div className="flex items-center gap-1.5 pl-2 border-l border-[#202B30]">
-                            <button
-                              type="button"
-                              onClick={() => handleFeedback(msg.id, true)}
-                              className={`p-1 rounded hover:text-[#F4F7F8] transition-colors ${
-                                msg.liked === true ? "text-[#00D6A0]" : ""
-                              }`}
-                              title="Útil"
-                            >
-                              <ThumbsUp className="h-3 w-3" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleFeedback(msg.id, false)}
-                              className={`p-1 rounded hover:text-[#F4F7F8] transition-colors ${
-                                msg.liked === false ? "text-rose-400" : ""
-                              }`}
-                              title="Não foi útil"
-                            >
-                              <ThumbsDown className="h-3 w-3" />
-                            </button>
-                          </div>
-                        </div>
+                      {/* Feedback Thumbs */}
+                      <button
+                        type="button"
+                        onClick={() => handleFeedback(msg.id, true)}
+                        className={`p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors ${
+                          msg.liked === true ? "text-[#00D6A0]" : ""
+                        }`}
+                        title="Boa resposta"
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleFeedback(msg.id, false)}
+                        className={`p-1.5 rounded-md hover:bg-[#212121] hover:text-[#ececec] transition-colors ${
+                          msg.liked === false ? "text-rose-400" : ""
+                        }`}
+                        title="Resposta ruim"
+                      >
+                        <ThumbsDown className="h-4 w-4" />
+                      </button>
 
-                        {/* CTA Especialista */}
-                        <a
-                          href={getBonaSoftWhatsAppUrl(
-                            `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[#00D6A0] hover:brightness-110 font-medium transition-colors"
-                        >
-                          <span>Falar com especialista</span>
-                          <ArrowRight className="h-3 w-3" />
-                        </a>
-                      </div>
+                      {/* CTA Especialista */}
+                      <a
+                        href={getBonaSoftWhatsAppUrl(
+                          `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-auto inline-flex items-center gap-1.5 text-xs text-[#00D6A0] hover:underline font-medium transition-colors"
+                      >
+                        <span>Falar com especialista</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </a>
                     </div>
                   </div>
                 </div>
               );
             })}
 
-            {/* Indicador de Digitando / Processando */}
+            {/* Indicador de Digitando estilo ChatGPT */}
             {carregando && (
-              <div
-                className="flex items-center gap-3"
-              >
+              <div className="flex items-start gap-3.5">
                 <img
                   src={hugLogo}
                   alt="HUG I.A"
-                  className="h-7 w-7 rounded-full object-cover ring-1 ring-[#00D6A0]/40 shrink-0"
+                  className="h-7 w-7 rounded-full object-cover shrink-0 mt-0.5"
                 />
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#0C1417] border border-[#202B30]">
-                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="flex items-center gap-1.5 py-2 text-[#8e8e8e]">
+                  <span className="h-2 w-2 rounded-full bg-[#8e8e8e] animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-[#8e8e8e] animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-[#8e8e8e] animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             )}
@@ -691,15 +671,13 @@ function HugAiHeroTester() {
       )}
 
       {/* 
-        COMPOSER FIXO NA PARTE INFERIOR
-        Fundo preto sólido (#101719) com borda discreta (#202B30)
+        COMPOSER ESTILO CHATGPT (Capsule, Fundo Escuro #212121, 100% Opaco)
       */}
-      <div className="relative group w-full">
-        {/* Superfície Sólida de Interação */}
-        <div className="relative rounded-[28px] border border-[#202B30] bg-[#101719] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.95)] transition-all duration-300 hover:border-[#00D6A0]/40 focus-within:border-[#00D6A0] focus-within:ring-1 focus-within:ring-[#00D6A0]/40 p-2.5 sm:p-3.5">
-          {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio */}
-          <div className="flex items-end gap-2.5 sm:gap-3">
-            {/* Botão de Adicionar (+) Minimalista */}
+      <div className="relative w-full">
+        <div className="relative rounded-full border border-[#303030] bg-[#212121] shadow-[0_12px_40px_rgba(0,0,0,0.9)] transition-all duration-200 focus-within:border-[#4d4d4d] px-3.5 sm:px-4 py-2 sm:py-2.5">
+          {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio Circular */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Botão de Adicionar (+) Estilo ChatGPT */}
             <button
               type="button"
               onClick={() => {
@@ -711,13 +689,13 @@ function HugAiHeroTester() {
               }}
               title="Inserir pergunta de exemplo"
               aria-label="Inserir pergunta de teste"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-[#080D0F] hover:bg-[#0C1417] text-[#AAB8BE] hover:text-[#F4F7F8] border border-[#202B30] transition-all duration-200 hover:scale-105 active:scale-95 mb-0.5"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[#2f2f2f] hover:bg-[#383838] text-[#b4b4b4] hover:text-white transition-colors"
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
             </button>
 
             {/* Campo Textarea Expansível com suporte a Enter para enviar */}
-            <div className="relative flex-1 min-w-0 flex items-center py-1 sm:py-1.5">
+            <div className="relative flex-1 min-w-0 flex items-center">
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -725,21 +703,21 @@ function HugAiHeroTester() {
                 onChange={(e) => setPergunta(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Pergunte à HUG I.A..."
-                className="w-full resize-none bg-transparent text-sm sm:text-base text-[#F4F7F8] placeholder:text-[#AAB8BE]/70 focus:outline-none leading-relaxed max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-[#202B30]"
+                className="w-full resize-none bg-transparent text-sm sm:text-base text-white placeholder:text-[#8e8e8e] focus:outline-none leading-relaxed max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-[#303030]"
               />
             </div>
 
-            {/* Botão de Envio Circular Verde HUG (#00D6A0) */}
+            {/* Botão de Envio Circular Estilo ChatGPT (Branco quando ativo, cinza quando desabilitado) */}
             <button
               type="button"
               onClick={() => handleEnviar()}
               disabled={carregando || !pergunta.trim()}
               title="Enviar mensagem à HUG I.A"
               aria-label="Enviar mensagem"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-[#00D6A0] hover:brightness-110 text-[#030506] font-medium shadow-[0_4px_16px_rgba(0,214,160,0.35)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none mb-0.5"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 font-medium transition-all duration-200 active:scale-95 disabled:bg-[#343434] disabled:text-[#676767] disabled:cursor-not-allowed"
             >
               {carregando ? (
-                <span className="h-4 w-4 border-2 border-[#030506] border-t-transparent rounded-full animate-spin" />
+                <span className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
               ) : (
                 <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
               )}
@@ -767,10 +745,8 @@ function HugAiHeroTester() {
                 const sorteado = exemplos[0]!;
                 handleEnviar(sorteado);
               }}
-              className="group relative inline-flex items-center gap-2 rounded-full border border-teal-500/25 bg-[#061219]/60 hover:bg-teal-950/40 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:text-white backdrop-blur-md transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(20,184,166,0.18)] hover:border-teal-400/50 active:scale-95 lowercase"
+              className="group relative inline-flex items-center gap-2 rounded-full border border-[#303030] bg-[#1a1a1a] hover:bg-[#262626] hover:border-[#444444] px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-[#b4b4b4] hover:text-[#ececec] transition-all duration-200 shadow-sm active:scale-95 lowercase"
             >
-              {/* Brilho interno do chip */}
-              <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/30 to-transparent" />
               <span>vamos começar</span>
             </button>
           </motion.div>
