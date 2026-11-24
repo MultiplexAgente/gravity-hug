@@ -356,22 +356,28 @@ function HugAiHeroTester() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
 
   const exemplos = [
     "Qual o valor dos planos da plataforma?",
-    "Quais produtos mais venderam hoje no meu estoque?",
-    "Qual o faturamento acumulado da semana na matriz?",
-    "Quantas unidades de Dipirona 500mg restam na filial Centro?",
-    "Como funciona a emissão de nota fiscal no PDV?",
+    "Quem te desenvolveu?",
+    "Quais segmentos você atende?",
+    "Qual a diferença entre Starter e Business?",
+    "Você consegue gerenciar uma farmácia?",
   ];
 
-  // Rola EXCLUSIVAMENTE o container interno do chat, SEM rolar a janela do usuário
+  // Monitora a posição de rolagem interna do chat
+  function handleChatScroll() {
+    if (!chatContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 80;
+  }
+
+  // Rola EXCLUSIVAMENTE o container interno do chat quando o usuário está no fim
+  // Sem jamais movimentar a janela do usuário (window)
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+    if (chatContainerRef.current && isAtBottomRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages, carregando]);
 
@@ -395,198 +401,10 @@ function HugAiHeroTester() {
     return agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  function gerarRespostaIa(query: string): string {
-    const q = query.toLowerCase().trim();
-
-    // 1. Quem te criou, criador, empresa, quem desenvolveu ("quem te criou", "quem fez", "bonasoft", etc.)
-    if (
-      q.includes("quem te criou") ||
-      q.includes("quem criou") ||
-      q.includes("quem te fez") ||
-      q.includes("quem fez") ||
-      q.includes("quem desenvolveu") ||
-      q.includes("criador") ||
-      q.includes("dono") ||
-      q.includes("bonasoft") ||
-      q.includes("empresa que criou") ||
-      q.includes("quem inventou")
-    ) {
-      return "Fui criada e desenvolvida pela BonaSoft (bonasoftmt.com), empresa de tecnologia e inteligência corporativa sediada no Mato Grosso. Fui projetada exclusivamente para ser a inteligência operacional do ecossistema HUG, unificando frente de caixa (PDV), estoque físico, retaguarda financeira e canais digitais de atendimento em tempo real.";
-    }
-
-    // 2. Nível de processamento, arquitetura, velocidade, inteligência, infraestrutura
-    if (
-      q.includes("processamento") ||
-      q.includes("nivel de processamento") ||
-      q.includes("nível de processamento") ||
-      q.includes("velocidade") ||
-      q.includes("latencia") ||
-      q.includes("latência") ||
-      q.includes("capacidade") ||
-      q.includes("arquitetura") ||
-      q.includes("infraestrutura") ||
-      q.includes("qual modelo") ||
-      q.includes("qual llm")
-    ) {
-      return "Meu processamento opera sobre uma arquitetura de inteligência distribuída de alta disponibilidade, com tempo de resposta médio inferior a 800 milissegundos. Sou conectada diretamente ao banco de dados do seu ERP e PDV, executando simultaneamente conciliação de caixa, auditoria de estoque multi-canal, emissão fiscal e relatórios preditivos em tempo real, sem lentidão ou filas.";
-    }
-
-    // 3. Valores, Preços, Planos e Custos ("qual valor", "quanto custa", "planos", "preço", etc.)
-    if (
-      q.includes("valor") ||
-      q.includes("quanto custa") ||
-      q.includes("preço") ||
-      q.includes("preco") ||
-      q.includes("plano") ||
-      q.includes("mensalidade") ||
-      q.includes("tabela") ||
-      q.includes("custo") ||
-      q.includes("pagar")
-    ) {
-      return "Os planos oficiais da plataforma HUG são 100% transparentes e sem taxa oculta de implantação:\n\n• Starter (R$ 99,00/mês): PDV ágil, catálogo online integrado, controle de estoque e clientes.\n• Business (R$ 199,00/mês - Recomendado): Multicanal (balcão + web), assistente HUG I.A., múltiplos caixas e relatórios de faturamento.\n• Premium (R$ 399,00/mês): Multi-filiais conectadas, acesso prioritário à HUG I.A., auditoria avançada e suporte prioritário.\n\nVocê pode alterar ou cancelar a qualquer momento sem taxa de fidelidade.";
-    }
-
-    // 4. Como funciona o PDV, Frente de Caixa, Venda de Balcão
-    if (
-      q.includes("pdv") ||
-      q.includes("frente de caixa") ||
-      q.includes("balcão") ||
-      q.includes("balcao") ||
-      q.includes("caixa")
-    ) {
-      return "O PDV da HUG é ultra-rápido, com resposta em menos de 1 segundo por item. Conta com busca instantânea por leitor de código de barras ou teclado de atalho, múltiplos caixas simultâneos, fechamento com conciliação automática (Pix, Cartão e Dinheiro) e baixa imediata no estoque central.";
-    }
-
-    // 5. Como funciona o Estoque, Inventário, Lotes
-    if (
-      q.includes("estoque") ||
-      q.includes("inventario") ||
-      q.includes("inventário") ||
-      q.includes("reposicao") ||
-      q.includes("reposição") ||
-      q.includes("lote") ||
-      q.includes("validade")
-    ) {
-      return "O controle de estoque da HUG opera de forma unificada entre balcão físico, loja virtual e canais de WhatsApp. A cada venda realizada, a disponibilidade é atualizada no mesmo segundo. O sistema emite alertas preventivos de ruptura, calcula ponto de reposição e gerencia lotes com controle de validade FEFO.";
-    }
-
-    // 6. Contratar, Assinar, Comprar, Começar
-    if (
-      q.includes("contratar") ||
-      q.includes("comprar") ||
-      q.includes("assinar") ||
-      q.includes("comecar") ||
-      q.includes("começar") ||
-      q.includes("implantar") ||
-      q.includes("adesao") ||
-      q.includes("adesão")
-    ) {
-      return "Para começar com a plataforma HUG, basta escolher o plano ideal para a sua empresa (Starter R$ 99/mês, Business R$ 199/mês ou Premium R$ 399/mês) e clicar no botão 'Falar com Especialista'. Nosso time técnico realiza a ativação e configuração da sua empresa no mesmo dia.";
-    }
-
-    // 7. Demonstração, Teste Grátis, Demo
-    if (
-      q.includes("teste") ||
-      q.includes("gratis") ||
-      q.includes("grátis") ||
-      q.includes("demonstra") ||
-      q.includes("demo")
-    ) {
-      return "Oferecemos uma demonstração guiada e personalizada com dados reais do seu segmento (varejo, farmácia, moda, agro, etc.). Nossos especialistas apresentam todo o fluxo de vendas, PDV, estoque e a HUG I.A em funcionamento prático.";
-    }
-
-    // 8. Fiscal, Nota Fiscal, NFC-e, NF-e, SEFAZ
-    if (
-      q.includes("fiscal") ||
-      q.includes("nota") ||
-      q.includes("nfce") ||
-      q.includes("nfe") ||
-      q.includes("cupom") ||
-      q.includes("sefaz") ||
-      q.includes("imposto")
-    ) {
-      return "O HUG possui emissão fiscal completa e instantânea com homologação para NFC-e e NF-e em todo o Brasil. O envio para a SEFAZ ocorre em menos de 1 segundo diretamente no fechamento da venda do PDV, com impressão de cupom térmico e envio digital ao cliente.";
-    }
-
-    // 9. Suporte, Atendimento, Contato, WhatsApp
-    if (
-      q.includes("suporte") ||
-      q.includes("whatsapp") ||
-      q.includes("telefone") ||
-      q.includes("atendimento") ||
-      q.includes("contato") ||
-      q.includes("ajuda")
-    ) {
-      return "O suporte técnico da BonaSoft opera diretamente via WhatsApp e canais dedicados para lojistas. Todos os clientes contam com auxílio na implantação, treinamento de equipe e acompanhamento contínuo sem filas burocráticas.";
-    }
-
-    // 10. Segmentos e Setores Atendidos
-    if (
-      q.includes("segmento") ||
-      q.includes("setor") ||
-      q.includes("ramo") ||
-      q.includes("atende")
-    ) {
-      return "O HUG conta com módulos especializados com regras de negócio adaptadas para:\n• Materiais, Papelarias e Ferramentas (conversão fracionada m², kg, resma);\n• Mercados e Mercearias (pesagem na balança, código de barras e saída rápida);\n• Moda e Vestuário (grade de cor, tamanho e catálogo digital);\n• Gastronomia (comandas e delivery);\n• Beleza e Clínicas (atendimento e serviços);\n• Farmácias e Drogarias (lotes, validade FEFO e Portaria 344);\n• Agro & Fazendas (safras, talhões e armazenagem).";
-    }
-
-    // 11. Identidade e Apresentação
-    if (
-      q.includes("quem e voce") ||
-      q.includes("quem é você") ||
-      q.includes("o que voce") ||
-      q.includes("o que você") ||
-      q.includes("o que e o hug") ||
-      q.includes("o que é o hug") ||
-      q.includes("como funciona") ||
-      q.includes("apresente") ||
-      q.includes("o que faz")
-    ) {
-      return "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp. Posso consultar estoque em linguagem natural, auditar caixas, verificar margens, rastrear lotes e apoiar seu time comercial instantaneamente. O que deseja saber sobre a plataforma?";
-    }
-
-    // 12. Saudações
-    if (
-      q === "oi" ||
-      q === "olá" ||
-      q === "ola" ||
-      q.startsWith("bom dia") ||
-      q.startsWith("boa tarde") ||
-      q.startsWith("boa noite") ||
-      q === "opa" ||
-      q === "e ai" ||
-      q === "e aí"
-    ) {
-      return "Olá! Sou a HUG I.A, inteligência conectada aos dados da sua empresa. Você pode me perguntar sobre os valores dos planos (a partir de R$ 99/mês), faturamento de vendas, reposição de estoque ou solicitar uma demonstração com nossos especialistas. Como posso te ajudar?";
-    }
-
-    // 13. Produtos mais vendidos / Consultas de vendas
-    if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
-      return "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são:\n1º Amoxicilina 875mg (14 un)\n2º Dipirona 500mg (12 un)\n3º Losartana 50mg (9 un)\n\nO estoque de segurança de todos permanece dentro da margem de reposição.";
-    }
-
-    // 14. Faturamento e Caixa
-    if (q.includes("faturamento") || q.includes("receita") || q.includes("venda")) {
-      return "O faturamento consolidado hoje é de R$ 4.820,50 em 38 transações (Ticket Médio: R$ 126,85).\n• 68% recebido via Pix\n• 24% Cartão de Crédito\n• 8% Dinheiro/Débito\n\nNão há divergências de fechamento de caixa.";
-    }
-
-    // 15. Dipirona / Medicamentos
-    if (q.includes("dipirona") || q.includes("medicamento") || q.includes("remedio") || q.includes("remédio")) {
-      return "Localizei 84 unidades físicas de Dipirona 500mg (20 comp) no estoque da Unidade Centro (Lote LT-DIP-2024, validade ago/2027, custo R$ 3,20, preço de venda R$ 8,50). Status: 100% regular.";
-    }
-
-    // 16. Safra / Grãos / Silos
-    if (q.includes("safra") || q.includes("agro") || q.includes("fazenda") || q.includes("silo") || q.includes("soja") || q.includes("milho")) {
-      return "No módulo Agro, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
-    }
-
-    // Fallback conversacional elegante e dinâmico de segurança
-    return `Entendido! Sobre "${query.trim()}": a plataforma HUG unifica toda a retaguarda, frente de caixa (PDV) e estoque físico da sua empresa sob uma única base de dados inteligente em tempo real.\n\nCaso queira conhecer os valores dos planos (a partir de R$ 99/mês), tirar dúvidas operacionais ou agendar uma demonstração, clique em 'Falar com especialista' abaixo!`;
-  }
-
-  async function consultarGptOuFallback(query: string, historicoAtual: ChatMessage[]): Promise<string> {
+  // Consulta exclusivamente o HUG IA Core sem fallbacks mockados ou simulações estáticas
+  async function consultarHugIaCore(query: string, historicoAtual: ChatMessage[]): Promise<string> {
     try {
-      const payloadHistory = historicoAtual.slice(-6).map((m) => ({
+      const payloadHistory = historicoAtual.slice(-8).map((m) => ({
         role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
         content: m.text,
       }));
@@ -605,12 +423,15 @@ function HugAiHeroTester() {
         if (data.ok && data.reply && data.reply.trim().length > 0) {
           return data.reply.trim();
         }
+        if (data.error) {
+          return `Não foi possível obter resposta da HUG I.A: ${data.error}`;
+        }
       }
-    } catch (err) {
-      console.warn("[HUG I.A / GPT Fetch Warning]:", err);
+    } catch (err: any) {
+      console.error("[HUG I.A Core Gateway Error]:", err);
     }
 
-    return gerarRespostaIa(query);
+    return "Não foi possível conectar ao motor HUG IA Core no momento. Por favor, tente novamente em instantes.";
   }
 
   function handleEnviar(textoCustom?: string) {
@@ -628,13 +449,21 @@ function HugAiHeroTester() {
     setMessages(novoHistorico);
     setPergunta("");
     setCarregando(true);
+    isAtBottomRef.current = true;
+
+    // Rola o container interno sem interferir na página
+    setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, 10);
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
 
-    // Chama o GPT em tempo real através da rota oficial /api/ai/public-chat
-    consultarGptOuFallback(textoFinal, messages).then((respostaTexto) => {
+    // Chama o HUG IA Core em tempo real através da rota oficial /api/ai/public-chat
+    consultarHugIaCore(textoFinal, messages).then((respostaTexto) => {
       const hugMsg: ChatMessage = {
         id: `hug-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         sender: "hug",
@@ -736,7 +565,10 @@ function HugAiHeroTester() {
           {/* Lista de Mensagens com rolagem vertical independente e isolada */}
           <div
             ref={chatContainerRef}
-            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-5 scrollbar-thin scrollbar-thumb-white/10"
+            onScroll={handleChatScroll}
+            data-lenis-prevent="true"
+            style={{ overscrollBehavior: "contain" }}
+            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-5 scrollbar-thin scrollbar-thumb-white/10 overscroll-contain"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
@@ -871,10 +703,7 @@ function HugAiHeroTester() {
         COMPOSER FIXO NA PARTE INFERIOR
         Permanece visível e acessível durante toda a experiência
       */}
-      <motion.div
-        layout
-        className="relative group w-full"
-      >
+      <div className="relative group w-full">
         {/* Aura difusa ambiental atrás da interface */}
         <div className="pointer-events-none absolute -inset-1 rounded-[32px] bg-gradient-to-r from-teal-500/20 via-emerald-500/25 to-cyan-500/20 blur-xl opacity-60 transition-opacity duration-500 group-hover:opacity-85 group-focus-within:opacity-100 -z-10" />
 
@@ -892,7 +721,7 @@ function HugAiHeroTester() {
                 const sorteado = exemplos[Math.floor(Math.random() * exemplos.length)]!;
                 setPergunta(sorteado);
                 if (textareaRef.current) {
-                  textareaRef.current.focus();
+                  textareaRef.current.focus({ preventScroll: true });
                 }
               }}
               title="Inserir pergunta de exemplo"
@@ -932,7 +761,7 @@ function HugAiHeroTester() {
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* 
         CHIP / BOTÃO "VAMOS COMEÇAR"
