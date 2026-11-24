@@ -32,6 +32,7 @@ import {
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
 import hugLogo from "@/assets/hug-icon.jpg";
+import agroSafra from "@/assets/agro-safra.jpg";
 import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 import { SmoothScroll } from "@/components/cinematic/SmoothScroll";
 
@@ -122,8 +123,7 @@ const NARRATIVE_PILLARS = [
       "Pesagem em balança rodoviária, classificação e estocagem em silos",
       "Rastreabilidade de insumos, contratos de grãos e fluxo financeiro rural",
     ],
-    image:
-      "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=85",
+    image: agroSafra,
   },
   {
     title: "Inteligência que entende o seu negócio.",
