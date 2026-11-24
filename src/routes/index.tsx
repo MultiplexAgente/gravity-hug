@@ -84,7 +84,7 @@ const BONASOFT_WHATSAPP_NUMBER = "556692734632";
 const getBonaSoftWhatsAppUrl = (mensagem: string) =>
   `https://wa.me/${BONASOFT_WHATSAPP_NUMBER}?text=${encodeURIComponent(mensagem)}`;
 
-// 1. Narrativa Contínua dos Três Pilares (Sem formato de cards, composições amplas)
+// 1. Narrativa Contínua dos Pilares Operacionais (Sem formato de cards, composições amplas)
 const NARRATIVE_PILLARS = [
   {
     title: "Venda em qualquer frente.",
@@ -111,6 +111,19 @@ const NARRATIVE_PILLARS = [
     ],
     image:
       "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    title: "HUG-AGRO: Do campo ao armazém.",
+    subtitle: "Fazendas, safras, silos e faturamento rural sem dispersão.",
+    description:
+      "Gerencie o ciclo produtivo da semeadura à colheita. Monitore pesagens na balança rodoviária, controle de umidade e classificação de grãos, estocagem em silos e armazéns e acompanhe custos operacionais por talhão em tempo real.",
+    highlights: [
+      "Controle de safras, talhões e custo operacional por hectare",
+      "Pesagem em balança rodoviária, classificação e estocagem em silos",
+      "Rastreabilidade de insumos, contratos de grãos e fluxo financeiro rural",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1600&q=85",
   },
   {
     title: "Inteligência que entende o seu negócio.",
