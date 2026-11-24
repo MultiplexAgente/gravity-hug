@@ -16,6 +16,10 @@ import {
   Globe,
   Radio,
   CheckCheck,
+  Copy,
+  RotateCcw,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
@@ -328,22 +332,45 @@ function InteractiveTiltCard({
 }
 
 /**
- * Interface Interativa Premium da HUG I.A no Hero
- * Design refinado: Glassmorphism escuro, aura luminosa teal/emerald,
- * campo expansível de comando (textarea responsivo), tipografia sofisticada e feedback em tempo real.
+ * Interface Conversacional Completa da HUG I.A no Hero
+ * Inspirada na usabilidade e fluidez do ChatGPT, com a identidade visual exclusiva da HUG.
+ * - Mensagens do usuário alinhadas à direita
+ * - Respostas da HUG I.A alinhadas à esquerda com avatar oficial
+ * - Histórico vertical com rolagem independente e auto-scroll
+ * - Ações sobre mensagens (copiar com feedback, feedback positivo/negativo)
+ * - Composer fixo na parte inferior com textarea expansível e gradiente de fundo
+ * - Estado inicial limpo com "como posso te ajudar?" e "vamos começar"
  */
+interface ChatMessage {
+  id: string;
+  sender: "user" | "hug";
+  text: string;
+  timestamp: string;
+  liked?: boolean | null;
+}
+
 function HugAiHeroTester() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pergunta, setPergunta] = useState("");
-  const [resposta, setResposta] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const exemplos = [
+    "Qual o valor dos planos da plataforma?",
     "Quais produtos mais venderam hoje no meu estoque?",
     "Qual o faturamento acumulado da semana na matriz?",
     "Quantas unidades de Dipirona 500mg restam na filial Centro?",
-    "Qual a produtividade média por talhão na safra atual?",
+    "Como funciona a emissão de nota fiscal no PDV?",
   ];
+
+  // Rola automaticamente para a última mensagem quando o histórico atualiza
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, carregando]);
 
   // Ajusta dinamicamente a altura do textarea conforme o usuário digita
   useEffect(() => {
@@ -353,161 +380,189 @@ function HugAiHeroTester() {
     }
   }, [pergunta]);
 
-  function executarSimulacao(query: string) {
-    setCarregando(true);
-    setResposta(null);
-
-    setTimeout(() => {
-      const q = query.toLowerCase().trim();
-      let resp = "";
-
-      // 1. Valores, Preços, Planos e Custos ("qual valor", "quanto custa", "planos", "preço", etc.)
-      if (
-        q.includes("valor") ||
-        q.includes("quanto custa") ||
-        q.includes("preço") ||
-        q.includes("preco") ||
-        q.includes("plano") ||
-        q.includes("mensalidade") ||
-        q.includes("tabela") ||
-        q.includes("custo") ||
-        q.includes("pagar")
-      ) {
-        resp =
-          "Os planos oficiais da plataforma HUG são 100% transparentes e sem taxa oculta de implantação:\n• Starter (R$ 99,00/mês): PDV ágil, catálogo online integrado, controle de estoque e clientes.\n• Business (R$ 199,00/mês - Recomendado): Multicanal (balcão + web), assistente HUG I.A., múltiplos caixas e relatórios de faturamento.\n• Premium (R$ 399,00/mês): Multi-filiais conectadas, acesso prioritário à HUG I.A., auditoria avançada e suporte prioritário.\nVocê pode alterar ou cancelar a qualquer momento sem fidelidade.";
-      } else if (
-        q.includes("contratar") ||
-        q.includes("comprar") ||
-        q.includes("assinar") ||
-        q.includes("comecar") ||
-        q.includes("começar") ||
-        q.includes("implantar") ||
-        q.includes("adesao") ||
-        q.includes("adesão")
-      ) {
-        resp =
-          "Para começar com a plataforma HUG, basta escolher o plano ideal para a sua empresa (Starter R$ 99/mês, Business R$ 199/mês ou Premium R$ 399/mês) e clicar no botão 'Falar com Especialista'. Nosso time técnico realiza a ativação e configuração da sua empresa no mesmo dia.";
-      } else if (
-        q.includes("teste") ||
-        q.includes("gratis") ||
-        q.includes("grátis") ||
-        q.includes("demonstra") ||
-        q.includes("demo")
-      ) {
-        resp =
-          "Oferecemos uma demonstração guiada e personalizada com dados reais do seu segmento (varejo, farmácia, moda, agro, etc.). Nossos especialistas apresentam todo o fluxo de vendas, PDV, estoque e a HUG I.A em funcionamento prático.";
-      } else if (
-        q.includes("fiscal") ||
-        q.includes("nota") ||
-        q.includes("nfce") ||
-        q.includes("nfe") ||
-        q.includes("cupom") ||
-        q.includes("sefaz") ||
-        q.includes("imposto")
-      ) {
-        resp =
-          "O HUG possui emissão fiscal completa e instantânea com homologação para NFC-e e NF-e em todo o Brasil. O envio para a SEFAZ ocorre em menos de 1 segundo diretamente no fechamento da venda do PDV, com impressão de cupom térmico e envio digital ao cliente.";
-      } else if (
-        q.includes("suporte") ||
-        q.includes("whatsapp") ||
-        q.includes("telefone") ||
-        q.includes("atendimento") ||
-        q.includes("contato") ||
-        q.includes("ajuda")
-      ) {
-        resp =
-          "O suporte técnico da BonaSoft opera diretamente via WhatsApp e canais dedicados para lojistas. Todos os clientes contam com auxílio na implantação, treinamento de equipe e acompanhamento contínuo sem filas burocráticas.";
-      } else if (
-        q.includes("segmento") ||
-        q.includes("setor") ||
-        q.includes("ramo") ||
-        q.includes("atende")
-      ) {
-        resp =
-          "O HUG conta com módulos especializados com regras de negócio adaptadas para:\n• Materiais, Papelarias e Ferramentas (conversão fracionada m², kg, resma);\n• Mercados e Mercearias (pesagem na balança, código de barras e saída rápida);\n• Moda e Vestuário (grade de cor, tamanho e catálogo digital);\n• Gastronomia (comandas e delivery);\n• Beleza e Clínicas (atendimento e serviços);\n• Farmácias e Drogarias (lotes, validade FEFO e Portaria 344);\n• Agro & Fazendas (safras, talhões e armazenagem).";
-      } else if (
-        q.includes("quem e") ||
-        q.includes("quem é") ||
-        q.includes("o que voce") ||
-        q.includes("o que você") ||
-        q.includes("o que e o hug") ||
-        q.includes("o que é o hug") ||
-        q.includes("como funciona") ||
-        q.includes("apresente") ||
-        q.includes("quem voce") ||
-        q.includes("quem você") ||
-        q.includes("o que faz")
-      ) {
-        resp =
-          "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp. Posso consultar estoque em linguagem natural, auditar caixas, verificar margens, rastrear lotes e apoiar seu time comercial instantaneamente. O que deseja saber sobre a plataforma?";
-      } else if (
-        q === "oi" ||
-        q === "olá" ||
-        q === "ola" ||
-        q.startsWith("bom dia") ||
-        q.startsWith("boa tarde") ||
-        q.startsWith("boa noite") ||
-        q === "opa" ||
-        q === "e ai" ||
-        q === "e aí"
-      ) {
-        resp =
-          "Olá! Sou a HUG I.A, inteligência conectada aos dados da sua empresa. Você pode me perguntar sobre os valores dos planos (a partir de R$ 99/mês), faturamento de vendas, reposição de estoque ou solicitar uma demonstração com nossos especialistas. Como posso te ajudar?";
-      } else if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
-        resp =
-          "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são: 1º Amoxicilina 875mg (14 un), 2º Dipirona 500mg (12 un) e 3º Losartana 50mg (9 un). O estoque de segurança de todos permanece dentro da margem de reposição.";
-      } else if (q.includes("faturamento") || q.includes("receita") || q.includes("venda") || q.includes("caixa")) {
-        resp =
-          "O faturamento consolidado hoje é de R$ 4.820,50 em 38 transações (Ticket Médio: R$ 126,85). 68% recebido via Pix, 24% Cartão de Crédito e 8% Dinheiro/Débito. Não há divergências de fechamento de caixa.";
-      } else if (
-        q.includes("estoque") ||
-        q.includes("dipirona") ||
-        q.includes("unidade") ||
-        q.includes("restando") ||
-        q.includes("lote")
-      ) {
-        resp =
-          "Localizei 84 unidades físicas de Dipirona 500mg (20 comp) no estoque da Unidade Centro (Lote LT-DIP-2024, validade ago/2027, custo R$ 3,20, preço de venda R$ 8,50). Status: 100% regular.";
-      } else if (
-        q.includes("safra") ||
-        q.includes("agro") ||
-        q.includes("fazenda") ||
-        q.includes("silo") ||
-        q.includes("talhão") ||
-        q.includes("grão") ||
-        q.includes("soja") ||
-        q.includes("milho")
-      ) {
-        resp =
-          "No módulo Agro, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
-      } else if (
-        q.includes("farmacia") ||
-        q.includes("farmácia") ||
-        q.includes("receita") ||
-        q.includes("remedio") ||
-        q.includes("remédio")
-      ) {
-        resp =
-          "No módulo Farmacêutico, a conformidade de receituários controlados (Portaria 344/98) e lotes FEFO está 100% regularizada. Não há pendências sanitárias nem produtos em ruptura.";
-      } else {
-        resp =
-          `Com base nos registros operacionais da plataforma HUG para "${query}": todas as rotinas de frente de caixa (PDV), estoque unificado e faturamento financeiro são gerenciadas em tempo real sob uma única base de dados. Caso deseje verificar valores dos planos (a partir de R$ 99/mês) ou agendar uma consultoria com nosso time técnico, clique abaixo em 'Falar com especialista'.`;
-      }
-
-      setResposta(resp);
-      setCarregando(false);
-    }, 600);
+  function getHoraAtual() {
+    const agora = new Date();
+    return agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  function handleEnviar(texto?: string) {
-    const query = (texto || pergunta).trim();
-    if (!query) {
-      const sorteado = exemplos[Math.floor(Math.random() * exemplos.length)]!;
-      setPergunta(sorteado);
-      executarSimulacao(sorteado);
-      return;
+  function gerarRespostaIa(query: string): string {
+    const q = query.toLowerCase().trim();
+
+    // 1. Valores, Preços, Planos e Custos ("qual valor", "quanto custa", "planos", "preço", etc.)
+    if (
+      q.includes("valor") ||
+      q.includes("quanto custa") ||
+      q.includes("preço") ||
+      q.includes("preco") ||
+      q.includes("plano") ||
+      q.includes("mensalidade") ||
+      q.includes("tabela") ||
+      q.includes("custo") ||
+      q.includes("pagar")
+    ) {
+      return "Os planos oficiais da plataforma HUG são 100% transparentes e sem taxa oculta de implantação:\n\n• Starter (R$ 99,00/mês): PDV ágil, catálogo online integrado, controle de estoque e clientes.\n• Business (R$ 199,00/mês - Recomendado): Multicanal (balcão + web), assistente HUG I.A., múltiplos caixas e relatórios de faturamento.\n• Premium (R$ 399,00/mês): Multi-filiais conectadas, acesso prioritário à HUG I.A., auditoria avançada e suporte prioritário.\n\nVocê pode alterar ou cancelar a qualquer momento sem fidelidade.";
     }
-    executarSimulacao(query);
+
+    if (
+      q.includes("contratar") ||
+      q.includes("comprar") ||
+      q.includes("assinar") ||
+      q.includes("comecar") ||
+      q.includes("começar") ||
+      q.includes("implantar") ||
+      q.includes("adesao") ||
+      q.includes("adesão")
+    ) {
+      return "Para começar com a plataforma HUG, basta escolher o plano ideal para a sua empresa (Starter R$ 99/mês, Business R$ 199/mês ou Premium R$ 399/mês) e clicar no botão 'Falar com Especialista'. Nosso time técnico realiza a ativação e configuração da sua empresa no mesmo dia.";
+    }
+
+    if (
+      q.includes("teste") ||
+      q.includes("gratis") ||
+      q.includes("grátis") ||
+      q.includes("demonstra") ||
+      q.includes("demo")
+    ) {
+      return "Oferecemos uma demonstração guiada e personalizada com dados reais do seu segmento (varejo, farmácia, moda, agro, etc.). Nossos especialistas apresentam todo o fluxo de vendas, PDV, estoque e a HUG I.A em funcionamento prático.";
+    }
+
+    if (
+      q.includes("fiscal") ||
+      q.includes("nota") ||
+      q.includes("nfce") ||
+      q.includes("nfe") ||
+      q.includes("cupom") ||
+      q.includes("sefaz") ||
+      q.includes("imposto")
+    ) {
+      return "O HUG possui emissão fiscal completa e instantânea com homologação para NFC-e e NF-e em todo o Brasil. O envio para a SEFAZ ocorre em menos de 1 segundo diretamente no fechamento da venda do PDV, com impressão de cupom térmico e envio digital ao cliente.";
+    }
+
+    if (
+      q.includes("suporte") ||
+      q.includes("whatsapp") ||
+      q.includes("telefone") ||
+      q.includes("atendimento") ||
+      q.includes("contato") ||
+      q.includes("ajuda")
+    ) {
+      return "O suporte técnico da BonaSoft opera diretamente via WhatsApp e canais dedicados para lojistas. Todos os clientes contam com auxílio na implantação, treinamento de equipe e acompanhamento contínuo sem filas burocráticas.";
+    }
+
+    if (
+      q.includes("segmento") ||
+      q.includes("setor") ||
+      q.includes("ramo") ||
+      q.includes("atende")
+    ) {
+      return "O HUG conta com módulos especializados com regras de negócio adaptadas para:\n• Materiais, Papelarias e Ferramentas (conversão fracionada m², kg, resma);\n• Mercados e Mercearias (pesagem na balança, código de barras e saída rápida);\n• Moda e Vestuário (grade de cor, tamanho e catálogo digital);\n• Gastronomia (comandas e delivery);\n• Beleza e Clínicas (atendimento e serviços);\n• Farmácias e Drogarias (lotes, validade FEFO e Portaria 344);\n• Agro & Fazendas (safras, talhões e armazenagem).";
+    }
+
+    if (
+      q.includes("quem e") ||
+      q.includes("quem é") ||
+      q.includes("o que voce") ||
+      q.includes("o que você") ||
+      q.includes("o que e o hug") ||
+      q.includes("o que é o hug") ||
+      q.includes("como funciona") ||
+      q.includes("apresente") ||
+      q.includes("quem voce") ||
+      q.includes("quem você") ||
+      q.includes("o que faz")
+    ) {
+      return "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp. Posso consultar estoque em linguagem natural, auditar caixas, verificar margens, rastrear lotes e apoiar seu time comercial instantaneamente. O que deseja saber sobre a plataforma?";
+    }
+
+    if (
+      q === "oi" ||
+      q === "olá" ||
+      q === "ola" ||
+      q.startsWith("bom dia") ||
+      q.startsWith("boa tarde") ||
+      q.startsWith("boa noite") ||
+      q === "opa" ||
+      q === "e ai" ||
+      q === "e aí"
+    ) {
+      return "Olá! Sou a HUG I.A, inteligência conectada aos dados da sua empresa. Você pode me perguntar sobre os valores dos planos (a partir de R$ 99/mês), faturamento de vendas, reposição de estoque ou solicitar uma demonstração com nossos especialistas. Como posso te ajudar?";
+    }
+
+    if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
+      return "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são:\n1º Amoxicilina 875mg (14 un)\n2º Dipirona 500mg (12 un)\n3º Losartana 50mg (9 un)\n\nO estoque de segurança de todos permanece dentro da margem de reposição.";
+    }
+
+    if (q.includes("faturamento") || q.includes("receita") || q.includes("venda") || q.includes("caixa")) {
+      return "O faturamento consolidado hoje é de R$ 4.820,50 em 38 transações (Ticket Médio: R$ 126,85).\n• 68% recebido via Pix\n• 24% Cartão de Crédito\n• 8% Dinheiro/Débito\n\nNão há divergências de fechamento de caixa.";
+    }
+
+    if (
+      q.includes("estoque") ||
+      q.includes("dipirona") ||
+      q.includes("unidade") ||
+      q.includes("restando") ||
+      q.includes("lote")
+    ) {
+      return "Localizei 84 unidades físicas de Dipirona 500mg (20 comp) no estoque da Unidade Centro (Lote LT-DIP-2024, validade ago/2027, custo R$ 3,20, preço de venda R$ 8,50). Status: 100% regular.";
+    }
+
+    if (
+      q.includes("safra") ||
+      q.includes("agro") ||
+      q.includes("fazenda") ||
+      q.includes("silo") ||
+      q.includes("talhão") ||
+      q.includes("grão") ||
+      q.includes("soja") ||
+      q.includes("milho")
+    ) {
+      return "No módulo Agro, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
+    }
+
+    if (
+      q.includes("farmacia") ||
+      q.includes("farmácia") ||
+      q.includes("receita") ||
+      q.includes("remedio") ||
+      q.includes("remédio")
+    ) {
+      return "No módulo Farmacêutico, a conformidade de receituários controlados (Portaria 344/98) e lotes FEFO está 100% regularizada. Não há pendências sanitárias nem produtos em ruptura.";
+    }
+
+    return `Com base nos registros operacionais da plataforma HUG para "${query}": todas as rotinas de frente de caixa (PDV), estoque unificado e faturamento financeiro são gerenciadas em tempo real sob uma única base de dados.\n\nCaso deseje verificar valores dos planos (a partir de R$ 99/mês) ou agendar uma consultoria com nosso time técnico, clique abaixo em 'Falar com especialista'.`;
+  }
+
+  function handleEnviar(textoCustom?: string) {
+    const textoFinal = (textoCustom || pergunta).trim();
+    if (!textoFinal || carregando) return;
+
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      sender: "user",
+      text: textoFinal,
+      timestamp: getHoraAtual(),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setPergunta("");
+    setCarregando(true);
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
+    setTimeout(() => {
+      const respostaTexto = gerarRespostaIa(textoFinal);
+      const hugMsg: ChatMessage = {
+        id: `hug-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        sender: "hug",
+        text: respostaTexto,
+        timestamp: getHoraAtual(),
+      };
+
+      setMessages((prev) => [...prev, hugMsg]);
+      setCarregando(false);
+    }, 600);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -517,23 +572,223 @@ function HugAiHeroTester() {
     }
   }
 
-  return (
-    <div className="w-full max-w-2xl sm:max-w-3xl mx-auto mt-12 sm:mt-16 px-3">
-      {/* Título de chamada com tipografia limpa e elegante */}
-      <motion.h3
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.9 }}
-        className="text-2xl sm:text-3xl md:text-4xl font-light text-white/95 tracking-tight mb-5 sm:mb-6 text-center lowercase select-none"
-      >
-        como posso te ajudar?
-      </motion.h3>
+  function handleCopiar(msgId: string, texto: string) {
+    navigator.clipboard.writeText(texto).then(() => {
+      setCopiedId(msgId);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  }
 
-      {/* Container Principal de Interação com Superfície Glassmorphism e Aura Ciano/Teal */}
+  function handleFeedback(msgId: string, tipo: boolean) {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === msgId ? { ...m, liked: m.liked === tipo ? null : tipo } : m))
+    );
+  }
+
+  function handleLimparConversa() {
+    setMessages([]);
+    setPergunta("");
+    setCarregando(false);
+  }
+
+  const isConversando = messages.length > 0;
+
+  return (
+    <div className="w-full max-w-2xl sm:max-w-3xl mx-auto mt-10 sm:mt-14 px-3">
+      {/* 
+        ESTADO INICIAL: Título limpo e convidativo
+        Desaparece suavemente quando o usuário inicia a conversa
+      */}
+      <AnimatePresence>
+        {!isConversando && (
+          <motion.h3
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-2xl sm:text-3xl md:text-4xl font-light text-white/95 tracking-tight mb-5 sm:mb-6 text-center lowercase select-none overflow-hidden"
+          >
+            como posso te ajudar?
+          </motion.h3>
+        )}
+      </AnimatePresence>
+
+      {/* 
+        ÁREA DE CONVERSA PRINCIPAL (Chat Histórico)
+        Aparece assim que a primeira mensagem é enviada
+      */}
+      {isConversando && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-4 rounded-3xl border border-white/10 bg-[#060c14]/80 backdrop-blur-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
+        >
+          {/* Cabeçalho sutil da conversa */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08] bg-white/[0.02]">
+            <div className="flex items-center gap-2.5">
+              <img
+                src={hugLogo}
+                alt="HUG I.A"
+                className="h-6 w-6 rounded-full object-cover ring-1 ring-teal-400/40"
+              />
+              <span className="text-xs font-medium text-white tracking-tight">HUG I.A</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Online
+              </span>
+            </div>
+
+            {/* Ação de Reiniciar/Limpar conversa */}
+            <button
+              type="button"
+              onClick={handleLimparConversa}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-2.5 py-1 rounded-lg hover:bg-white/5 active:scale-95"
+              title="Iniciar uma nova conversa"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Nova conversa</span>
+            </button>
+          </div>
+
+          {/* Lista de Mensagens com rolagem vertical independente */}
+          <div className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-5 scrollbar-thin scrollbar-thumb-white/10">
+            {messages.map((msg) => {
+              const isUser = msg.sender === "user";
+
+              if (isUser) {
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="flex justify-end"
+                  >
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-sm bg-teal-950/45 border border-teal-500/30 px-4 py-3 text-sm sm:text-[15px] text-white shadow-sm">
+                      <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
+                      <div className="mt-1 text-right text-[10px] font-mono text-teal-300/60">
+                        {msg.timestamp}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              return (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  className="flex items-start gap-3 justify-start"
+                >
+                  <img
+                    src={hugLogo}
+                    alt="HUG I.A"
+                    className="h-7 w-7 rounded-full object-cover ring-1 ring-teal-400/40 shrink-0 mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0 max-w-[90%] sm:max-w-[85%]">
+                    {/* Conteúdo da resposta da IA */}
+                    <div className="text-slate-200 text-sm sm:text-[15px] leading-relaxed whitespace-pre-line select-text font-light">
+                      {msg.text}
+                    </div>
+
+                    {/* Barra de ações discretas da mensagem */}
+                    <div className="mt-3 pt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.08] text-[11px] text-slate-400">
+                      <div className="flex items-center gap-3">
+                        {/* Botão Copiar */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopiar(msg.id, msg.text)}
+                          className="inline-flex items-center gap-1 hover:text-white transition-colors"
+                          title="Copiar resposta"
+                        >
+                          {copiedId === msg.id ? (
+                            <>
+                              <Check className="h-3 w-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copiado!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3" />
+                              <span>Copiar</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* Feedback Thumbs */}
+                        <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => handleFeedback(msg.id, true)}
+                            className={`p-1 rounded hover:text-white transition-colors ${
+                              msg.liked === true ? "text-emerald-400" : ""
+                            }`}
+                            title="Útil"
+                          >
+                            <ThumbsUp className="h-3 w-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleFeedback(msg.id, false)}
+                            className={`p-1 rounded hover:text-white transition-colors ${
+                              msg.liked === false ? "text-rose-400" : ""
+                            }`}
+                            title="Não foi útil"
+                          >
+                            <ThumbsDown className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* CTA Especialista */}
+                      <a
+                        href={getBonaSoftWhatsAppUrl(
+                          `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-teal-400 hover:text-teal-300 font-medium transition-colors"
+                      >
+                        <span>Falar com especialista</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+
+            {/* Indicador de Digitando / Processando */}
+            {carregando && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3"
+              >
+                <img
+                  src={hugLogo}
+                  alt="HUG I.A"
+                  className="h-7 w-7 rounded-full object-cover ring-1 ring-teal-400/40 shrink-0"
+                />
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10">
+                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </motion.div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        </motion.div>
+      )}
+
+      {/* 
+        COMPOSER FIXO NA PARTE INFERIOR
+        Permanece visível e acessível durante toda a experiência
+      */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 1 }}
+        layout
         className="relative group w-full"
       >
         {/* Aura difusa ambiental atrás da interface */}
@@ -580,10 +835,10 @@ function HugAiHeroTester() {
             <button
               type="button"
               onClick={() => handleEnviar()}
-              disabled={carregando}
-              title="Enviar consulta à HUG I.A"
+              disabled={carregando || !pergunta.trim()}
+              title="Enviar mensagem à HUG I.A"
               aria-label="Enviar mensagem"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-medium shadow-[0_4px_16px_rgba(16,185,129,0.35)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none mb-0.5"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-medium shadow-[0_4px_16px_rgba(16,185,129,0.35)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none mb-0.5"
             >
               {carregando ? (
                 <span className="h-4 w-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -595,73 +850,31 @@ function HugAiHeroTester() {
         </div>
       </motion.div>
 
-      {/* Chip / Botão Refinado "vamos começar" */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.1 }}
-        className="mt-4 sm:mt-5 flex justify-center"
-      >
-        <button
-          type="button"
-          onClick={() => handleEnviar()}
-          className="group relative inline-flex items-center gap-2 rounded-full border border-teal-500/25 bg-[#061219]/60 hover:bg-teal-950/40 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:text-white backdrop-blur-md transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(20,184,166,0.18)] hover:border-teal-400/50 active:scale-95 lowercase"
-        >
-          {/* Brilho interno do chip */}
-          <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/30 to-transparent" />
-          <span>vamos começar</span>
-        </button>
-      </motion.div>
-
-      {/* Caixa de Resposta da IA com Animação Fluida e Glassmorphism Refinado */}
+      {/* 
+        CHIP / BOTÃO "VAMOS COMEÇAR"
+        Aparece apenas no estado inicial antes do primeiro envio
+      */}
       <AnimatePresence>
-        {resposta && (
+        {!isConversando && (
           <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mt-6 p-5 sm:p-6 rounded-[24px] border border-teal-500/30 bg-[#050b12]/95 backdrop-blur-2xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.85),0_0_30px_rgba(20,184,166,0.1)] text-left space-y-3.5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-4 sm:mt-5 flex justify-center overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src={hugLogo}
-                  alt="HUG I.A"
-                  className="h-7 w-7 rounded-full object-cover ring-1 ring-teal-400/40"
-                />
-                <span className="text-xs font-semibold text-white tracking-tight">HUG I.A Oficial</span>
-                <span className="text-[10px] font-mono text-teal-400 bg-teal-500/10 border border-teal-500/20 px-1.5 py-0.5 rounded-full">
-                  Tempo Real
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setResposta(null)}
-                className="text-[11px] text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/5"
-              >
-                Limpar
-              </button>
-            </div>
-
-            <p className="text-sm sm:text-[15px] text-slate-200 leading-relaxed font-light whitespace-pre-line">
-              {resposta}
-            </p>
-
-            <div className="pt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 text-[11px]">
-              <span className="text-slate-400">Resposta gerada com inteligência sobre dados reais</span>
-              <a
-                href={getBonaSoftWhatsAppUrl(
-                  `Olá! Testei a HUG I.A na pergunta "${pergunta}" e gostaria de implantar na minha empresa.`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-teal-400 hover:text-teal-300 font-medium transition-colors"
-              >
-                <span>Falar com especialista</span>
-                <ArrowRight size={13} />
-              </a>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const sorteado = exemplos[0]!;
+                handleEnviar(sorteado);
+              }}
+              className="group relative inline-flex items-center gap-2 rounded-full border border-teal-500/25 bg-[#061219]/60 hover:bg-teal-950/40 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:text-white backdrop-blur-md transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(20,184,166,0.18)] hover:border-teal-400/50 active:scale-95 lowercase"
+            >
+              {/* Brilho interno do chip */}
+              <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/30 to-transparent" />
+              <span>vamos começar</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
