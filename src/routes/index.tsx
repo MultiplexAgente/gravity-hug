@@ -526,26 +526,23 @@ function HugAiHeroTester() {
 
       {/* 
         ÁREA DE CONVERSA PRINCIPAL (Chat Histórico)
-        Aparece assim que a primeira mensagem é enviada
+        Fundo 100% preto opaco sólido, sem transparência sobre o planeta
       */}
       {isConversando && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-4 rounded-3xl border border-white/10 bg-[#060c14]/80 backdrop-blur-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
+        <div
+          className="mb-4 rounded-3xl border border-[#202B30] bg-[#030506] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col"
         >
-          {/* Cabeçalho sutil da conversa */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08] bg-white/[0.02]">
+          {/* Cabeçalho preto sólido da conversa */}
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#202B30] bg-[#080D0F]">
             <div className="flex items-center gap-2.5">
               <img
                 src={hugLogo}
                 alt="HUG I.A"
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-teal-400/40"
+                className="h-6 w-6 rounded-full object-cover ring-1 ring-[#00D6A0]/40"
               />
-              <span className="text-xs font-medium text-white tracking-tight">HUG I.A</span>
-              <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs sm:text-sm font-medium text-[#F4F7F8] tracking-tight">HUG I.A</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#00D6A0] bg-[#00D6A0]/10 border border-[#00D6A0]/25 px-2 py-0.5 rounded-full">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#00D6A0] animate-pulse" />
                 Online
               </span>
             </div>
@@ -554,7 +551,7 @@ function HugAiHeroTester() {
             <button
               type="button"
               onClick={handleLimparConversa}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-2.5 py-1 rounded-lg hover:bg-white/5 active:scale-95"
+              className="inline-flex items-center gap-1.5 text-xs text-[#AAB8BE] hover:text-[#F4F7F8] transition-colors px-2.5 py-1 rounded-lg hover:bg-[#101719] active:scale-95"
               title="Iniciar uma nova conversa"
             >
               <RotateCcw className="h-3 w-3" />
@@ -562,156 +559,144 @@ function HugAiHeroTester() {
             </button>
           </div>
 
-          {/* Lista de Mensagens com rolagem vertical independente e isolada */}
+          {/* Lista de Mensagens com fundo sólido e rolagem vertical independente */}
           <div
             ref={chatContainerRef}
             onScroll={handleChatScroll}
             data-lenis-prevent="true"
-            style={{ overscrollBehavior: "contain" }}
-            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-5 scrollbar-thin scrollbar-thumb-white/10 overscroll-contain"
+            style={{ overscrollBehavior: "contain", backgroundColor: "#05090B" }}
+            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 space-y-4 scrollbar-thin scrollbar-thumb-[#202B30] overscroll-contain"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
 
               if (isUser) {
                 return (
-                  <motion.div
+                  <div
                     key={msg.id}
-                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     className="flex justify-end"
                   >
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-sm bg-teal-950/45 border border-teal-500/30 px-4 py-3 text-sm sm:text-[15px] text-white shadow-sm">
-                      <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
-                      <div className="mt-1 text-right text-[10px] font-mono text-teal-300/60">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-sm bg-[#073A34] border border-[#202B30] px-4 py-3 text-sm sm:text-[15px] text-[#F4F7F8] shadow-sm">
+                      <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
+                      <div className="mt-1 text-right text-[10px] font-mono text-[#AAB8BE]">
                         {msg.timestamp}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               }
 
               return (
-                <motion.div
+                <div
                   key={msg.id}
-                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   className="flex items-start gap-3 justify-start"
                 >
                   <img
                     src={hugLogo}
                     alt="HUG I.A"
-                    className="h-7 w-7 rounded-full object-cover ring-1 ring-teal-400/40 shrink-0 mt-0.5"
+                    className="h-7 w-7 rounded-full object-cover ring-1 ring-[#00D6A0]/40 shrink-0 mt-0.5"
                   />
-                  <div className="flex-1 min-w-0 max-w-[90%] sm:max-w-[85%]">
-                    {/* Conteúdo da resposta da IA */}
-                    <div className="text-slate-200 text-sm sm:text-[15px] leading-relaxed whitespace-pre-line select-text font-light">
+                  <div className="flex-1 min-w-0 max-w-[92%] sm:max-w-[88%]">
+                    {/* Bloco de resposta com fundo escuro sólido e borda de alto contraste */}
+                    <div className="rounded-2xl rounded-tl-sm bg-[#0C1417] border border-[#202B30] p-4 text-[#F4F7F8] text-sm sm:text-[15px] leading-relaxed whitespace-pre-line select-text font-normal text-left shadow-sm">
                       {msg.text}
-                    </div>
 
-                    {/* Barra de ações discretas da mensagem */}
-                    <div className="mt-3 pt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.08] text-[11px] text-slate-400">
-                      <div className="flex items-center gap-3">
-                        {/* Botão Copiar */}
-                        <button
-                          type="button"
-                          onClick={() => handleCopiar(msg.id, msg.text)}
-                          className="inline-flex items-center gap-1 hover:text-white transition-colors"
-                          title="Copiar resposta"
-                        >
-                          {copiedId === msg.id ? (
-                            <>
-                              <Check className="h-3 w-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copiado!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="h-3 w-3" />
-                              <span>Copiar</span>
-                            </>
-                          )}
-                        </button>
-
-                        {/* Feedback Thumbs */}
-                        <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
+                      {/* Barra de ações discretas da mensagem */}
+                      <div className="mt-3.5 pt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-[#202B30] text-[11px] text-[#AAB8BE]">
+                        <div className="flex items-center gap-3">
+                          {/* Botão Copiar */}
                           <button
                             type="button"
-                            onClick={() => handleFeedback(msg.id, true)}
-                            className={`p-1 rounded hover:text-white transition-colors ${
-                              msg.liked === true ? "text-emerald-400" : ""
-                            }`}
-                            title="Útil"
+                            onClick={() => handleCopiar(msg.id, msg.text)}
+                            className="inline-flex items-center gap-1 hover:text-[#F4F7F8] transition-colors"
+                            title="Copiar resposta"
                           >
-                            <ThumbsUp className="h-3 w-3" />
+                            {copiedId === msg.id ? (
+                              <>
+                                <Check className="h-3 w-3 text-[#00D6A0]" />
+                                <span className="text-[#00D6A0]">Copiado!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3 w-3" />
+                                <span>Copiar</span>
+                              </>
+                            )}
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleFeedback(msg.id, false)}
-                            className={`p-1 rounded hover:text-white transition-colors ${
-                              msg.liked === false ? "text-rose-400" : ""
-                            }`}
-                            title="Não foi útil"
-                          >
-                            <ThumbsDown className="h-3 w-3" />
-                          </button>
+
+                          {/* Feedback Thumbs */}
+                          <div className="flex items-center gap-1.5 pl-2 border-l border-[#202B30]">
+                            <button
+                              type="button"
+                              onClick={() => handleFeedback(msg.id, true)}
+                              className={`p-1 rounded hover:text-[#F4F7F8] transition-colors ${
+                                msg.liked === true ? "text-[#00D6A0]" : ""
+                              }`}
+                              title="Útil"
+                            >
+                              <ThumbsUp className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleFeedback(msg.id, false)}
+                              className={`p-1 rounded hover:text-[#F4F7F8] transition-colors ${
+                                msg.liked === false ? "text-rose-400" : ""
+                              }`}
+                              title="Não foi útil"
+                            >
+                              <ThumbsDown className="h-3 w-3" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* CTA Especialista */}
-                      <a
-                        href={getBonaSoftWhatsAppUrl(
-                          `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-teal-400 hover:text-teal-300 font-medium transition-colors"
-                      >
-                        <span>Falar com especialista</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </a>
+                        {/* CTA Especialista */}
+                        <a
+                          href={getBonaSoftWhatsAppUrl(
+                            `Olá! Estava conversando com a HUG I.A no site e gostaria de tirar dúvidas sobre a plataforma.`
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[#00D6A0] hover:brightness-110 font-medium transition-colors"
+                        >
+                          <span>Falar com especialista</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
 
             {/* Indicador de Digitando / Processando */}
             {carregando && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
                 className="flex items-center gap-3"
               >
                 <img
                   src={hugLogo}
                   alt="HUG I.A"
-                  className="h-7 w-7 rounded-full object-cover ring-1 ring-teal-400/40 shrink-0"
+                  className="h-7 w-7 rounded-full object-cover ring-1 ring-[#00D6A0]/40 shrink-0"
                 />
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10">
-                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#0C1417] border border-[#202B30]">
+                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-[#00D6A0] animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
-              </motion.div>
+              </div>
             )}
 
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* 
         COMPOSER FIXO NA PARTE INFERIOR
-        Permanece visível e acessível durante toda a experiência
+        Fundo preto sólido (#101719) com borda discreta (#202B30)
       */}
       <div className="relative group w-full">
-        {/* Aura difusa ambiental atrás da interface */}
-        <div className="pointer-events-none absolute -inset-1 rounded-[32px] bg-gradient-to-r from-teal-500/20 via-emerald-500/25 to-cyan-500/20 blur-xl opacity-60 transition-opacity duration-500 group-hover:opacity-85 group-focus-within:opacity-100 -z-10" />
-
-        {/* Superfície Tecnológica de Interação */}
-        <div className="relative rounded-[28px] border border-white/15 bg-[#060c14]/85 backdrop-blur-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.9),0_0_36px_rgba(20,184,166,0.12)] transition-all duration-300 hover:border-teal-400/40 focus-within:border-teal-400/80 focus-within:ring-2 focus-within:ring-teal-400/25 p-2.5 sm:p-3.5">
-          {/* Brilho especular sutil na borda superior */}
-          <span className="pointer-events-none absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-teal-300/45 to-transparent" />
-
+        {/* Superfície Sólida de Interação */}
+        <div className="relative rounded-[28px] border border-[#202B30] bg-[#101719] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.95)] transition-all duration-300 hover:border-[#00D6A0]/40 focus-within:border-[#00D6A0] focus-within:ring-1 focus-within:ring-[#00D6A0]/40 p-2.5 sm:p-3.5">
           {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio */}
           <div className="flex items-end gap-2.5 sm:gap-3">
             {/* Botão de Adicionar (+) Minimalista */}
@@ -726,7 +711,7 @@ function HugAiHeroTester() {
               }}
               title="Inserir pergunta de exemplo"
               aria-label="Inserir pergunta de teste"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/[0.14] text-slate-300 hover:text-white border border-white/10 transition-all duration-200 hover:scale-105 active:scale-95 mb-0.5"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-[#080D0F] hover:bg-[#0C1417] text-[#AAB8BE] hover:text-[#F4F7F8] border border-[#202B30] transition-all duration-200 hover:scale-105 active:scale-95 mb-0.5"
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
             </button>
@@ -740,21 +725,21 @@ function HugAiHeroTester() {
                 onChange={(e) => setPergunta(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Pergunte à HUG I.A..."
-                className="w-full resize-none bg-transparent text-sm sm:text-base text-white placeholder:text-slate-400/70 focus:outline-none leading-relaxed max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10"
+                className="w-full resize-none bg-transparent text-sm sm:text-base text-[#F4F7F8] placeholder:text-[#AAB8BE]/70 focus:outline-none leading-relaxed max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-[#202B30]"
               />
             </div>
 
-            {/* Botão de Envio Circular com Gradiente Teal/Emerald */}
+            {/* Botão de Envio Circular Verde HUG (#00D6A0) */}
             <button
               type="button"
               onClick={() => handleEnviar()}
               disabled={carregando || !pergunta.trim()}
               title="Enviar mensagem à HUG I.A"
               aria-label="Enviar mensagem"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-medium shadow-[0_4px_16px_rgba(16,185,129,0.35)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none mb-0.5"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-[#00D6A0] hover:brightness-110 text-[#030506] font-medium shadow-[0_4px_16px_rgba(0,214,160,0.35)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none mb-0.5"
             >
               {carregando ? (
-                <span className="h-4 w-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                <span className="h-4 w-4 border-2 border-[#030506] border-t-transparent rounded-full animate-spin" />
               ) : (
                 <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
               )}
