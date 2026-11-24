@@ -372,6 +372,13 @@ function HugAiHeroTester() {
     }
   }, [messages, carregando]);
 
+  // Hook auxiliar para automação / testes da interface
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__enviarHugPergunta = handleEnviar;
+    }
+  }, [handleEnviar]);
+
   // Ajusta dinamicamente a altura do textarea conforme o usuário digita
   useEffect(() => {
     if (textareaRef.current) {
