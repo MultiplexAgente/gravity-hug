@@ -115,7 +115,7 @@ const NARRATIVE_PILLARS = [
       "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    title: "HUG-AGRO: Do campo ao armazém.",
+    title: "Do campo ao armazém em tempo real.",
     subtitle: "Fazendas, safras, silos e faturamento rural sem dispersão.",
     description:
       "Gerencie o ciclo produtivo da semeadura à colheita. Monitore pesagens na balança rodoviária, controle de umidade e classificação de grãos, estocagem em silos e armazéns e acompanhe custos operacionais por talhão em tempo real.",
@@ -125,7 +125,7 @@ const NARRATIVE_PILLARS = [
       "Rastreabilidade de insumos, contratos de grãos e fluxo financeiro rural",
     ],
     image:
-      "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1600&q=85",
   },
   {
     title: "Inteligência que entende o seu negócio.",
