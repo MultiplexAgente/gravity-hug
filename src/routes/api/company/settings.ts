@@ -42,6 +42,9 @@ export const Route = createFileRoute("/api/company/settings")({
 
         let savedSettings = null;
         if (body?.settings) {
+          if (session.role !== "owner" && session.role !== "admin") {
+            return Response.json({ error: "Acesso administrativo necessário." }, { status: 403 });
+          }
           const settings = sanitizeSettings(body.settings);
           const result = await saveSettings(supabase, session.companyId, settings);
           if (!result.ok) return Response.json({ error: result.error }, { status: 500 });

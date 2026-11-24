@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { generateCustomerSuggestedReply } from "@/lib/multiplex/ai-gateway.server";
-import { getOptionalCompanySession } from "@/lib/multiplex/company-auth.server";
-import { getServiceClient, resolvePublicCompany } from "@/lib/multiplex/supabase.server";
+import { requireCompanySession } from "@/lib/multiplex/company-auth.server";
+import { getServiceClient } from "@/lib/multiplex/supabase.server";
 
 const BodySchema = z.object({
   question: z.string().min(3, "A dúvida do cliente deve ter pelo menos 3 caracteres.").max(3000),
@@ -27,21 +27,14 @@ export const Route = createFileRoute("/api/ai/suggest-reply")({
         }
 
         const supabase = getServiceClient();
-        let companyName = "Loja";
-
-        if (supabase) {
-          try {
-            const session = await getOptionalCompanySession(supabase, request);
-            if (session) {
-              companyName = session.companyName;
-            } else {
-              const pub = await resolvePublicCompany(supabase);
-              if (pub) companyName = pub.name;
-            }
-          } catch {
-            // Ignora falha de leitura e usa default
-          }
+        if (!supabase) {
+          return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
         }
+        const session = await requireCompanySession(supabase, request);
+        if ("error" in session) {
+          return Response.json({ error: session.error }, { status: session.status });
+        }
+        const companyName = session.companyName;
 
         const result = await generateCustomerSuggestedReply({
           question: parsed.data.question,

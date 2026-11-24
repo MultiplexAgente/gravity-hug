@@ -43,6 +43,19 @@ export async function signInCompanyUser(
   return { accessToken: data.session.access_token, refreshToken: data.session.refresh_token ?? null };
 }
 
+/** Primeiro acesso: cria a conta sem confirmar o e-mail (o Supabase envia o link). */
+export async function signUpCompanyUser(
+  email: string,
+  password: string,
+  redirectTo: string,
+): Promise<{ ok: true } | { error: string }> {
+  const client = publishableClient();
+  if (!client) return { error: "Autenticação não configurada no servidor." };
+  const { error } = await client.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } });
+  if (error) return { error: "Não foi possível criar o acesso." };
+  return { ok: true };
+}
+
 /**
  * Valida o bearer token da requisição e devolve a empresa do usuário.
  * A empresa vem SEMPRE do vínculo em company_users — nunca do corpo do pedido.
@@ -58,10 +71,13 @@ export async function requireCompanySession(
   const { data, error } = await supabase.auth.getUser(token);
   const user = data?.user;
   if (error || !user) return { error: "Sessão expirada. Faça login novamente.", status: 401 };
+  if (!user.email_confirmed_at) {
+    return { error: "Confirme seu e-mail antes de entrar.", status: 403 };
+  }
 
   const { data: link } = await supabase
     .from("company_users")
-    .select("company_id, role, active, companies(id, name)")
+    .select("company_id, user_id, role, active, companies(id, name)")
     .or(`user_id.eq.${user.id},email.eq.${user.email ?? ""}`)
     .eq("active", true)
     .maybeSingle();
@@ -72,6 +88,10 @@ export async function requireCompanySession(
 
   if (!row) {
     return { error: "Seu usuário ainda não está vinculado a uma empresa.", status: 403 };
+  }
+
+  if (!(row as { user_id?: string | null }).user_id) {
+    await supabase.from("company_users").update({ user_id: user.id }).eq("company_id", row.company_id).eq("email", user.email ?? "").is("user_id", null);
   }
 
   return {

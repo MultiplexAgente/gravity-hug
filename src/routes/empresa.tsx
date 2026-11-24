@@ -217,6 +217,10 @@ function CompanyPage() {
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "E-mail ou senha inválidos.");
+      if (payload.pendingConfirmation) {
+        setError(payload.message);
+        return;
+      }
       localStorage.setItem(TOKEN_KEY, payload.accessToken);
       setToken(payload.accessToken);
     } catch (err) {

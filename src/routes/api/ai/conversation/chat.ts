@@ -33,6 +33,9 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
         if (!supabase) return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
 
         const session = await getOptionalCompanySession(supabase, request);
+        if (!session) {
+          return Response.json({ error: "Entre na sua empresa para usar o chat." }, { status: 401 });
+        }
         const company = session
           ? { id: session.companyId, name: session.companyName }
           : await resolvePublicCompany(supabase);

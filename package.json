@@ -10,9 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "dev:backend": "tsx watch backend/src/server.ts",
     "dev:frontend": "vite frontend",
-    "build:backend": "tsc -p backend/tsconfig.json",
     "build:frontend": "vite build frontend",
     "test": "vitest run"
   },

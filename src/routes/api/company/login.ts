@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { requireCompanySession, signInCompanyUser } from "@/lib/multiplex/company-auth.server";
+import { requireCompanySession, signInCompanyUser, signUpCompanyUser } from "@/lib/multiplex/company-auth.server";
 import { getServiceClient } from "@/lib/multiplex/supabase.server";
 
 const BodySchema = z.object({
@@ -52,19 +52,16 @@ export const Route = createFileRoute("/api/company/login")({
             );
           }
 
-          const { data: created, error: createError } = await supabase.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-          });
-          if (createError || !created.user) {
-            return Response.json(
-              { error: createError?.message ?? "Não foi possível criar o acesso." },
-              { status: 400 },
-            );
+          // Primeiro acesso exige confirmação do e-mail: a conta só entra na empresa
+          // depois que o dono do endereço clicar no link de verificação.
+          const signup = await signUpCompanyUser(email, password, new URL(request.url).origin);
+          if ("error" in signup) {
+            return Response.json({ error: signup.error }, { status: 400 });
           }
-
-          await supabase.from("company_users").update({ user_id: created.user.id }).eq("email", email);
+          return Response.json({
+            pendingConfirmation: true,
+            message: "Enviamos um link de confirmação para o seu e-mail. Confirme e depois entre com sua senha.",
+          });
         }
 
         const result = await signInCompanyUser(email, password);
