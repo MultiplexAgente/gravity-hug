@@ -505,7 +505,7 @@ function HugAiHeroTester() {
   const isConversando = messages.length > 0;
 
   return (
-    <div className="w-full max-w-2xl sm:max-w-3xl mx-auto mt-10 sm:mt-14 px-3">
+    <div className="w-full max-w-2xl sm:max-w-3xl mx-auto mt-6 sm:mt-12 px-2 sm:px-3">
       {/* 
         ESTADO INICIAL: Título limpo e convidativo
         Desaparece suavemente quando o usuário inicia a conversa
@@ -513,11 +513,11 @@ function HugAiHeroTester() {
       <AnimatePresence>
         {!isConversando && (
           <motion.h3
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15, height: 0, marginBottom: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-2xl sm:text-3xl md:text-4xl font-light text-white/95 tracking-tight mb-5 sm:mb-6 text-center lowercase select-none overflow-hidden"
+            exit={{ opacity: 0, y: -12, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-lg sm:text-3xl font-light text-white/90 tracking-tight mb-3 sm:mb-5 text-center lowercase select-none overflow-hidden"
           >
             como posso te ajudar?
           </motion.h3>
@@ -529,10 +529,10 @@ function HugAiHeroTester() {
       */}
       {isConversando && (
         <div
-          className="mb-4 rounded-3xl border border-[#262626] bg-[#0c0c0c] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.98)] overflow-hidden flex flex-col"
+          className="mb-3 sm:mb-4 rounded-3xl border border-[#262626] bg-[#0c0c0c] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.98)] overflow-hidden flex flex-col"
         >
           {/* Cabeçalho minimalista da conversa (sem badge Online) */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#212121] bg-[#0c0c0c]">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-[#212121] bg-[#0c0c0c]">
             <div className="flex items-center gap-2.5">
               <img
                 src={hugLogo}
@@ -560,7 +560,7 @@ function HugAiHeroTester() {
             onScroll={handleChatScroll}
             data-lenis-prevent="true"
             style={{ overscrollBehavior: "contain", backgroundColor: "#0c0c0c" }}
-            className="max-h-[460px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-6 space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain"
+            className="max-h-[420px] sm:max-h-[520px] overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#262626] overscroll-contain"
           >
             {messages.map((msg) => {
               const isUser = msg.sender === "user";
@@ -571,7 +571,7 @@ function HugAiHeroTester() {
                     key={msg.id}
                     className="flex justify-end"
                   >
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#212121] border border-[#303030] px-4.5 py-3 text-sm sm:text-[15px] text-[#ececec] shadow-sm">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[22px] rounded-br-[6px] bg-[#212121] border border-[#303030] px-4.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-[#ececec] shadow-sm">
                       <p className="whitespace-pre-line leading-relaxed font-normal">{msg.text}</p>
                     </div>
                   </div>
@@ -581,12 +581,12 @@ function HugAiHeroTester() {
               return (
                 <div
                   key={msg.id}
-                  className="flex items-start gap-3.5 justify-start"
+                  className="flex items-start gap-3 sm:gap-3.5 justify-start"
                 >
                   <img
                     src={hugLogo}
                     alt="HUG I.A"
-                    className="h-7 w-7 rounded-full object-cover shrink-0 mt-0.5"
+                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-cover shrink-0 mt-0.5"
                   />
                   <div className="flex-1 min-w-0 max-w-[95%] text-left">
                     {/* Texto direto sem caixa fechada, idêntico à experiência ChatGPT */}
@@ -639,7 +639,7 @@ function HugAiHeroTester() {
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="ml-auto inline-flex items-center gap-1.5 text-xs text-[#00D6A0] hover:underline font-medium transition-colors"
+                        className="ml-auto inline-flex items-center gap-1 text-xs text-[#00D6A0] hover:underline font-medium transition-colors"
                       >
                         <span>Falar com especialista</span>
                         <ArrowRight className="h-3 w-3" />
@@ -656,7 +656,7 @@ function HugAiHeroTester() {
                 <img
                   src={hugLogo}
                   alt="HUG I.A"
-                  className="h-7 w-7 rounded-full object-cover shrink-0 mt-0.5"
+                  className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-cover shrink-0 mt-0.5"
                 />
                 <div className="flex items-center gap-1.5 py-2 text-[#8e8e8e]">
                   <span className="h-2 w-2 rounded-full bg-[#8e8e8e] animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -671,12 +671,12 @@ function HugAiHeroTester() {
       )}
 
       {/* 
-        COMPOSER ESTILO CHATGPT (Capsule, Fundo Escuro #212121, 100% Opaco)
+        COMPOSER ESTILO CHATGPT (Capsule única, 100% Opaco, sem caixas internas)
       */}
       <div className="relative w-full">
-        <div className="relative rounded-full border border-[#303030] bg-[#212121] shadow-[0_12px_40px_rgba(0,0,0,0.9)] transition-all duration-200 focus-within:border-[#4d4d4d] px-3.5 sm:px-4 py-2 sm:py-2.5">
+        <div className="relative rounded-full border border-[#383838] bg-[#212121] shadow-[0_12px_40px_rgba(0,0,0,0.9)] transition-all duration-200 focus-within:border-[#555555] px-3 sm:px-4 py-2 sm:py-2.5">
           {/* Área de Entrada: Botão +, Textarea expansível e Botão de Envio Circular */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Botão de Adicionar (+) Estilo ChatGPT */}
             <button
               type="button"
@@ -694,8 +694,8 @@ function HugAiHeroTester() {
               <Plus className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
             </button>
 
-            {/* Campo Textarea Expansível com suporte a Enter para enviar */}
-            <div className="relative flex-1 min-w-0 flex items-center">
+            {/* Campo Textarea Expansível SEM caixa interna ou bordas herdadas */}
+            <div className="relative flex-1 min-w-0 flex items-center px-1">
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -703,7 +703,15 @@ function HugAiHeroTester() {
                 onChange={(e) => setPergunta(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Pergunte à HUG I.A..."
-                className="w-full resize-none bg-transparent text-sm sm:text-base text-white placeholder:text-[#8e8e8e] focus:outline-none leading-relaxed max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-[#303030]"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  boxShadow: "none",
+                  padding: "0",
+                  borderRadius: "0",
+                }}
+                className="w-full resize-none !bg-transparent !border-0 !border-none !outline-none !shadow-none !p-0 !rounded-none text-sm sm:text-base text-white placeholder:text-[#8e8e8e] leading-relaxed max-h-36 overflow-y-auto focus:!ring-0 focus:!outline-none focus:!border-none"
               />
             </div>
 
@@ -727,28 +735,28 @@ function HugAiHeroTester() {
       </div>
 
       {/* 
-        CHIP / BOTÃO "VAMOS COMEÇAR"
-        Aparece apenas no estado inicial antes do primeiro envio
+        CHIPS DE SUGESTÃO ESTILO CHATGPT
+        Aparecem apenas no estado inicial antes do primeiro envio
       */}
       <AnimatePresence>
         {!isConversando && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10, height: 0, marginTop: 0 }}
+            exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-4 sm:mt-5 flex justify-center overflow-hidden"
+            className="mt-3 sm:mt-4 flex flex-wrap justify-center gap-2 overflow-hidden px-1"
           >
-            <button
-              type="button"
-              onClick={() => {
-                const sorteado = exemplos[0]!;
-                handleEnviar(sorteado);
-              }}
-              className="group relative inline-flex items-center gap-2 rounded-full border border-[#303030] bg-[#1a1a1a] hover:bg-[#262626] hover:border-[#444444] px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-[#b4b4b4] hover:text-[#ececec] transition-all duration-200 shadow-sm active:scale-95 lowercase"
-            >
-              <span>vamos começar</span>
-            </button>
+            {exemplos.slice(0, 3).map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => handleEnviar(ex)}
+                className="inline-flex items-center rounded-full border border-[#333333] bg-[#1a1a1a]/95 hover:bg-[#262626] hover:border-[#4d4d4d] px-3.5 py-1.5 text-xs text-[#a0a0a0] hover:text-[#ececec] transition-all duration-200 shadow-sm active:scale-95"
+              >
+                <span>{ex}</span>
+              </button>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -977,7 +985,7 @@ function Landing() {
       */}
       <section
         ref={heroRef}
-        className="relative min-h-[85vh] lg:min-h-[92vh] overflow-hidden flex flex-col justify-center"
+        className="relative min-h-[85vh] lg:min-h-[92vh] overflow-hidden flex flex-col justify-start sm:justify-center"
       >
         {/* Imagem do Horizonte Planetário */}
         <motion.img
@@ -999,7 +1007,7 @@ function Landing() {
         {/* Conteúdo Central do Hero */}
         <motion.div
           style={{ y: textY, opacity: fade }}
-          className="relative z-10 flex flex-col items-center justify-center px-6 pt-28 pb-14 sm:pt-36 sm:pb-20 text-center max-w-5xl mx-auto"
+          className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 pt-24 pb-10 sm:pt-36 sm:pb-20 text-center max-w-5xl mx-auto"
         >
           {/* Título com Abertura Tipográfica Cinematográfica */}
           <div className="overflow-hidden py-1">
@@ -1007,7 +1015,7 @@ function Landing() {
               initial={{ opacity: 0, y: 70, filter: "blur(14px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 1.5, ease, delay: 0.3 }}
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-medium leading-[1.08] sm:leading-[1.03] tracking-[-0.035em] text-white"
+              className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-medium leading-[1.12] sm:leading-[1.03] tracking-[-0.035em] text-white"
             >
               Seu negócio,
               <br />
@@ -1019,7 +1027,7 @@ function Landing() {
             initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.2, ease, delay: 0.7 }}
-            className="mt-5 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-slate-300/90 font-light"
+            className="mt-3.5 sm:mt-5 max-w-2xl text-sm sm:text-lg md:text-xl leading-relaxed text-slate-300/90 font-light px-2"
           >
             Vendas, estoque, gestão empresarial e inteligência comercial integrados em uma única
             plataforma.
@@ -1030,14 +1038,14 @@ function Landing() {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1, ease, delay: 0.95 }}
-            className="mt-8 sm:mt-10 flex w-full flex-col items-center justify-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4 px-4 sm:px-0"
+            className="mt-6 sm:mt-10 flex w-full flex-col items-center justify-center gap-2.5 sm:w-auto sm:flex-row sm:gap-4 px-4 sm:px-0"
           >
             {/* CTA Principal: Falar com Especialista */}
             <a
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-300/40 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 px-8 py-4 sm:px-9 sm:py-4 text-sm sm:text-base font-medium text-white shadow-[0_0_28px_rgba(16,185,129,0.32)] backdrop-blur-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_42px_rgba(16,185,129,0.55)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
+              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-2.5 sm:gap-3 overflow-hidden rounded-full border border-emerald-300/40 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 px-6 py-3 sm:px-9 sm:py-4 text-xs sm:text-base font-medium text-white shadow-[0_0_28px_rgba(16,185,129,0.32)] backdrop-blur-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_42px_rgba(16,185,129,0.55)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
               {/* Brilho especular sutil na borda superior */}
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
@@ -1045,13 +1053,13 @@ function Landing() {
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
               
               <span className="relative z-10 tracking-tight">Falar com Especialista</span>
-              <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-white transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none" />
+              <ArrowRight className="relative z-10 h-3.5 w-3.5 sm:h-4.5 sm:w-4.5 text-white transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none" />
             </a>
 
             {/* CTA Secundário: Conhecer a plataforma */}
             <a
               href="#pilares"
-              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-3 overflow-hidden rounded-full border border-emerald-500/30 bg-[#080d14]/70 px-8 py-4 sm:px-9 sm:py-4 text-sm sm:text-base font-medium text-slate-100 shadow-lg shadow-black/40 backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/60 hover:bg-[#0c1420]/80 hover:text-white hover:shadow-[0_0_28px_rgba(16,185,129,0.18)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
+              className="group relative inline-flex w-full max-w-xs sm:w-auto sm:max-w-none items-center justify-center gap-2.5 sm:gap-3 overflow-hidden rounded-full border border-emerald-500/30 bg-[#080d14]/70 px-6 py-3 sm:px-9 sm:py-4 text-xs sm:text-base font-medium text-slate-100 shadow-lg shadow-black/40 backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/60 hover:bg-[#0c1420]/80 hover:text-white hover:shadow-[0_0_28px_rgba(16,185,129,0.18)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
               {/* Brilho especular sutil na borda superior */}
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/35 to-transparent" />
