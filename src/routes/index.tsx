@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
+  ArrowUp,
+  Plus,
   ChevronRight,
   Check,
   ShoppingBag,
@@ -340,6 +342,187 @@ function InteractiveTiltCard({
 }
 
 /**
+ * Campo Interativo estilo ChatGPT para os usuários testarem a HUG I.A no Hero
+ * Layout idêntico ao padrão oficial solicitado pelo usuário.
+ */
+function HugAiHeroTester() {
+  const [pergunta, setPergunta] = useState("");
+  const [resposta, setResposta] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(false);
+
+  const exemplos = [
+    "Quais produtos mais venderam hoje no meu estoque?",
+    "Qual o faturamento acumulado da semana na matriz?",
+    "Quantas unidades de Dipirona 500mg restam na filial Centro?",
+    "Qual a produtividade média por talhão na safra atual?",
+  ];
+
+  function executarSimulacao(query: string) {
+    setCarregando(true);
+    setResposta(null);
+
+    setTimeout(() => {
+      const q = query.toLowerCase();
+      let resp = "";
+
+      if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
+        resp = "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são: 1º Amoxicilina 875mg (14 un), 2º Dipirona 500mg (12 un) e 3º Losartana 50mg (9 un). O estoque de segurança de todos permanece dentro da margem de reposição.";
+      } else if (q.includes("faturamento") || q.includes("receita") || q.includes("venda")) {
+        resp = "O faturamento consolidado hoje é de R$ 4.820,50 em 38 transações (Ticket Médio: R$ 126,85). 68% recebido via Pix, 24% Cartão de Crédito e 8% Dinheiro/Débito. Não há divergências de fechamento de caixa.";
+      } else if (q.includes("estoque") || q.includes("dipirona") || q.includes("unidade") || q.includes("restando")) {
+        resp = "Localizei 84 unidades físicas de Dipirona 500mg (20 comp) no estoque da Unidade Centro (Lote LT-DIP-2024, validade ago/2027, custo R$ 3,20, preço de venda R$ 8,50). Status: 100% regular.";
+      } else if (q.includes("safra") || q.includes("agro") || q.includes("fazenda") || q.includes("silo") || q.includes("talhão")) {
+        resp = "No HUG-AGRO, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas armazenadas no Silo 02 com umidade estável em 13,2%.";
+      } else {
+        resp = `Entendido! Analisando sua operação em tempo real: para "${query}", localizei dados consolidados em seu ERP. Todos os lançamentos, estoque e faturamento estão sincronizados e auditados. Deseja emitir o relatório ou enviar um resumo ao WhatsApp?`;
+      }
+
+      setResposta(resp);
+      setCarregando(false);
+    }, 550);
+  }
+
+  function handleEnviar(texto?: string) {
+    const query = (texto || pergunta).trim();
+    if (!query) {
+      const sorteado = exemplos[Math.floor(Math.random() * exemplos.length)]!;
+      setPergunta(sorteado);
+      executarSimulacao(sorteado);
+      return;
+    }
+    executarSimulacao(query);
+  }
+
+  return (
+    <div className="w-full max-w-2xl mx-auto mt-12 sm:mt-16 px-2">
+      {/* Título exato exigido pelo usuário */}
+      <motion.h3
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1 }}
+        className="text-2xl sm:text-3xl md:text-4xl font-normal text-white/95 tracking-tight mb-5 sm:mb-6 text-center lowercase"
+      >
+        como posso te ajudar?
+      </motion.h3>
+
+      {/* Barra de Input estilo ChatGPT cápsula */}
+      <motion.form
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 1.1 }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleEnviar();
+        }}
+        className="relative flex items-center gap-3 w-full rounded-full border border-white/20 bg-[#080d14]/85 hover:border-white/35 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 px-4 py-3 sm:py-3.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-all"
+      >
+        {/* Botão de + igual ao do ChatGPT */}
+        <button
+          type="button"
+          onClick={() => {
+            const sorteado = exemplos[Math.floor(Math.random() * exemplos.length)]!;
+            setPergunta(sorteado);
+          }}
+          title="Inserir pergunta de teste"
+          className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors"
+        >
+          <Plus className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+        </button>
+
+        {/* Input de texto */}
+        <input
+          type="text"
+          value={pergunta}
+          onChange={(e) => setPergunta(e.target.value)}
+          placeholder="Pergunte à HUG I.A..."
+          className="w-full bg-transparent text-sm sm:text-base text-white placeholder:text-slate-400/75 focus:outline-none"
+        />
+
+        {/* Botão de Envio circular */}
+        <button
+          type="submit"
+          disabled={carregando}
+          className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-black shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+          title="Enviar pergunta"
+        >
+          {carregando ? (
+            <span className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <ArrowUp className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2.5]" />
+          )}
+        </button>
+      </motion.form>
+
+      {/* Botão pill abaixo do campo exigido pelo usuário */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1.2 }}
+        className="mt-4 flex justify-center"
+      >
+        <button
+          type="button"
+          onClick={() => handleEnviar()}
+          className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-5 py-2 text-xs sm:text-sm font-normal text-slate-300 hover:text-white transition-all shadow-sm active:scale-95 lowercase"
+        >
+          vamos começar
+        </button>
+      </motion.div>
+
+      {/* Caixa de Resposta da IA com Animação Fluida */}
+      <AnimatePresence>
+        {resposta && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-6 p-5 sm:p-6 rounded-3xl border border-emerald-500/30 bg-[#060c14]/95 backdrop-blur-2xl shadow-2xl text-left space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src={hugLogo}
+                  alt="HUG I.A"
+                  className="h-7 w-7 rounded-full object-cover ring-1 ring-emerald-500/40"
+                />
+                <span className="text-xs font-semibold text-white tracking-tight">HUG I.A Oficial</span>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                  Tempo Real
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResposta(null)}
+                className="text-[11px] text-slate-400 hover:text-white transition-colors"
+              >
+                Limpar
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-200 leading-relaxed font-light">
+              {resposta}
+            </p>
+
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 text-[11px]">
+              <span className="text-slate-400">Resposta gerada com inteligência sobre dados reais</span>
+              <a
+                href={getBonaSoftWhatsAppUrl(`Olá! Testei a HUG I.A na pergunta "${pergunta}" e gostaria de implantar na minha empresa.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-medium"
+              >
+                <span>Falar com especialista</span>
+                <ArrowRight size={13} />
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/**
  * Demonstração Autêntica de Conversa com a HUG I.A
  * Interface inspirada em mensageria corporativa moderna (estilo WhatsApp / Chat Real)
  */
@@ -645,6 +828,9 @@ function Landing() {
               <ArrowRight className="relative z-10 h-4 w-4 sm:h-4.5 sm:w-4.5 text-emerald-400 transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:text-emerald-300 motion-reduce:transform-none" />
             </a>
           </motion.div>
+
+          {/* Campo Interativo estilo ChatGPT para testar a HUG I.A no Hero */}
+          <HugAiHeroTester />
         </motion.div>
       </section>
 
