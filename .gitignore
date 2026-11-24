@@ -34,3 +34,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.chrome-profile/
+screenshots/

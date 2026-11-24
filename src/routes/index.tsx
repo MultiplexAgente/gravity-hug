@@ -115,7 +115,7 @@ const NARRATIVE_PILLARS = [
       "Rastreabilidade de insumos, contratos de grãos e fluxo financeiro rural",
     ],
     image:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=85",
   },
   {
     title: "Inteligência que entende o seu negócio.",
@@ -240,13 +240,13 @@ const COMMERCIAL_SECTORS = [
   },
   {
     id: "agro",
-    name: "Agro & Fazendas",
+    name: "Agro",
     title: "Fazendas, Safras, Armazéns & Silos",
     narrative:
       "Gerencie fazendas, safras, operações agrícolas, armazéns e silos em uma única plataforma. Gestão operacional, controle financeiro e dados em tempo real para decisões mais eficientes no campo e na armazenagem.",
     kpi: "Campo ao Armazém · Rastreabilidade Integral",
     image:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=1600&q=85",
   },
 ];
 
