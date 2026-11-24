@@ -361,8 +361,71 @@ function HugAiHeroTester() {
       const q = query.toLowerCase().trim();
       let resp = "";
 
-      // 1. Identidade e Apresentação da HUG I.A ("quem é você", "o que você faz", etc.)
+      // 1. Valores, Preços, Planos e Custos ("qual valor", "quanto custa", "planos", "preço", etc.)
       if (
+        q.includes("valor") ||
+        q.includes("quanto custa") ||
+        q.includes("preço") ||
+        q.includes("preco") ||
+        q.includes("plano") ||
+        q.includes("mensalidade") ||
+        q.includes("tabela") ||
+        q.includes("custo") ||
+        q.includes("pagar")
+      ) {
+        resp =
+          "Os planos oficiais da plataforma HUG são 100% transparentes e sem taxa oculta de implantação:\n• Starter (R$ 99,00/mês): PDV ágil, catálogo online integrado, controle de estoque e clientes.\n• Business (R$ 199,00/mês - Recomendado): Multicanal (balcão + web), assistente HUG I.A., múltiplos caixas e relatórios de faturamento.\n• Premium (R$ 399,00/mês): Multi-filiais conectadas, acesso prioritário à HUG I.A., auditoria avançada e suporte prioritário.\nVocê pode alterar ou cancelar a qualquer momento sem fidelidade.";
+      } else if (
+        q.includes("contratar") ||
+        q.includes("comprar") ||
+        q.includes("assinar") ||
+        q.includes("comecar") ||
+        q.includes("começar") ||
+        q.includes("implantar") ||
+        q.includes("adesao") ||
+        q.includes("adesão")
+      ) {
+        resp =
+          "Para começar com a plataforma HUG, basta escolher o plano ideal para a sua empresa (Starter R$ 99/mês, Business R$ 199/mês ou Premium R$ 399/mês) e clicar no botão 'Falar com Especialista'. Nosso time técnico realiza a ativação e configuração da sua empresa no mesmo dia.";
+      } else if (
+        q.includes("teste") ||
+        q.includes("gratis") ||
+        q.includes("grátis") ||
+        q.includes("demonstra") ||
+        q.includes("demo")
+      ) {
+        resp =
+          "Oferecemos uma demonstração guiada e personalizada com dados reais do seu segmento (varejo, farmácia, moda, agro, etc.). Nossos especialistas apresentam todo o fluxo de vendas, PDV, estoque e a HUG I.A em funcionamento prático.";
+      } else if (
+        q.includes("fiscal") ||
+        q.includes("nota") ||
+        q.includes("nfce") ||
+        q.includes("nfe") ||
+        q.includes("cupom") ||
+        q.includes("sefaz") ||
+        q.includes("imposto")
+      ) {
+        resp =
+          "O HUG possui emissão fiscal completa e instantânea com homologação para NFC-e e NF-e em todo o Brasil. O envio para a SEFAZ ocorre em menos de 1 segundo diretamente no fechamento da venda do PDV, com impressão de cupom térmico e envio digital ao cliente.";
+      } else if (
+        q.includes("suporte") ||
+        q.includes("whatsapp") ||
+        q.includes("telefone") ||
+        q.includes("atendimento") ||
+        q.includes("contato") ||
+        q.includes("ajuda")
+      ) {
+        resp =
+          "O suporte técnico da BonaSoft opera diretamente via WhatsApp e canais dedicados para lojistas. Todos os clientes contam com auxílio na implantação, treinamento de equipe e acompanhamento contínuo sem filas burocráticas.";
+      } else if (
+        q.includes("segmento") ||
+        q.includes("setor") ||
+        q.includes("ramo") ||
+        q.includes("atende")
+      ) {
+        resp =
+          "O HUG conta com módulos especializados com regras de negócio adaptadas para:\n• Materiais, Papelarias e Ferramentas (conversão fracionada m², kg, resma);\n• Mercados e Mercearias (pesagem na balança, código de barras e saída rápida);\n• Moda e Vestuário (grade de cor, tamanho e catálogo digital);\n• Gastronomia (comandas e delivery);\n• Beleza e Clínicas (atendimento e serviços);\n• Farmácias e Drogarias (lotes, validade FEFO e Portaria 344);\n• Agro & Fazendas (safras, talhões e armazenagem).";
+      } else if (
         q.includes("quem e") ||
         q.includes("quem é") ||
         q.includes("o que voce") ||
@@ -372,10 +435,11 @@ function HugAiHeroTester() {
         q.includes("como funciona") ||
         q.includes("apresente") ||
         q.includes("quem voce") ||
-        q.includes("quem você")
+        q.includes("quem você") ||
+        q.includes("o que faz")
       ) {
         resp =
-          "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp — incluindo operações agrícolas com o HUG-AGRO e drogarias com o HUG Farmácias. Posso consultar estoque, auditar caixas, rastrear lotes e apoiar seu time comercial instantaneamente. Como posso te ajudar hoje?";
+          "Eu sou a HUG I.A, a inteligência operacional do seu negócio. Conecto em tempo real suas vendas de balcão (PDV), e-commerce, estoque físico, faturamento e canais de WhatsApp. Posso consultar estoque em linguagem natural, auditar caixas, verificar margens, rastrear lotes e apoiar seu time comercial instantaneamente. O que deseja saber sobre a plataforma?";
       } else if (
         q === "oi" ||
         q === "olá" ||
@@ -388,7 +452,7 @@ function HugAiHeroTester() {
         q === "e aí"
       ) {
         resp =
-          "Olá! Sou a HUG I.A. Estou conectada aos dados da sua empresa. Você pode me fazer perguntas em linguagem natural sobre faturamento de hoje, reposição de estoque, vendas por canal ou operações de campo. O que deseja consultar?";
+          "Olá! Sou a HUG I.A, inteligência conectada aos dados da sua empresa. Você pode me perguntar sobre os valores dos planos (a partir de R$ 99/mês), faturamento de vendas, reposição de estoque ou solicitar uma demonstração com nossos especialistas. Como posso te ajudar?";
       } else if (q.includes("produto") || q.includes("venderam") || q.includes("mais vendid")) {
         resp =
           "Hoje foram registradas 48 vendas no PDV. Os 3 itens líderes em saída são: 1º Amoxicilina 875mg (14 un), 2º Dipirona 500mg (12 un) e 3º Losartana 50mg (9 un). O estoque de segurança de todos permanece dentro da margem de reposição.";
@@ -415,7 +479,7 @@ function HugAiHeroTester() {
         q.includes("milho")
       ) {
         resp =
-          "No HUG-AGRO, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
+          "No módulo Agro, a Fazenda Primavera concluiu a colheita do Talhão 04 com produtividade média de 68 sacas/ha. Temos 4.250 toneladas de soja armazenadas no Silo 02 com umidade estável em 13,2% e pesagem rodoviária 100% conciliada.";
       } else if (
         q.includes("farmacia") ||
         q.includes("farmácia") ||
@@ -424,9 +488,10 @@ function HugAiHeroTester() {
         q.includes("remédio")
       ) {
         resp =
-          "No HUG Farmácias, a conformidade de receituários controlados (Portaria 344/98) e lotes FEFO está 100% regularizada. Não há pendências sanitárias nem produtos em ruptura.";
+          "No módulo Farmacêutico, a conformidade de receituários controlados (Portaria 344/98) e lotes FEFO está 100% regularizada. Não há pendências sanitárias nem produtos em ruptura.";
       } else {
-        resp = `Consulta processada para "${query}". A HUG I.A analisa os registros do seu ecossistema comercial (frente de caixa, controle de estoque e faturamento) para entregar respostas imediatas e auditadas sem planilhas soltas. Deseja conhecer o fluxo completo ou conectar ao seu WhatsApp?`;
+        resp =
+          `Com base nos registros operacionais da plataforma HUG para "${query}": todas as rotinas de frente de caixa (PDV), estoque unificado e faturamento financeiro são gerenciadas em tempo real sob uma única base de dados. Caso deseje verificar valores dos planos (a partir de R$ 99/mês) ou agendar uma consultoria com nosso time técnico, clique abaixo em 'Falar com especialista'.`;
       }
 
       setResposta(resp);
@@ -579,7 +644,7 @@ function HugAiHeroTester() {
               </button>
             </div>
 
-            <p className="text-sm sm:text-[15px] text-slate-200 leading-relaxed font-light">
+            <p className="text-sm sm:text-[15px] text-slate-200 leading-relaxed font-light whitespace-pre-line">
               {resposta}
             </p>
 
