@@ -217,29 +217,8 @@ export function AgentsAuthView({ onSuccess }: Props) {
               )}
             </Button>
           </form>
-
-          {/* Destaque de Recursos */}
-          <div className="pt-3 border-t border-white/[0.08] text-[11px] text-slate-400 space-y-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
-              <span>Crie agentes no WhatsApp sem saber programar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
-              <span>Motor oficial HUG IA Core com raciocínio avançado</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
-              <span>Isolamento total dos seus dados e agentes</span>
-            </div>
-          </div>
         </div>
       </main>
-
-      {/* Rodapé */}
-      <footer className="text-center text-[11px] text-slate-600 py-3 relative z-10">
-        © {new Date().getFullYear()} HUG Agents & BonaSoft. Inteligência empresarial independente.
-      </footer>
     </div>
   );
 }
