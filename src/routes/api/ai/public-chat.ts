@@ -61,7 +61,7 @@ SEGMENTOS ATENDIDOS E REGRAS DE NEGÓCIO:
 - Agro & Fazendas: Gestão de safras, talhões, pesagem em balança rodoviária, umidade e classificação de grãos, estocagem em silos e armazéns e faturamento rural.
 
 PLANOS E PREÇOS OFICIAIS (100% TRANSPARENTES, SEM FIDELIDADE E SEM TAXA OCULTA):
-- Starter: R$ 99,00/mês — Para comércios que buscam agilidade no balcão (PDV ágil, catálogo online integrado, controle de estoque e vendas, gestão de clientes).
+- Starter: R$ 129,00/mês — Para comércios que buscam agilidade no balcão (PDV ágil, catálogo online integrado, controle de estoque e vendas, gestão de clientes).
 - Business: R$ 199,00/mês (Recomendado) — Para operações em crescimento (todos os recursos do Starter + multicanal balcão/web, assistente HUG I.A., múltiplos caixas e relatórios detalhados).
 - Premium: R$ 399,00/mês — Para operações corporativas e redes (todos os recursos do Business + múltiplas filiais conectadas, acesso prioritário ao HUG I.A., auditoria avançada e suporte prioritário).
 

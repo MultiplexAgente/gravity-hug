@@ -262,7 +262,7 @@ const COMMERCIAL_SECTORS = [
 const APPROVED_PLANS = [
   {
     name: "Starter",
-    price: "99,00",
+    price: "129,00",
     tagline: "Para comércios e lojas que buscam agilidade no balcão e presença online.",
     features: [
       "Frente de caixa (PDV) ágil",
@@ -1737,7 +1737,7 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO PLANOS: Apresentação Transparente (R$ 99,00, R$ 199,00, R$ 399,00)
+        SEÇÃO PLANOS: Apresentação Transparente (R$ 129,00, R$ 199,00, R$ 399,00)
         ========================================================================
       */}
       <section
