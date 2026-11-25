@@ -1348,10 +1348,6 @@ function Landing() {
               Planos
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
-            <Link to="/agents" className="transition-colors hover:text-emerald-300 relative group py-1 text-emerald-400/90 font-medium">
-              HUG Agents
-              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
-            </Link>
           </nav>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
