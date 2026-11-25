@@ -1348,9 +1348,19 @@ function Landing() {
               Planos
               <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
             </a>
+            <Link to="/agents" className="transition-colors hover:text-emerald-300 relative group py-1 text-emerald-400/90 font-medium">
+              HUG Agents
+              <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-emerald-400 transition-all duration-300 group-hover:w-full" />
+            </Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link
+              to="/agents"
+              className="relative group overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:text-white hover:bg-emerald-500/20 active:scale-95"
+            >
+              HUG Agents
+            </Link>
             <a
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma consultoria e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"

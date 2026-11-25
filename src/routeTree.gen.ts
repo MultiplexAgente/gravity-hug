@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as ClientesRouteImport } from './routes/clientes'
@@ -25,6 +26,7 @@ import { Route as RespostasIaRouteImport } from './routes/respostas-ia'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
+import { Route as ApiAiAgentsRouteImport } from './routes/api/ai/agents'
 import { Route as ApiAiModelsRouteImport } from './routes/api/ai/models'
 import { Route as ApiAiPublicChatRouteImport } from './routes/api/ai/public-chat'
 import { Route as ApiAiSuggestReplyRouteImport } from './routes/api/ai/suggest-reply'
@@ -46,6 +48,11 @@ import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/publi
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -121,6 +128,11 @@ const ApiProductsRoute = ApiProductsRouteImport.update({
 const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
   id: '/api/admin/ai-routing',
   path: '/api/admin/ai-routing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiAgentsRoute = ApiAiAgentsRouteImport.update({
+  id: '/api/ai/agents',
+  path: '/api/ai/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiModelsRoute = ApiAiModelsRouteImport.update({
@@ -212,6 +224,7 @@ const ApiPublicWhatsappWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
@@ -227,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/agents': typeof ApiAiAgentsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -247,6 +261,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
@@ -262,6 +277,7 @@ export interface FileRoutesByTo {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/agents': typeof ApiAiAgentsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -283,6 +299,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
@@ -298,6 +315,7 @@ export interface FileRoutesById {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/agents': typeof ApiAiAgentsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -320,6 +338,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agents'
     | '/app'
     | '/catalogo'
     | '/clientes'
@@ -335,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/agents'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -355,6 +375,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agents'
     | '/app'
     | '/catalogo'
     | '/clientes'
@@ -370,6 +391,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/agents'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -390,6 +412,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/agents'
     | '/app'
     | '/catalogo'
     | '/clientes'
@@ -405,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/agents'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -426,6 +450,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentsRoute: typeof AgentsRoute
   AppRoute: typeof AppRoute
   CatalogoRoute: typeof CatalogoRoute
   ClientesRoute: typeof ClientesRoute
@@ -441,6 +466,7 @@ export interface RootRouteChildren {
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
+  ApiAiAgentsRoute: typeof ApiAiAgentsRoute
   ApiAiModelsRoute: typeof ApiAiModelsRoute
   ApiAiPublicChatRoute: typeof ApiAiPublicChatRoute
   ApiAiSuggestReplyRoute: typeof ApiAiSuggestReplyRoute
@@ -467,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -572,6 +605,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/ai-routing'
       fullPath: '/api/admin/ai-routing'
       preLoaderRoute: typeof ApiAdminAiRoutingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/agents': {
+      id: '/api/ai/agents'
+      path: '/api/ai/agents'
+      fullPath: '/api/ai/agents'
+      preLoaderRoute: typeof ApiAiAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/models': {
@@ -698,6 +738,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentsRoute: AgentsRoute,
   AppRoute: AppRoute,
   CatalogoRoute: CatalogoRoute,
   ClientesRoute: ClientesRoute,
@@ -713,6 +754,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
+  ApiAiAgentsRoute: ApiAiAgentsRoute,
   ApiAiModelsRoute: ApiAiModelsRoute,
   ApiAiPublicChatRoute: ApiAiPublicChatRoute,
   ApiAiSuggestReplyRoute: ApiAiSuggestReplyRoute,
