@@ -38,6 +38,8 @@ export interface AgentChatMessage {
   createdAt: string;
   agentId?: string;
   attachments?: { name: string; type: string; url?: string }[];
+  tempoProcessamentoSegundos?: number;
+  etapasPensamento?: { label: string; status: "concluido" | "em_andamento" | "pendente"; duracao?: string }[];
 }
 
 export interface AgentConversation {

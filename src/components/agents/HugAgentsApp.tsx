@@ -45,6 +45,7 @@ import {
 } from "@/lib/multiplex/agents-service";
 import { AgentModalEditor } from "./AgentModalEditor";
 import { DesktopFSModal } from "./DesktopFSModal";
+import { AIThinkingProcess, type ThinkingStep } from "./AIThinkingProcess";
 import { getToken, clearToken } from "@/lib/multiplex/client";
 import { toast } from "sonner";
 
@@ -89,6 +90,10 @@ export function HugAgentsApp({ onLogout }: Props) {
   // Ferramentas Desktop do Windows (Criar Pastas, Mover Arquivos, Localizar)
   const [modalDesktopFSAberto, setModalDesktopFSAberto] = useState(false);
   const [abaDesktopFS, setAbaDesktopFS] = useState<"criar" | "mover" | "buscar" | "explorar">("criar");
+
+  // Raciocínio ao Vivo & Timer estilo Antigravity
+  const [etapasThinkingAtivas, setEtapasThinkingAtivas] = useState<string[]>([]);
+  const inicioThinkingRef = useRef<number>(0);
 
   // Gravação de Áudio
   const [gravandoAudio, setGravandoAudio] = useState(false);
@@ -197,6 +202,38 @@ export function HugAgentsApp({ onLogout }: Props) {
     setAnexosPendentes([]);
     setProcessando(true);
 
+    // Gera etapas de raciocínio dinâmicas com base na mensagem e no agente ativo
+    let passosPensamento: string[] = [];
+    const textoLower = texto.toLowerCase();
+
+    if (
+      textoLower.includes("pasta") ||
+      textoLower.includes("diretorio") ||
+      textoLower.includes("mover") ||
+      textoLower.includes("arquivo") ||
+      textoLower.includes("onde está") ||
+      textoLower.includes("disco d") ||
+      textoLower.includes("desktop")
+    ) {
+      passosPensamento = [
+        "Ran search for electron or desktop projects",
+        "Checked task Search for electron or desktop",
+        "Accessing Windows Desktop FS Tools in Node.js",
+        "Executing file system command in D:\\Desenvolvimento\\Projetos",
+        "Validating disk operation output",
+      ];
+    } else {
+      passosPensamento = [
+        "Analyzing user message and context",
+        `Loading guidelines for ${agenteAtivo.name}`,
+        `Routing reasoning via HUG IA Core Gateway (${agenteAtivo.model})`,
+        "Formulating structured response",
+      ];
+    }
+
+    setEtapasThinkingAtivas(passosPensamento);
+    inicioThinkingRef.current = Date.now();
+
     try {
       const token = getToken();
       const resposta = await HugAgentsService.enviarMensagem({
@@ -206,12 +243,20 @@ export function HugAgentsApp({ onLogout }: Props) {
         token,
       });
 
+      const tempoTotalSegundos = Math.max(1, Math.round((Date.now() - inicioThinkingRef.current) / 1000));
+      const etapasConcluidas: ThinkingStep[] = etapasThinkingAtivas.map((p) => ({
+        label: p,
+        status: "concluido",
+      }));
+
       const mensagemAssistente: AgentChatMessage = {
         id: `msg-agt-${Date.now()}`,
         role: "assistant",
         content: resposta.resposta,
         createdAt: new Date().toISOString(),
         agentId: agenteAtivo.id,
+        tempoProcessamentoSegundos: tempoTotalSegundos,
+        etapasPensamento: etapasConcluidas,
       };
 
       const mensagensFinais = [...novasMensagens, mensagemAssistente];
@@ -655,6 +700,16 @@ export function HugAgentsApp({ onLogout }: Props) {
                           : "bg-[#090e17] border border-white/[0.08] text-slate-200 rounded-tl-none"
                       }`}
                     >
+                      {!isUser && msg.tempoProcessamentoSegundos !== undefined && (
+                        <div className="mb-3 pb-2 border-b border-white/[0.06]">
+                          <AIThinkingProcess
+                            emAndamento={false}
+                            tempoTotal={msg.tempoProcessamentoSegundos}
+                            etapas={msg.etapasPensamento || []}
+                          />
+                        </div>
+                      )}
+
                       {msg.content}
 
                       {/* Anexos da Mensagem */}
@@ -702,13 +757,16 @@ export function HugAgentsApp({ onLogout }: Props) {
 
           {/* Indicador de Processamento / Pensando */}
           {processando && (
-            <div className="flex gap-3 items-center text-xs text-slate-400">
-              <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 animate-pulse">
+            <div className="flex gap-3 sm:gap-4 items-start text-xs">
+              <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-1 animate-pulse">
                 <ActiveIcon className="size-4" />
               </div>
-              <div className="p-3 rounded-2xl bg-[#090e17] border border-white/[0.08] text-slate-300 flex items-center gap-2">
-                <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>Processando resposta...</span>
+              <div className="p-4 rounded-2xl bg-[#090e17] border border-white/[0.08] text-slate-200 rounded-tl-none max-w-[85%] sm:max-w-[78%]">
+                <AIThinkingProcess
+                  emAndamento={true}
+                  titulo="Exploring"
+                  etapasIniciais={etapasThinkingAtivas}
+                />
               </div>
             </div>
           )}
