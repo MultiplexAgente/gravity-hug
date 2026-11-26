@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as ConversasRouteImport } from './routes/conversas'
@@ -59,6 +60,11 @@ const AgentsRoute = AgentsRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogoRoute = CatalogoRouteImport.update({
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
+  '/cadastro': typeof CadastroRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
   '/conversas': typeof ConversasRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
+  '/cadastro': typeof CadastroRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
   '/conversas': typeof ConversasRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/app': typeof AppRoute
+  '/cadastro': typeof CadastroRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
   '/conversas': typeof ConversasRoute
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/app'
+    | '/cadastro'
     | '/catalogo'
     | '/clientes'
     | '/conversas'
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/app'
+    | '/cadastro'
     | '/catalogo'
     | '/clientes'
     | '/conversas'
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/app'
+    | '/cadastro'
     | '/catalogo'
     | '/clientes'
     | '/conversas'
@@ -464,6 +476,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentsRoute: typeof AgentsRoute
   AppRoute: typeof AppRoute
+  CadastroRoute: typeof CadastroRoute
   CatalogoRoute: typeof CatalogoRoute
   ClientesRoute: typeof ClientesRoute
   ConversasRoute: typeof ConversasRoute
@@ -520,6 +533,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalogo': {
@@ -760,6 +780,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
   AppRoute: AppRoute,
+  CadastroRoute: CadastroRoute,
   CatalogoRoute: CatalogoRoute,
   ClientesRoute: ClientesRoute,
   ConversasRoute: ConversasRoute,

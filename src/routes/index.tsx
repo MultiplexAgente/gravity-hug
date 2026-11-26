@@ -1352,23 +1352,21 @@ function Landing() {
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             <Link
-              to="/agents"
+              to="/entrar"
               className="relative group overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-semibold text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:text-white hover:bg-emerald-500/20 active:scale-95"
             >
-              HUG Agents
+              Entrar
             </Link>
-            <a
-              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma consultoria e conhecer a plataforma HUG para minha empresa.")}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/cadastro"
               className="relative group overflow-hidden rounded-full border border-emerald-400/40 bg-gradient-to-r from-emerald-600/90 to-teal-500/90 px-5 py-2 text-xs font-medium text-white shadow-[0_0_16px_rgba(16,185,129,0.22)] backdrop-blur-md transition-all duration-300 hover:from-emerald-500 hover:to-teal-400 hover:shadow-[0_0_24px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03060a] motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
               {/* Brilho especular sutil na borda superior */}
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
               {/* Reflexo luminoso suave ao hover */}
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
-              <span className="relative z-10">Falar com Especialista</span>
-            </a>
+              <span className="relative z-10">Cadastro</span>
+            </Link>
           </div>
         </div>
       </header>
