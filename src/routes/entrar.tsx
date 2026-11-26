@@ -61,7 +61,6 @@ function LoginPage() {
             className="size-16 rounded-full object-cover shadow-lg shrink-0 mb-3"
           />
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">HUG</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Plataforma Integrada de Gestão & Atendimento</p>
         </div>
 
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/80 bg-card/90 backdrop-blur p-6 shadow-xl">
