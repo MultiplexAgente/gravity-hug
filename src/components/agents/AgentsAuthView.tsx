@@ -5,7 +5,6 @@ import {
   Mail,
   ArrowRight,
   User,
-  ShieldCheck,
   CheckCircle2,
   ArrowLeft,
   Eye,
@@ -69,7 +68,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] bg-gradient-to-tr from-emerald-600/15 via-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Barra Superior */}
-      <header className="max-w-5xl mx-auto w-full flex items-center justify-between py-3 relative z-10">
+      <header className="max-w-5xl mx-auto w-full flex items-center py-3 relative z-10">
         <Link
           to="/"
           className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors group"
@@ -77,10 +76,6 @@ export function AgentsAuthView({ onSuccess }: Props) {
           <ArrowLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
           Voltar à Homepage
         </Link>
-        <div className="flex items-center gap-2 text-xs font-mono text-emerald-400/90 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-          <ShieldCheck className="size-3.5 text-emerald-400" />
-          HUG Agents Seguro
-        </div>
       </header>
 
       {/* Caixa Central de Autenticação */}
