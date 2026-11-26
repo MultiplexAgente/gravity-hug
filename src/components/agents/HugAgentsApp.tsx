@@ -27,6 +27,12 @@ import {
   User,
   Radio,
   ExternalLink,
+  HardDrive,
+  FolderPlus,
+  FolderKanban,
+  FolderOpen,
+  Move,
+  Search,
 } from "lucide-react";
 import hugLogo from "@/assets/hug-icon.jpg";
 import { Button } from "@/components/ui/button";
@@ -38,6 +44,7 @@ import {
   OFFICIAL_AGENT_TEMPLATES,
 } from "@/lib/multiplex/agents-service";
 import { AgentModalEditor } from "./AgentModalEditor";
+import { DesktopFSModal } from "./DesktopFSModal";
 import { getToken, clearToken } from "@/lib/multiplex/client";
 import { toast } from "sonner";
 
@@ -78,6 +85,10 @@ export function HugAgentsApp({ onLogout }: Props) {
   // Modal Editor de Agentes
   const [modalEditorAberto, setModalEditorAberto] = useState(false);
   const [agenteParaEditar, setAgenteParaEditar] = useState<CustomAgent | null>(null);
+
+  // Ferramentas Desktop do Windows (Criar Pastas, Mover Arquivos, Localizar)
+  const [modalDesktopFSAberto, setModalDesktopFSAberto] = useState(false);
+  const [abaDesktopFS, setAbaDesktopFS] = useState<"criar" | "mover" | "buscar" | "explorar">("criar");
 
   // Gravação de Áudio
   const [gravandoAudio, setGravandoAudio] = useState(false);
@@ -534,6 +545,19 @@ export function HugAgentsApp({ onLogout }: Props) {
 
           {/* Ações do Topo */}
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={() => {
+                setAbaDesktopFS("criar");
+                setModalDesktopFSAberto(true);
+              }}
+              className="h-8 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm transition-all"
+            >
+              <HardDrive className="size-3.5" />
+              <span className="hidden sm:inline">Desktop OS: Pastas & Arquivos</span>
+              <span className="sm:hidden">Desktop OS</span>
+            </Button>
+
             {agenteAtivo && (
               <Button
                 type="button"
@@ -721,6 +745,49 @@ export function HugAgentsApp({ onLogout }: Props) {
               </div>
             )}
 
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none">
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("criar");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
+              >
+                <FolderPlus className="size-3" /> Criar Pasta no Disco D:
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("mover");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
+              >
+                <Move className="size-3" /> Mover Arquivo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("buscar");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
+              >
+                <Search className="size-3" /> Localizar no PC
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("explorar");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
+              >
+                <FolderOpen className="size-3" /> Explorar Disco D:
+              </button>
+            </div>
+
             <form
               onSubmit={handleEnviarMensagem}
               className="relative flex items-center bg-[#0d131f] border border-white/10 rounded-2xl p-1.5 focus-within:border-emerald-500/60 shadow-xl transition-all"
@@ -796,6 +863,11 @@ export function HugAgentsApp({ onLogout }: Props) {
         onSave={handleSalvarAgente}
         onDelete={handleExcluirAgente}
         onDuplicate={handleDuplicarAgente}
+      />
+      <DesktopFSModal
+        open={modalDesktopFSAberto}
+        onClose={() => setModalDesktopFSAberto(false)}
+        abaInicial={abaDesktopFS}
       />
     </div>
   );

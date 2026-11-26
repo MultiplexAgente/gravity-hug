@@ -52,6 +52,32 @@ export interface AgentConversation {
 
 export const OFFICIAL_AGENT_TEMPLATES: Omit<CustomAgent, "id" | "createdAt" | "updatedAt">[] = [
   {
+    name: "HUG Desktop OS & Arquivos",
+    role: "Gerenciador do Sistema de Arquivos Windows",
+    description: "Cria pastas no disco D:, move arquivos e documentos, busca caminhos exatos no PC e organiza seus projetos locais.",
+    systemPrompt: `Você é o Agente HUG Desktop OS, especialista oficial em automação e gerenciamento do sistema de arquivos do Windows no computador.
+OBJETIVOS:
+1. Criar pastas no disco D:\\Desenvolvimento\\Projetos com rapidez quando solicitado.
+2. Mover, renomear e organizar arquivos e pastas locais.
+3. Buscar e localizar arquivos no PC informando o caminho completo exato.
+4. Listar diretórios e ler prévias de documentos.
+5. Sempre respeitar as diretrizes de segurança do sistema operacional e o Disco D:.`,
+    avatarIcon: "HardDrive",
+    model: "hug-fast",
+    temperature: 0.2,
+    active: true,
+    whatsappEnabled: false,
+    humanHandoffEnabled: false,
+    knowledgeFiles: [],
+    welcomeMessage: "Olá! Sou o Agente HUG Desktop OS. Posso criar pastas, mover arquivos, localizar documentos e organizar seus projetos no Windows. Como posso te ajudar agora?",
+    quickPrompts: [
+      "Criar pasta D:\\Desenvolvimento\\Projetos\\NovaPasta",
+      "Listar pastas em D:\\Desenvolvimento\\Projetos",
+      "Onde está o arquivo ...",
+      "Mover arquivo de uma pasta para outra",
+    ],
+  },
+  {
     name: "Agente de Vendas WhatsApp",
     role: "Especialista em Vendas & Conversão",
     description: "Atende clientes no WhatsApp, apresenta produtos do catálogo, calcula frete e envia links de pagamento rápidos.",
@@ -199,6 +225,20 @@ export const HugAgentsService = {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasDesktop = parsed.some((a: any) => a.name && (a.name.includes("Desktop") || a.name.includes("Pastas")));
+          if (!hasDesktop) {
+            const tplDesktop = OFFICIAL_AGENT_TEMPLATES.find((t) => t.name.includes("Desktop"));
+            if (tplDesktop) {
+              const novoDesktop = {
+                ...tplDesktop,
+                id: `agent-hug-desktop-${Date.now().toString(36)}`,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              parsed.unshift(novoDesktop);
+              safeSetItem(CHAVE_AGENTS_STORAGE(userId), JSON.stringify(parsed));
+            }
+          }
           return parsed;
         }
       }

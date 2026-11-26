@@ -19,6 +19,8 @@ import {
   Smartphone,
   Phone,
   Layers,
+  HardDrive,
+  FolderKanban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +46,8 @@ const ICONES_DISPONIVEIS = [
   { id: "Wallet", label: "Financeiro", Icon: Wallet },
   { id: "MessageSquare", label: "Atendimento", Icon: MessageSquare },
   { id: "FileText", label: "Contratos", Icon: FileText },
+  { id: "HardDrive", label: "Desktop OS", Icon: HardDrive },
+  { id: "FolderKanban", label: "Pastas / Arquivos", Icon: FolderKanban },
 ];
 
 const MODELOS_HUG = [
