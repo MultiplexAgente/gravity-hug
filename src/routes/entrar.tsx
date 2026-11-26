@@ -74,7 +74,7 @@ function LoginPage() {
             <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               E-mail
             </Label>
-            <div className="flex items-center gap-3 h-11 px-3.5 rounded-xl border border-border bg-background/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-border bg-background/50 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/25 transition-all">
               <Mail className="size-4 text-muted-foreground shrink-0" />
               <input
                 id="email"
@@ -84,7 +84,7 @@ function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 required
-                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-foreground placeholder:text-muted-foreground/60 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ function LoginPage() {
             <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Senha
             </Label>
-            <div className="flex items-center gap-3 h-11 px-3.5 rounded-xl border border-border bg-background/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-border bg-background/50 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/25 transition-all">
               <Lock className="size-4 text-muted-foreground shrink-0" />
               <input
                 id="password"
@@ -104,7 +104,7 @@ function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-foreground placeholder:text-muted-foreground/60 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal tracking-wide"
               />
               <button
                 type="button"

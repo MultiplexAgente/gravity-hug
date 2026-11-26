@@ -137,7 +137,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
             {modo === "cadastro" && (
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-slate-300">Seu Nome Completo</Label>
-                <div className="flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
                   <User className="size-4 text-slate-400 shrink-0" />
                   <input
                     type="text"
@@ -145,7 +145,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     placeholder="Como gostaria de ser chamado"
-                    className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none"
+                    className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal"
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-300">Email de Acesso</Label>
-              <div className="flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+              <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
                 <Mail className="size-4 text-slate-400 shrink-0" />
                 <input
                   type="email"
@@ -161,14 +161,14 @@ export function AgentsAuthView({ onSuccess }: Props) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none"
+                  className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-300">Senha de Acesso</Label>
-              <div className="flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+              <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
                 <Lock className="size-4 text-slate-400 shrink-0" />
                 <input
                   type={mostrarSenha ? "text" : "password"}
@@ -176,12 +176,12 @@ export function AgentsAuthView({ onSuccess }: Props) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none"
+                  className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal tracking-wide"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenha(!mostrarSenha)}
-                  className="text-slate-500 hover:text-slate-300 transition-colors p-1"
+                  className="text-slate-400 hover:text-white transition-colors p-1 shrink-0"
                   title={mostrarSenha ? "Ocultar senha" : "Ver senha"}
                 >
                   {mostrarSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
