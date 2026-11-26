@@ -80,6 +80,31 @@ OBJETIVOS:
     ],
   },
   {
+    name: "HUG Browser & Autofill",
+    role: "Especialista em Automação Web & Cadastros",
+    description: "Acessa o Google Chrome no seu computador, preenche formulários de cadastro e login automaticamente e pausa obrigatoriamente na tela de pagamento para sua segurança.",
+    systemPrompt: `Você é o Agente HUG Browser & Autofill, especialista em automação e preenchimento de formulários web no navegador.
+OBJETIVOS:
+1. Abrir o Google Chrome no computador e acessar portais solicitados (Netflix, Spotify, etc.).
+2. Preencher dados de cadastro (email, senha provisória, nome).
+3. Avançar etapas de formulário até chegar na tela de pagamento.
+4. PARAR IMEDIATAMENTE na etapa de pagamento e deixar a tela aberta para que o usuário insira seus dados financeiros com 100% de privacidade e segurança.`,
+    avatarIcon: "Globe",
+    model: "hug-fast",
+    temperature: 0.2,
+    active: true,
+    whatsappEnabled: false,
+    humanHandoffEnabled: false,
+    knowledgeFiles: [],
+    welcomeMessage: "Olá! Sou o Agente HUG Browser & Autofill. Posso acessar o navegador no seu PC e preencher seus dados de login ou cadastro (como na Netflix, Spotify, etc.), pausando com segurança antes do pagamento. O que deseja cadastrar?",
+    quickPrompts: [
+      "Crie uma conta na Netflix para mim e pare na parte do pagamento",
+      "Acesse o Spotify e inicie o cadastro",
+      "Preencha o formulário de cadastro na Amazon",
+      "Abrir portal de login no navegador",
+    ],
+  },
+  {
     name: "Agente de Vendas WhatsApp",
     role: "Especialista em Vendas & Conversão",
     description: "Atende clientes no WhatsApp, apresenta produtos do catálogo, calcula frete e envia links de pagamento rápidos.",
@@ -238,8 +263,25 @@ export const HugAgentsService = {
                 updatedAt: new Date().toISOString(),
               };
               parsed.unshift(novoDesktop);
-              safeSetItem(CHAVE_AGENTS_STORAGE(userId), JSON.stringify(parsed));
             }
+          }
+
+          const hasBrowser = parsed.some((a: any) => a.name && (a.name.includes("Browser") || a.name.includes("Autofill")));
+          if (!hasBrowser) {
+            const tplBrowser = OFFICIAL_AGENT_TEMPLATES.find((t) => t.name.includes("Browser"));
+            if (tplBrowser) {
+              const novoBrowser = {
+                ...tplBrowser,
+                id: `agent-hug-browser-${Date.now().toString(36)}`,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              parsed.splice(1, 0, novoBrowser);
+            }
+          }
+
+          if (!hasDesktop || !hasBrowser) {
+            safeSetItem(CHAVE_AGENTS_STORAGE(userId), JSON.stringify(parsed));
           }
           return parsed;
         }

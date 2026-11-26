@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   X,
   HardDrive,
+  Globe,
   FolderPlus,
   FolderOpen,
   Search,
@@ -24,11 +25,19 @@ import { toast } from "sonner";
 interface Props {
   open: boolean;
   onClose: () => void;
-  abaInicial?: "criar" | "mover" | "buscar" | "explorar";
+  abaInicial?: "criar" | "mover" | "buscar" | "explorar" | "autofill";
 }
 
 export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
-  const [abaAtiva, setAbaAtiva] = useState<"criar" | "mover" | "buscar" | "explorar">(abaInicial);
+  const [abaAtiva, setAbaAtiva] = useState<"criar" | "mover" | "buscar" | "explorar" | "autofill">(abaInicial);
+
+  // 5. Automação de Cadastro Web (Netflix, Spotify, etc.)
+  const [servicoAutofill, setServicoAutofill] = useState("netflix");
+  const [emailAutofill, setEmailAutofill] = useState("usuario@empresa.com");
+  const [senhaAutofill, setSenhaAutofill] = useState("SenhaForte@HUG2026!");
+  const [nomeAutofill, setNomeAutofill] = useState("Cliente HUG");
+  const [executandoAutofill, setExecutandoAutofill] = useState(false);
+  const [resultadoAutofill, setResultadoAutofill] = useState<any>(null);
 
   // 1. Criar Pasta
   const [caminhoNovaPasta, setCaminhoNovaPasta] = useState("D:\\Desenvolvimento\\Projetos\\nova-pasta");
@@ -62,6 +71,39 @@ export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
   }, [open, abaInicial]);
 
   // Ações API
+  async function handleExecutarAutofill(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setExecutandoAutofill(true);
+    setResultadoAutofill(null);
+
+    try {
+      const resp = await fetch("/api/desktop/browser-automation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          servico: servicoAutofill,
+          email: emailAutofill,
+          senha: senhaAutofill,
+          nome: nomeAutofill,
+          pararNoPagamento: true,
+        }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok || !data.sucesso) {
+        throw new Error(data.erro || data.mensagem || "Falha na automação.");
+      }
+
+      setResultadoAutofill(data);
+      toast.success("Navegador aberto e dados preenchidos com sucesso!");
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao executar automação no navegador.");
+      setResultadoAutofill({ sucesso: false, erro: err?.message });
+    } finally {
+      setExecutandoAutofill(false);
+    }
+  }
+
   async function handleCriarPasta(e?: React.FormEvent) {
     if (e) e.preventDefault();
     if (!caminhoNovaPasta.trim()) {
@@ -218,7 +260,7 @@ export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
           </div>
 
           {/* Alternador de Abas */}
-          <div className="grid grid-cols-4 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] w-full text-xs font-semibold mt-4 gap-1">
+          <div className="grid grid-cols-2 sm:grid-cols-5 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] w-full text-xs font-semibold mt-4 gap-1">
             <button
               type="button"
               onClick={() => setAbaAtiva("criar")}
@@ -269,6 +311,18 @@ export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
             >
               <FolderOpen className="size-3.5 shrink-0" />
               <span>Explorador D:</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAbaAtiva("autofill")}
+              className={`py-2 px-1 rounded-lg transition-all flex items-center justify-center gap-1.5 text-center truncate ${
+                abaAtiva === "autofill"
+                  ? "bg-emerald-600 text-white font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Globe className="size-3.5 shrink-0" />
+              <span>Cadastro Web</span>
             </button>
           </div>
         </div>
@@ -524,6 +578,107 @@ export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
               </div>
             </div>
           )}
+
+          {/* ABA 5: AUTOMAÇÃO DE CADASTRO WEB (NETFLIX, SPOTIFY, ETC) */}
+          {abaAtiva === "autofill" && (
+            <form onSubmit={handleExecutarAutofill} className="space-y-4">
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 leading-relaxed">
+                <span className="font-bold flex items-center gap-1.5 mb-1">
+                  <Globe className="size-4 text-emerald-400" />
+                  Preenchimento Automático com Parada de Segurança no Pagamento
+                </span>
+                A I.A abre o Google Chrome visível na sua tela, acessa o portal desejado, preenche os dados cadastrais e <strong>pausa obrigatoriamente antes de qualquer cobrança</strong> para você finalizar com total privacidade.
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-200">Escolha o Serviço ou Digite o Nome:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "netflix", label: "Netflix" },
+                    { id: "spotify", label: "Spotify" },
+                    { id: "amazon", label: "Amazon" },
+                    { id: "globoplay", label: "Globoplay" },
+                    { id: "disney", label: "Disney+" },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setServicoAutofill(s.id)}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                        servicoAutofill === s.id
+                          ? "bg-emerald-600 text-white border-emerald-500 font-bold"
+                          : "bg-white/[0.04] text-slate-300 border-white/[0.08] hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-200">E-mail para o Cadastro:</Label>
+                  <Input
+                    value={emailAutofill}
+                    onChange={(e) => setEmailAutofill(e.target.value)}
+                    placeholder="seu-email@dominio.com"
+                    className="h-10 text-xs bg-black/40 border-white/10 text-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-200">Senha Provisória:</Label>
+                  <Input
+                    type="text"
+                    value={senhaAutofill}
+                    onChange={(e) => setSenhaAutofill(e.target.value)}
+                    placeholder="Senha forte..."
+                    className="h-10 text-xs font-mono bg-black/40 border-white/10 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-between text-xs text-slate-300">
+                <span>Parar automaticamente na tela de pagamento:</span>
+                <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 font-bold">
+                  Ativado (Proteção Obrigatória)
+                </Badge>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={executandoAutofill}
+                className="w-full h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-2 shadow-lg shadow-emerald-500/20"
+              >
+                <Globe className="size-4" />
+                {executandoAutofill ? "Abrindo Google Chrome & Preenchendo..." : `Abrir Navegador & Preencher Cadastro (${servicoAutofill.toUpperCase()})`}
+              </Button>
+
+              {resultadoAutofill && (
+                <div
+                  className={`p-3.5 rounded-2xl border text-xs leading-relaxed ${
+                    resultadoAutofill.sucesso
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                  }`}
+                >
+                  <p className="font-bold flex items-center gap-1.5">
+                    {resultadoAutofill.sucesso ? <Check className="size-4" /> : <AlertCircle className="size-4" />}
+                    {resultadoAutofill.mensagem || resultadoAutofill.erro}
+                  </p>
+                  {resultadoAutofill.passosExecutados && (
+                    <div className="mt-2 pt-2 border-t border-white/10 space-y-1 font-mono text-[11px] opacity-90">
+                      {resultadoAutofill.passosExecutados.map((p: string, i: number) => (
+                        <div key={i}>• {p}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </form>
+          )}
+
         </div>
 
         {/* Rodapé Fixo */}

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { providerApiKey } from "@/lib/multiplex/model-registry.server";
 import { HugAISecurityShield } from "@/lib/multiplex/ai-security";
 import { DesktopFSTools } from "@/lib/multiplex/desktop-fs-tools";
+import { BrowserAutomationTools } from "@/lib/multiplex/browser-automation-tools";
 
 const BodySchema = z.object({
   message: z.string().max(4000).optional().default(""),
@@ -228,6 +229,35 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             }
           } catch (fsErr) {
             console.warn("[Desktop FS Tool Warning]:", fsErr);
+          }
+
+          // 1.2 EXECUÇÃO DE AUTOMAÇÃO DE NAVEGADOR WEB (CADASTRO & AUTOFILL)
+          try {
+            const webAction = BrowserAutomationTools.analisarComandoWeb(combinedMessage);
+            if (webAction) {
+              const resAuto = await BrowserAutomationTools.executarCadastroAuto(webAction);
+              const passosFormatados = resAuto.passosExecutados
+                .map((p) => `• ${p}`)
+                .join("\n");
+
+              const replyText =
+                `🌐 **Automação de Navegador Web Executada no seu Computador:**\n\n` +
+                `${resAuto.mensagem}\n\n` +
+                `**Etapas executadas no Google Chrome:**\n${passosFormatados}\n\n` +
+                `> 🔒 **Segurança & Privacidade:** A I.A pausou antes de qualquer cobrança e deixou o navegador aberto na sua tela para você concluir os dados financeiros com total privacidade.`;
+
+              return Response.json({
+                ok: true,
+                reply: replyText,
+                transcription: audioTranscription || undefined,
+                modelUsed: "hug-browser-agent",
+                requestId: `browser-auto-${Date.now()}`,
+                conversationId: convId,
+                toolExecuted: "browser_signup",
+              });
+            }
+          } catch (webErr) {
+            console.warn("[Browser Automation Tool Warning]:", webErr);
           }
 
           // 2. TENTATIVA VIA HUG IA CORE GATEWAY HTTP

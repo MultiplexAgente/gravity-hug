@@ -40,6 +40,7 @@ import { Route as ApiCompanyOverviewRouteImport } from './routes/api/company/ove
 import { Route as ApiCompanyProductsRouteImport } from './routes/api/company/products'
 import { Route as ApiCompanySettingsRouteImport } from './routes/api/company/settings'
 import { Route as ApiCompanyWorkspaceRouteImport } from './routes/api/company/workspace'
+import { Route as ApiDesktopBrowserAutomationRouteImport } from './routes/api/desktop/browser-automation'
 import { Route as ApiDesktopFsRouteImport } from './routes/api/desktop/fs'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
 import { Route as ApiCompanyPdvCheckoutRouteImport } from './routes/api/company/pdv/checkout'
@@ -202,6 +203,12 @@ const ApiCompanyWorkspaceRoute = ApiCompanyWorkspaceRouteImport.update({
   path: '/api/company/workspace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDesktopBrowserAutomationRoute =
+  ApiDesktopBrowserAutomationRouteImport.update({
+    id: '/api/desktop/browser-automation',
+    path: '/api/desktop/browser-automation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiDesktopFsRoute = ApiDesktopFsRouteImport.update({
   id: '/api/desktop/fs',
   path: '/api/desktop/fs',
@@ -266,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/browser-automation': typeof ApiDesktopBrowserAutomationRoute
   '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
@@ -305,6 +313,7 @@ export interface FileRoutesByTo {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/browser-automation': typeof ApiDesktopBrowserAutomationRoute
   '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
@@ -345,6 +354,7 @@ export interface FileRoutesById {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/browser-automation': typeof ApiDesktopBrowserAutomationRoute
   '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/browser-automation'
     | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/browser-automation'
     | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
@@ -464,6 +476,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/browser-automation'
     | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
@@ -504,6 +517,7 @@ export interface RootRouteChildren {
   ApiCompanyProductsRoute: typeof ApiCompanyProductsRoute
   ApiCompanySettingsRoute: typeof ApiCompanySettingsRoute
   ApiCompanyWorkspaceRoute: typeof ApiCompanyWorkspaceRoute
+  ApiDesktopBrowserAutomationRoute: typeof ApiDesktopBrowserAutomationRoute
   ApiDesktopFsRoute: typeof ApiDesktopFsRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
   ApiCompanyPdvCheckoutRoute: typeof ApiCompanyPdvCheckoutRoute
@@ -731,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCompanyWorkspaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/desktop/browser-automation': {
+      id: '/api/desktop/browser-automation'
+      path: '/api/desktop/browser-automation'
+      fullPath: '/api/desktop/browser-automation'
+      preLoaderRoute: typeof ApiDesktopBrowserAutomationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/desktop/fs': {
       id: '/api/desktop/fs'
       path: '/api/desktop/fs'
@@ -808,6 +829,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCompanyProductsRoute: ApiCompanyProductsRoute,
   ApiCompanySettingsRoute: ApiCompanySettingsRoute,
   ApiCompanyWorkspaceRoute: ApiCompanyWorkspaceRoute,
+  ApiDesktopBrowserAutomationRoute: ApiDesktopBrowserAutomationRoute,
   ApiDesktopFsRoute: ApiDesktopFsRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
   ApiCompanyPdvCheckoutRoute: ApiCompanyPdvCheckoutRoute,

@@ -31,6 +31,7 @@ import {
   FolderPlus,
   FolderKanban,
   FolderOpen,
+  Globe,
   Move,
   Search,
 } from "lucide-react";
@@ -207,6 +208,24 @@ export function HugAgentsApp({ onLogout }: Props) {
     const textoLower = texto.toLowerCase();
 
     if (
+      textoLower.includes("netflix") ||
+      textoLower.includes("spotify") ||
+      textoLower.includes("amazon") ||
+      textoLower.includes("navegador") ||
+      textoLower.includes("crie uma conta") ||
+      textoLower.includes("criar conta") ||
+      textoLower.includes("preench") ||
+      textoLower.includes("autofill")
+    ) {
+      passosPensamento = [
+        "Iniciando Google Chrome na área de trabalho do Windows",
+        "Navegando até o portal oficial de cadastro",
+        "Localizando campos de identificação (e-mail, senha, nome)",
+        "Preenchendo credenciais e avançando etapas",
+        "🛑 Limite de segurança: tela de pagamento/plano detectada",
+        "Pausando automação e mantendo navegador aberto na sua tela",
+      ];
+    } else if (
       textoLower.includes("pasta") ||
       textoLower.includes("diretorio") ||
       textoLower.includes("mover") ||
@@ -833,6 +852,16 @@ export function HugAgentsApp({ onLogout }: Props) {
                 className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
               >
                 <Search className="size-3" /> Localizar no PC
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("autofill");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors"
+              >
+                <Globe className="size-3" /> Cadastro Web (Netflix, etc.)
               </button>
               <button
                 type="button"
