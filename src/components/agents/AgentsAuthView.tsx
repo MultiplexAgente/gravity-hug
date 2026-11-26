@@ -94,7 +94,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
                 HUG Agents
               </h1>
               <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                Crie e comande agentes de inteligência personalizados para seu WhatsApp e atendimento.
+                Acesso ao ambiente de atendimento e automação.
               </p>
             </div>
 

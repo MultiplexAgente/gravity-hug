@@ -7,16 +7,15 @@ import { AgentsAuthView } from "@/components/agents/AgentsAuthView";
 export const Route = createFileRoute("/agents")({
   head: () => ({
     meta: [
-      { title: "HUG Agents — Inteligência e Agentes para WhatsApp e Negócios" },
+      { title: "HUG Agents — Atendimento e Vendas" },
       {
         name: "description",
-        content:
-          "Crie agentes de IA personalizados para vendas, suporte e atendimento no WhatsApp com o motor HUG IA Core.",
+        content: "Plataforma de automação e atendimento HUG.",
       },
-      { property: "og:title", content: "HUG Agents — Agentes de IA Autônomos" },
+      { property: "og:title", content: "HUG Agents" },
       {
         property: "og:description",
-        content: "Crie agentes inteligentes para WhatsApp e balcão com o HUG IA Core.",
+        content: "Plataforma de atendimento e gestão HUG.",
       },
     ],
   }),

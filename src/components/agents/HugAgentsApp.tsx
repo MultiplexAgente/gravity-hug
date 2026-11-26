@@ -584,8 +584,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                   {agenteAtivo?.name || "HUG Agents"}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  {agenteAtivo?.description ||
-                    "Seu agente de atendimento e vendas inteligente conectado ao HUG IA Core."}
+                  {agenteAtivo?.description || "Canal de atendimento e automação conectado."}
                 </p>
                 <p className="text-xs text-emerald-400/90 font-medium italic pt-1">
                   "{agenteAtivo?.welcomeMessage}"
@@ -688,7 +687,7 @@ export function HugAgentsApp({ onLogout }: Props) {
               </div>
               <div className="p-3 rounded-2xl bg-[#090e17] border border-white/[0.08] text-slate-300 flex items-center gap-2">
                 <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>HUG IA Core está processando a resposta...</span>
+                <span>Processando resposta...</span>
               </div>
             </div>
           )}
@@ -784,7 +783,7 @@ export function HugAgentsApp({ onLogout }: Props) {
             </form>
 
             <div className="flex justify-between items-center text-[10px] text-slate-500 px-2">
-              <span>HUG IA Core oficial • Motor autônomo com isolamento de dados</span>
+              <span>HUG Plataforma • Operação ativa</span>
               <span className="hidden sm:inline font-mono">Tenant {codigoEmpresa}</span>
             </div>
           </div>
