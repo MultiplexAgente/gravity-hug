@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { providerApiKey } from "@/lib/multiplex/model-registry.server";
+import { HugAISecurityShield } from "@/lib/multiplex/ai-security";
 
 const BodySchema = z.object({
   message: z.string().max(4000).optional().default(""),
@@ -180,6 +181,24 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             combinedMessage = "Por favor, analise a(s) imagem(ns) enviada(s) e me dê detalhes ou informações relevantes.";
           }
 
+          // BLINDAGEM DE SEGURANÇA: HUG AI Security & Anti-Fraud Shield
+          const threat = HugAISecurityShield.inspecionarEntrada(combinedMessage, {
+            identificadorCliente: convId,
+            nomeEmpresa: "HUG Agents & BonaSoft",
+          });
+
+          if (threat.bloqueado) {
+            return Response.json({
+              ok: true,
+              reply: threat.respostaSegura || "Mensagem bloqueada pelos protocolos de segurança do HUG IA Core.",
+              transcription: audioTranscription || undefined,
+              modelUsed: "hug-security-shield",
+              requestId: `sec-block-${Date.now()}`,
+              conversationId: convId,
+              securityTriggered: true,
+            });
+          }
+
           // 2. TENTATIVA VIA HUG IA CORE GATEWAY HTTP
           const coreUrl =
             process.env.HUG_CORE_GATEWAY_URL ||
@@ -353,9 +372,10 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               const replyText = openAiJson.choices?.[0]?.message?.content?.trim();
 
               if (replyText) {
+                const outGuard = HugAISecurityShield.inspecionarSaida(replyText, "HUG Agents & BonaSoft");
                 return Response.json({
                   ok: true,
-                  reply: replyText,
+                  reply: outGuard.textoSeguro,
                   transcription: audioTranscription || undefined,
                   modelUsed: visionOrChatModel,
                   requestId: `comp_${Date.now().toString(36)}`,
