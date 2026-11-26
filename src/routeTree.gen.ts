@@ -39,6 +39,7 @@ import { Route as ApiCompanyOverviewRouteImport } from './routes/api/company/ove
 import { Route as ApiCompanyProductsRouteImport } from './routes/api/company/products'
 import { Route as ApiCompanySettingsRouteImport } from './routes/api/company/settings'
 import { Route as ApiCompanyWorkspaceRouteImport } from './routes/api/company/workspace'
+import { Route as ApiDesktopFsRouteImport } from './routes/api/desktop/fs'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
 import { Route as ApiCompanyPdvCheckoutRouteImport } from './routes/api/company/pdv/checkout'
 import { Route as ApiCompanyPdvSalesRouteImport } from './routes/api/company/pdv/sales'
@@ -195,6 +196,11 @@ const ApiCompanyWorkspaceRoute = ApiCompanyWorkspaceRouteImport.update({
   path: '/api/company/workspace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDesktopFsRoute = ApiDesktopFsRouteImport.update({
+  id: '/api/desktop/fs',
+  path: '/api/desktop/fs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
   id: '/api/ai/conversation/chat',
   path: '/api/ai/conversation/chat',
@@ -253,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
   '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
   '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
+  '/api/desktop/fs': typeof ApiDesktopFsRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
   '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
@@ -367,6 +376,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
     | '/api/company/pdv/sales'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
     | '/api/company/pdv/sales'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
+    | '/api/desktop/fs'
     | '/api/ai/conversation/chat'
     | '/api/company/pdv/checkout'
     | '/api/company/pdv/sales'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   ApiCompanyProductsRoute: typeof ApiCompanyProductsRoute
   ApiCompanySettingsRoute: typeof ApiCompanySettingsRoute
   ApiCompanyWorkspaceRoute: typeof ApiCompanyWorkspaceRoute
+  ApiDesktopFsRoute: typeof ApiDesktopFsRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
   ApiCompanyPdvCheckoutRoute: typeof ApiCompanyPdvCheckoutRoute
   ApiCompanyPdvSalesRoute: typeof ApiCompanyPdvSalesRoute
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCompanyWorkspaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/desktop/fs': {
+      id: '/api/desktop/fs'
+      path: '/api/desktop/fs'
+      fullPath: '/api/desktop/fs'
+      preLoaderRoute: typeof ApiDesktopFsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai/conversation/chat': {
       id: '/api/ai/conversation/chat'
       path: '/api/ai/conversation/chat'
@@ -767,6 +787,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCompanyProductsRoute: ApiCompanyProductsRoute,
   ApiCompanySettingsRoute: ApiCompanySettingsRoute,
   ApiCompanyWorkspaceRoute: ApiCompanyWorkspaceRoute,
+  ApiDesktopFsRoute: ApiDesktopFsRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
   ApiCompanyPdvCheckoutRoute: ApiCompanyPdvCheckoutRoute,
   ApiCompanyPdvSalesRoute: ApiCompanyPdvSalesRoute,

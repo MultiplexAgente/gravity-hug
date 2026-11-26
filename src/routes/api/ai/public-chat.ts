@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { providerApiKey } from "@/lib/multiplex/model-registry.server";
 import { HugAISecurityShield } from "@/lib/multiplex/ai-security";
+import { DesktopFSTools } from "@/lib/multiplex/desktop-fs-tools";
 
 const BodySchema = z.object({
   message: z.string().max(4000).optional().default(""),
@@ -197,6 +198,36 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               conversationId: convId,
               securityTriggered: true,
             });
+          }
+
+          // 1.1 EXECUÇÃO DE FERRAMENTAS DO WINDOWS (DESKTOP FS TOOLS)
+          try {
+            const fsAction = await DesktopFSTools.processarComandoInteligente(combinedMessage);
+            if (fsAction && fsAction.sucesso) {
+              let replyText = `**Operação realizada com sucesso no Windows:**\n\n${fsAction.mensagem}`;
+              if (fsAction.acao === "buscar" && Array.isArray(fsAction.dados) && fsAction.dados.length > 0) {
+                replyText = `**Arquivos encontrados no seu computador:**\n\n`;
+                for (const arq of fsAction.dados.slice(0, 10)) {
+                  replyText += `• **${arq.nome}** (${arq.tamanhoFormatado})\n  Local exato: \`${arq.caminhoCompleto}\`\n\n`;
+                }
+              } else if (fsAction.acao === "criar_pasta" && fsAction.dados?.caminho) {
+                replyText = `📁 **Pasta criada com sucesso no seu computador!**\n\nLocal exato: \`${fsAction.dados.caminho}\``;
+              } else if (fsAction.acao === "mover" && fsAction.dados?.destino) {
+                replyText = `🚚 **Arquivo movido com sucesso no Windows!**\n\nDe: \`${fsAction.dados.origem}\`\nPara: \`${fsAction.dados.destino}\``;
+              }
+
+              return Response.json({
+                ok: true,
+                reply: replyText,
+                transcription: audioTranscription || undefined,
+                modelUsed: "hug-desktop-agent",
+                requestId: `fs-op-${Date.now()}`,
+                conversationId: convId,
+                toolExecuted: fsAction.acao,
+              });
+            }
+          } catch (fsErr) {
+            console.warn("[Desktop FS Tool Warning]:", fsErr);
           }
 
           // 2. TENTATIVA VIA HUG IA CORE GATEWAY HTTP
