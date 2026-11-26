@@ -83,14 +83,11 @@ export function AgentsAuthView({ onSuccess }: Props) {
         <div className="rounded-3xl border border-white/10 bg-[#090d16]/90 backdrop-blur-2xl p-7 sm:p-9 shadow-[0_24px_80px_rgba(0,0,0,0.85)] space-y-6">
           {/* Logo e Cabeçalho */}
           <div className="flex flex-col items-center text-center space-y-3">
-            <div className="relative">
-              <img
-                src={hugLogo}
-                alt="HUG Agents"
-                className="size-16 rounded-2xl object-cover ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-500/15"
-              />
-              <span className="absolute -bottom-1 -right-1 size-3.5 rounded-full bg-emerald-500 ring-2 ring-[#090d16]" />
-            </div>
+            <img
+              src={hugLogo}
+              alt="HUG Agents"
+              className="size-16 rounded-2xl object-cover shadow-lg"
+            />
 
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">

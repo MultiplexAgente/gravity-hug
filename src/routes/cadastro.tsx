@@ -99,7 +99,7 @@ function CadastroPage() {
           <img
             src={hugLogo}
             alt="HUG"
-            className="size-16 rounded-full object-cover shadow-2xl ring-2 ring-primary/40 shrink-0 mb-3"
+            className="size-16 rounded-full object-cover shadow-lg shrink-0 mb-3"
           />
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">HUG</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Cadastre sua empresa e conecte sua operação</p>

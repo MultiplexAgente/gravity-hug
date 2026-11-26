@@ -323,7 +323,7 @@ export function HugAgentsApp({ onLogout }: Props) {
               <img
                 src={hugLogo}
                 alt="HUG"
-                className="size-7 rounded-xl object-cover ring-1 ring-emerald-500/40"
+                className="size-7 rounded-xl object-cover"
               />
               <span className="text-sm font-bold tracking-wider text-white">
                 HUG <span className="text-emerald-400 font-mono text-xs">AGENTS</span>
@@ -574,10 +574,9 @@ export function HugAgentsApp({ onLogout }: Props) {
             /* TELA INICIAL QUANDO NÃO HÁ MENSAGENS */
             <div className="h-full flex flex-col justify-center items-center text-center my-auto py-12 space-y-6">
               <div className="relative">
-                <div className="size-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/10">
+                <div className="size-16 rounded-3xl bg-card border border-border flex items-center justify-center text-foreground shadow-xl">
                   <ActiveIcon className="size-8" />
                 </div>
-                <span className="absolute -bottom-1 -right-1 size-4 rounded-full bg-emerald-500 ring-2 ring-[#03060a]" />
               </div>
 
               <div className="max-w-md space-y-2">
