@@ -58,10 +58,9 @@ export function HugAgentsApp({ onLogout }: Props) {
   const navigate = useNavigate();
   const [sidebarAberta, setSidebarAberta] = useState(true);
 
-  // Usuário e Workspace
+  // Usuário
   const [userEmail, setUserEmail] = useState("usuario@empresa.com");
   const [userName, setUserName] = useState("Administrador");
-  const [codigoEmpresa, setCodigoEmpresa] = useState("0001");
 
   // Agentes
   const [agentes, setAgentes] = useState<CustomAgent[]>([]);
@@ -96,10 +95,8 @@ export function HugAgentsApp({ onLogout }: Props) {
   useEffect(() => {
     const email = localStorage.getItem("hug_agents_user_email") || "usuario@empresa.com";
     const nome = localStorage.getItem("hug_agents_user_name") || "Administrador";
-    const cod = localStorage.getItem("hug_codigo_loja") || "0001";
     setUserEmail(email);
     setUserName(nome);
-    setCodigoEmpresa(cod);
 
     const listaAgentes = HugAgentsService.obterAgentes(email);
     setAgentes(listaAgentes);
@@ -479,7 +476,7 @@ export function HugAgentsApp({ onLogout }: Props) {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-bold text-white truncate">{userName}</p>
-              <p className="text-[10px] text-slate-500 truncate">Empresa {codigoEmpresa}</p>
+              <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
             </div>
           </div>
 
@@ -783,8 +780,7 @@ export function HugAgentsApp({ onLogout }: Props) {
             </form>
 
             <div className="flex justify-between items-center text-[10px] text-slate-500 px-2">
-              <span>HUG Plataforma • Operação ativa</span>
-              <span className="hidden sm:inline font-mono">Tenant {codigoEmpresa}</span>
+              <span>HUG Plataforma • Conectado</span>
             </div>
           </div>
         </div>

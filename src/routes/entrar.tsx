@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { Building2, Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,9 +11,9 @@ export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
       { title: "Entrar | HUG" },
-      { name: "description", content: "Acesse a conta da sua empresa no HUG." },
+      { name: "description", content: "Acesse sua conta no HUG." },
       { property: "og:title", content: "Entrar | HUG" },
-      { property: "og:description", content: "Acesse a conta da sua empresa no HUG." },
+      { property: "og:description", content: "Acesse sua conta no HUG." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -23,48 +23,26 @@ export const Route = createFileRoute("/entrar")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [codigoEmpresa, setCodigoEmpresa] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [mostrarCodigoAvancado, setMostrarCodigoAvancado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  // Carrega automaticamente o código da loja salvo no dispositivo
-  useEffect(() => {
-    const salvo =
-      localStorage.getItem("hug_codigo_loja") ||
-      localStorage.getItem("hug_codigo_farmacia") ||
-      "0001";
-    if (salvo) setCodigoEmpresa(salvo);
-  }, []);
-
-  const handleCodigoChange = (valor: string) => {
-    const limpo = valor.trim();
-    setCodigoEmpresa(limpo);
-    if (limpo) {
-      localStorage.setItem("hug_codigo_loja", limpo);
-    }
-  };
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const cod = codigoEmpresa.trim() || "0001";
-      localStorage.setItem("hug_codigo_loja", cod);
-      
       const data = await api<{ accessToken: string }>("/api/company/login", {
         method: "POST",
         auth: false,
-        body: JSON.stringify({ email: email.trim(), password, companyCode: cod }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       setToken(data.accessToken);
       await navigate({ to: "/inicio" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível entrar no HUG.");
+      setError(err instanceof Error ? err.message : "Não foi possível entrar. Verifique seu e-mail e senha.");
     } finally {
       setBusy(false);
     }
@@ -83,16 +61,16 @@ function LoginPage() {
             className="size-16 rounded-full object-cover shadow-lg shrink-0 mb-3"
           />
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">HUG</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Plataforma Integrada de Gestão & PDV</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Plataforma Integrada de Gestão & Atendimento</p>
         </div>
 
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/80 bg-card/90 backdrop-blur p-6 shadow-xl">
           <div className="space-y-1">
-            <h2 className="text-base font-semibold text-foreground">Acesso ao Sistema</h2>
-            <p className="text-xs text-muted-foreground">Entre com suas credenciais de acesso corporativo.</p>
+            <h2 className="text-base font-semibold text-foreground">Acesso à Sua Conta</h2>
+            <p className="text-xs text-muted-foreground">Informe seu e-mail e senha de acesso.</p>
           </div>
 
-          {/* Campo de E-mail Sem Sobreposição */}
+          {/* Campo de E-mail */}
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               E-mail
@@ -105,14 +83,14 @@ function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="voce@empresa.com"
+                placeholder="seu@email.com"
                 required
                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Campo de Senha Sem Sobreposição com Botão Visualizar */}
+          {/* Campo de Senha com Botão de Mostrar/Ocultar */}
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Senha
@@ -140,37 +118,9 @@ function LoginPage() {
             </div>
           </div>
 
-          {/* Código da Loja Opcional/Colapsável para não poluir */}
-          <div className="space-y-1.5 pt-1">
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setMostrarCodigoAvancado((v) => !v)}
-                className="text-[11px] text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
-              >
-                {mostrarCodigoAvancado ? "Ocultar código da loja" : "Informar código de unidade/loja"}
-              </button>
-              <span className="text-[10px] text-muted-foreground/70 font-mono">Padrão: {codigoEmpresa || "0001"}</span>
-            </div>
-
-            {mostrarCodigoAvancado && (
-              <div className="flex items-center gap-3 h-10 px-3.5 rounded-xl border border-border bg-background/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all mt-1">
-                <Building2 className="size-4 text-muted-foreground shrink-0" />
-                <input
-                  id="codigo"
-                  type="text"
-                  value={codigoEmpresa}
-                  onChange={(e) => handleCodigoChange(e.target.value)}
-                  placeholder="0001"
-                  className="w-full bg-transparent font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-                />
-              </div>
-            )}
-          </div>
-
           {error && <p className="text-xs text-destructive bg-destructive/10 p-2.5 rounded-xl border border-destructive/20">{error}</p>}
 
-          <Button type="submit" className="w-full h-11 font-semibold shadow-lg shadow-primary/20 rounded-xl" disabled={busy}>
+          <Button type="submit" className="w-full h-11 font-semibold shadow-lg shadow-primary/20 rounded-xl mt-2" disabled={busy}>
             {busy ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />
@@ -178,7 +128,7 @@ function LoginPage() {
               </>
             ) : (
               <>
-                Entrar no HUG
+                Entrar na Conta
                 <ArrowRight className="ml-2 size-4" />
               </>
             )}
@@ -186,9 +136,9 @@ function LoginPage() {
 
           <div className="text-center pt-2 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
-              Ainda não tem conta da sua empresa?{" "}
+              Ainda não tem conta?{" "}
               <Link to="/cadastro" className="text-primary font-bold hover:underline">
-                Cadastre-se aqui
+                Criar uma conta
               </Link>
             </p>
           </div>

@@ -71,8 +71,6 @@ function CadastroPage() {
     setBusy(true);
 
     try {
-      const codLojaSugerido = Math.floor(1000 + Math.random() * 9000).toString();
-      localStorage.setItem("hug_codigo_loja", codLojaSugerido);
       localStorage.setItem("hug_empresa_nome", nomeEmpresa);
       localStorage.setItem("hug_empresa_segmento", segmento);
       localStorage.setItem("hug_gestor_nome", responsavel);
@@ -113,7 +111,7 @@ function CadastroPage() {
             <div>
               <h2 className="text-lg font-bold text-foreground">Conta Criada com Sucesso!</h2>
               <p className="text-xs text-muted-foreground mt-1">
-                A empresa <strong className="text-foreground">{nomeEmpresa}</strong> foi cadastrada no HUG. O código de acesso da sua unidade é <strong className="text-primary font-mono">{localStorage.getItem("hug_codigo_loja")}</strong>.
+                A empresa <strong className="text-foreground">{nomeEmpresa}</strong> foi cadastrada no HUG. Você já pode acessar sua conta utilizando seu e-mail e senha.
               </p>
             </div>
 
