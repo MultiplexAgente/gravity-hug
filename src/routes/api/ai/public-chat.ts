@@ -201,65 +201,6 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             });
           }
 
-          // 1.1 EXECUÇÃO DE FERRAMENTAS DO WINDOWS (DESKTOP FS TOOLS)
-          try {
-            const fsAction = await DesktopFSTools.processarComandoInteligente(combinedMessage);
-            if (fsAction && fsAction.sucesso) {
-              let replyText = `**Operação realizada com sucesso no Windows:**\n\n${fsAction.mensagem}`;
-              if (fsAction.acao === "buscar" && Array.isArray(fsAction.dados) && fsAction.dados.length > 0) {
-                replyText = `**Arquivos encontrados no seu computador:**\n\n`;
-                for (const arq of fsAction.dados.slice(0, 10)) {
-                  replyText += `• **${arq.nome}** (${arq.tamanhoFormatado})\n  Local exato: \`${arq.caminhoCompleto}\`\n\n`;
-                }
-              } else if (fsAction.acao === "criar_pasta" && fsAction.dados?.caminho) {
-                replyText = `📁 **Pasta criada com sucesso no seu computador!**\n\nLocal exato: \`${fsAction.dados.caminho}\``;
-              } else if (fsAction.acao === "mover" && fsAction.dados?.destino) {
-                replyText = `🚚 **Arquivo movido com sucesso no Windows!**\n\nDe: \`${fsAction.dados.origem}\`\nPara: \`${fsAction.dados.destino}\``;
-              }
-
-              return Response.json({
-                ok: true,
-                reply: replyText,
-                transcription: audioTranscription || undefined,
-                modelUsed: "hug-desktop-agent",
-                requestId: `fs-op-${Date.now()}`,
-                conversationId: convId,
-                toolExecuted: fsAction.acao,
-              });
-            }
-          } catch (fsErr) {
-            console.warn("[Desktop FS Tool Warning]:", fsErr);
-          }
-
-          // 1.2 EXECUÇÃO DE AUTOMAÇÃO DE NAVEGADOR WEB (CADASTRO & AUTOFILL)
-          try {
-            const webAction = BrowserAutomationTools.analisarComandoWeb(combinedMessage);
-            if (webAction) {
-              const resAuto = await BrowserAutomationTools.executarCadastroAuto(webAction);
-              const passosFormatados = resAuto.passosExecutados
-                .map((p) => `• ${p}`)
-                .join("\n");
-
-              const replyText =
-                `🌐 **Automação de Navegador Web Executada no seu Computador:**\n\n` +
-                `${resAuto.mensagem}\n\n` +
-                `**Etapas executadas no Google Chrome:**\n${passosFormatados}\n\n` +
-                `> 🔒 **Segurança & Privacidade:** A I.A pausou antes de qualquer cobrança e deixou o navegador aberto na sua tela para você concluir os dados financeiros com total privacidade.`;
-
-              return Response.json({
-                ok: true,
-                reply: replyText,
-                transcription: audioTranscription || undefined,
-                modelUsed: "hug-browser-agent",
-                requestId: `browser-auto-${Date.now()}`,
-                conversationId: convId,
-                toolExecuted: "browser_signup",
-              });
-            }
-          } catch (webErr) {
-            console.warn("[Browser Automation Tool Warning]:", webErr);
-          }
-
           // 2. TENTATIVA VIA HUG IA CORE GATEWAY HTTP
           const coreUrl =
             process.env.HUG_CORE_GATEWAY_URL ||
@@ -388,9 +329,69 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               },
             ];
 
+            const tools = [
+              {
+                type: "function",
+                function: {
+                  name: "buscar_arquivos",
+                  description: "Busca pastas ou arquivos no computador do usuário pelo nome ou termo.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      termo: { type: "string", description: "Nome da pasta ou arquivo a buscar" },
+                    },
+                    required: ["termo"],
+                  },
+                },
+              },
+              {
+                type: "function",
+                function: {
+                  name: "abrir_pasta_explorer",
+                  description: "Abre uma pasta ou arquivo diretamente no Windows Explorer na tela do usuário.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      caminho: { type: "string", description: "Caminho completo da pasta ou arquivo a abrir" },
+                    },
+                    required: ["caminho"],
+                  },
+                },
+              },
+              {
+                type: "function",
+                function: {
+                  name: "criar_pasta",
+                  description: "Cria uma nova pasta no Disco D: do Windows.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      caminho: { type: "string", description: "Caminho da pasta a criar" },
+                    },
+                    required: ["caminho"],
+                  },
+                },
+              },
+              {
+                type: "function",
+                function: {
+                  name: "listar_diretorio",
+                  description: "Lista o conteúdo de uma pasta no computador.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      caminho: { type: "string", description: "Caminho da pasta a listar" },
+                    },
+                    required: ["caminho"],
+                  },
+                },
+              },
+            ];
+
             const payloadBody: any = {
               model: visionOrChatModel,
               messages: apiMessages,
+              tools,
             };
 
             // Modelos de raciocínio como gpt-6.2-astra, o1 e o3 não aceitam temperature customizada
@@ -429,8 +430,63 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             }
 
             if (openAiResp.ok) {
-              const openAiJson = await openAiResp.json();
-              const replyText = openAiJson.choices?.[0]?.message?.content?.trim();
+              let openAiJson = await openAiResp.json();
+              let messageObj = openAiJson.choices?.[0]?.message;
+
+              // Execução real de ferramentas chamadas pela IA
+              if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
+                apiMessages.push(messageObj);
+
+                for (const toolCall of messageObj.tool_calls) {
+                  const fnName = toolCall.function?.name;
+                  let args: any = {};
+                  try {
+                    args = JSON.parse(toolCall.function?.arguments || "{}");
+                  } catch {}
+
+                  let toolResult = "";
+                  if (fnName === "buscar_arquivos") {
+                    const res = await DesktopFSTools.buscarArquivos(args.termo);
+                    toolResult = JSON.stringify(res);
+                  } else if (fnName === "abrir_pasta_explorer") {
+                    const res = await DesktopFSTools.abrirNoExplorer(args.caminho);
+                    toolResult = JSON.stringify(res);
+                  } else if (fnName === "criar_pasta") {
+                    const res = await DesktopFSTools.criarPasta(args.caminho);
+                    toolResult = JSON.stringify(res);
+                  } else if (fnName === "listar_diretorio") {
+                    const res = await DesktopFSTools.listarDiretorio(args.caminho);
+                    toolResult = JSON.stringify(res);
+                  }
+
+                  apiMessages.push({
+                    role: "tool",
+                    tool_call_id: toolCall.id,
+                    content: toolResult,
+                  } as any);
+                }
+
+                // Chamada de retorno para o modelo formular a resposta final
+                const followUpResp = await fetch("https://api.openai.com/v1/chat/completions", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${openAiKey}`,
+                  },
+                  body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: apiMessages,
+                    temperature: 0.5,
+                  }),
+                });
+
+                if (followUpResp.ok) {
+                  const followUpJson = await followUpResp.json();
+                  messageObj = followUpJson.choices?.[0]?.message;
+                }
+              }
+
+              const replyText = messageObj?.content?.trim();
 
               if (replyText) {
                 const outGuard = HugAISecurityShield.inspecionarSaida(replyText, "HUG");

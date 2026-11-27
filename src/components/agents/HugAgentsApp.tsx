@@ -211,52 +211,12 @@ export function HugAgentsApp({ onLogout }: Props) {
     setAnexosPendentes([]);
     setProcessando(true);
 
-    // Gera etapas de raciocínio dinâmicas com base na mensagem e no agente ativo
-    let passosPensamento: string[] = [];
-    const textoLower = texto.toLowerCase();
-
-    if (
-      textoLower.includes("netflix") ||
-      textoLower.includes("spotify") ||
-      textoLower.includes("amazon") ||
-      textoLower.includes("navegador") ||
-      textoLower.includes("crie uma conta") ||
-      textoLower.includes("criar conta") ||
-      textoLower.includes("preench") ||
-      textoLower.includes("autofill")
-    ) {
-      passosPensamento = [
-        "Iniciando Google Chrome na área de trabalho do Windows",
-        "Navegando até o portal oficial de cadastro",
-        "Localizando campos de identificação (e-mail, senha, nome)",
-        "Preenchendo credenciais e avançando etapas",
-        "🛑 Limite de segurança: tela de pagamento/plano detectada",
-        "Pausando automação e mantendo navegador aberto na sua tela",
-      ];
-    } else if (
-      textoLower.includes("pasta") ||
-      textoLower.includes("diretorio") ||
-      textoLower.includes("mover") ||
-      textoLower.includes("arquivo") ||
-      textoLower.includes("onde está") ||
-      textoLower.includes("disco d") ||
-      textoLower.includes("desktop")
-    ) {
-      passosPensamento = [
-        "Ran search for electron or desktop projects",
-        "Checked task Search for electron or desktop",
-        "Accessing Windows Desktop FS Tools in Node.js",
-        "Executing file system command in D:\\Desenvolvimento\\Projetos",
-        "Validating disk operation output",
-      ];
-    } else {
-      passosPensamento = [
-        "Analyzing user message and context",
-        `Loading guidelines for ${agenteAtivo.name}`,
-        `Routing reasoning via HUG IA Core Gateway (${agenteAtivo.model})`,
-        "Formulating structured response",
-      ];
-    }
+    // Etapas de processamento reais do agente
+    const passosPensamento: string[] = [
+      `Analisando solicitação com ${agenteAtivo.name}`,
+      "Consultando ferramentas e diretrizes do agente",
+      "Processando resposta com o modelo de IA",
+    ];
 
     setEtapasThinkingAtivas(passosPensamento);
     inicioThinkingRef.current = Date.now();

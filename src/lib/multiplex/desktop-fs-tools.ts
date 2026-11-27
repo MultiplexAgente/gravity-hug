@@ -62,19 +62,34 @@ export class DesktopFSTools {
 
       const termoLower = termoLimpo.toLowerCase();
 
-      // Diretório base
-      let dirBase = diretorioInicial ? path.resolve(diretorioInicial) : "D:\\Desenvolvimento";
-      if (!fs.existsSync(dirBase)) {
-        dirBase = "D:\\";
-        if (!fs.existsSync(dirBase)) {
-          dirBase = process.env.USERPROFILE || "C:\\Users";
+      // Diretórios base para varredura rápida
+      const bases: string[] = [];
+      if (diretorioInicial && fs.existsSync(diretorioInicial)) {
+        bases.push(path.resolve(diretorioInicial));
+      } else {
+        const candidatas = [
+          "D:\\Desenvolvimento\\Projetos",
+          "D:\\Desenvolvimento",
+          "D:\\",
+          path.join(process.env.USERPROFILE || "", "OneDrive", "Área de Trabalho"),
+          path.join(process.env.USERPROFILE || "", "Desktop"),
+          path.join(process.env.USERPROFILE || "", "Pictures"),
+          path.join(process.env.USERPROFILE || "", "Documents"),
+        ];
+        for (const c of candidatas) {
+          if (c && fs.existsSync(c)) {
+            bases.push(c);
+          }
         }
       }
 
       const encontrados: ResultadoArquivo[] = [];
-      const filaDiretorios: { dir: string; profundidade: number }[] = [{ dir: dirBase, profundidade: 0 }];
-      const maxProfundidade = 4;
-      const maxDiretoriosExaminados = 200;
+      const filaDiretorios: { dir: string; profundidade: number }[] = bases.map((b) => ({
+        dir: b,
+        profundidade: 0,
+      }));
+      const maxProfundidade = 3;
+      const maxDiretoriosExaminados = 400;
       let diretoriosExaminados = 0;
       const pastasIgnoradas = new Set([
         "node_modules",
@@ -138,7 +153,7 @@ export class DesktopFSTools {
         acao: "buscar",
         mensagem: encontrados.length > 0
           ? `Foram encontrados ${encontrados.length} arquivo(s)/pasta(s) correspondente(s) a "${termoLimpo}".`
-          : `Nenhum arquivo ou pasta com o termo "${termoLimpo}" foi encontrado em ${dirBase}.`,
+          : `Nenhum arquivo ou pasta com o termo "${termoLimpo}" foi encontrado nos diretórios monitorados.`,
         dados: encontrados,
       };
     } catch (err: any) {
@@ -146,6 +161,37 @@ export class DesktopFSTools {
         sucesso: false,
         acao: "buscar",
         mensagem: `Erro ao buscar arquivos no Windows: ${err?.message}`,
+        erro: err?.message,
+      };
+    }
+  }
+
+  /**
+   * Abre uma pasta ou arquivo diretamente no Windows Explorer
+   */
+  public static async abrirNoExplorer(caminho: string): Promise<RespostaOperacaoFS> {
+    try {
+      const p = path.resolve(caminho);
+      if (!fs.existsSync(p)) {
+        return {
+          sucesso: false,
+          acao: "abrir",
+          mensagem: `Caminho não encontrado no computador: ${p}`,
+        };
+      }
+      const { exec } = await import("node:child_process");
+      exec(`explorer "${p}"`);
+      return {
+        sucesso: true,
+        acao: "abrir",
+        mensagem: `Pasta aberta no Windows Explorer: ${p}`,
+        dados: { caminho: p },
+      };
+    } catch (err: any) {
+      return {
+        sucesso: false,
+        acao: "abrir",
+        mensagem: `Erro ao abrir Explorer: ${err?.message}`,
         erro: err?.message,
       };
     }
