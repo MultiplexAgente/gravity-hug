@@ -17,6 +17,8 @@ import {
   HelpCircle,
   QrCode,
   Smartphone,
+  Instagram,
+  Facebook,
   Phone,
   Layers,
   HardDrive,
@@ -110,6 +112,10 @@ export function AgentModalEditor({
   const [welcomeMessage, setWelcomeMessage] = useState("");
   const [whatsappEnabled, setWhatsappEnabled] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [instagramEnabled, setInstagramEnabled] = useState(false);
+  const [instagramUsername, setInstagramUsername] = useState("");
+  const [facebookEnabled, setFacebookEnabled] = useState(false);
+  const [facebookPageName, setFacebookPageName] = useState("");
   const [humanHandoffEnabled, setHumanHandoffEnabled] = useState(true);
   const [novoArquivo, setNovoArquivo] = useState("");
   const [knowledgeFiles, setKnowledgeFiles] = useState<{ name: string; size: string; type: string }[]>([]);
@@ -126,12 +132,16 @@ export function AgentModalEditor({
       setWelcomeMessage(agent.welcomeMessage);
       setWhatsappEnabled(agent.whatsappEnabled);
       setWhatsappNumber(agent.whatsappNumber || "");
+      setInstagramEnabled(agent.instagramEnabled || false);
+      setInstagramUsername(agent.instagramUsername || "");
+      setFacebookEnabled(agent.facebookEnabled || false);
+      setFacebookPageName(agent.facebookPageName || "");
       setHumanHandoffEnabled(agent.humanHandoffEnabled);
       setKnowledgeFiles(agent.knowledgeFiles || []);
     } else {
       setNome("Novo Agente HUG");
       setPapel("Atendimento & Vendas");
-      setDescricao("Agente personalizado para atender meus clientes no WhatsApp e site.");
+      setDescricao("Agente personalizado para atender meus clientes no WhatsApp, Instagram, Facebook e site.");
       setAvatarIcon("ShoppingBag");
       setModel("hug-fast");
       setTemperature(0.6);
@@ -139,6 +149,10 @@ export function AgentModalEditor({
       setWelcomeMessage("Olá! Sou o assistente oficial da loja. Como posso te ajudar hoje?");
       setWhatsappEnabled(true);
       setWhatsappNumber("");
+      setInstagramEnabled(false);
+      setInstagramUsername("");
+      setFacebookEnabled(false);
+      setFacebookPageName("");
       setHumanHandoffEnabled(true);
       setKnowledgeFiles([]);
     }
@@ -163,6 +177,10 @@ export function AgentModalEditor({
       active: true,
       whatsappEnabled,
       whatsappNumber: whatsappNumber.trim(),
+      instagramEnabled,
+      instagramUsername: instagramUsername.trim(),
+      facebookEnabled,
+      facebookPageName: facebookPageName.trim(),
       humanHandoffEnabled,
       knowledgeFiles,
       systemPrompt: systemPrompt.trim(),
@@ -258,7 +276,7 @@ export function AgentModalEditor({
             }`}
           >
             <Smartphone className="size-3.5" />
-            WhatsApp & Canais
+            Canais (WhatsApp, Insta, Face)
           </button>
           <button
             type="button"
@@ -419,18 +437,19 @@ export function AgentModalEditor({
             </div>
           )}
 
-          {/* ABA 3: WHATSAPP & CANAIS */}
+          {/* ABA 3: CANAIS DE ATENDIMENTO */}
           {abaAtiva === "whatsapp" && (
             <div className="space-y-4">
+              {/* CANAL 1: WHATSAPP */}
               <div className="p-4 rounded-2xl bg-[#070b12] border border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <p className="text-xs font-bold text-white flex items-center gap-2">
                       <Smartphone className="size-4 text-emerald-400" />
-                      Responder Automaticamente no WhatsApp
+                      WhatsApp Business
                     </p>
                     <p className="text-[11px] text-slate-400">
-                      Quando ativado, o agente responderá aos clientes que mandarem mensagem no número da loja.
+                      Responder automaticamente mensagens recebidas no número de WhatsApp da empresa.
                     </p>
                   </div>
                   <Switch
@@ -450,23 +469,90 @@ export function AgentModalEditor({
                         className="bg-black/40 border-white/10 text-white text-xs h-10 rounded-xl focus:border-emerald-500 font-mono"
                       />
                     </div>
+                  </div>
+                )}
+              </div>
 
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="space-y-0.5">
-                        <p className="text-xs font-bold text-slate-200">
-                          Transferência para Atendente Humano
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          Se o cliente pedir para falar com uma pessoa, o agente pausa a IA e avisa a equipe.
-                        </p>
-                      </div>
-                      <Switch
-                        checked={humanHandoffEnabled}
-                        onCheckedChange={setHumanHandoffEnabled}
+              {/* CANAL 2: INSTAGRAM DIRECT */}
+              <div className="p-4 rounded-2xl bg-[#070b12] border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-bold text-white flex items-center gap-2">
+                      <Instagram className="size-4 text-pink-400" />
+                      Instagram Direct
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Responder automaticamente mensagens diretas (DMs) e menções no perfil da loja.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={instagramEnabled}
+                    onCheckedChange={setInstagramEnabled}
+                  />
+                </div>
+
+                {instagramEnabled && (
+                  <div className="pt-3 border-t border-white/[0.06] space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-slate-300">Perfil do Instagram (@)</Label>
+                      <Input
+                        value={instagramUsername}
+                        onChange={(e) => setInstagramUsername(e.target.value)}
+                        placeholder="Ex: @minhaloja_oficial"
+                        className="bg-black/40 border-white/10 text-white text-xs h-10 rounded-xl focus:border-pink-500 font-mono"
                       />
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* CANAL 3: FACEBOOK MESSENGER */}
+              <div className="p-4 rounded-2xl bg-[#070b12] border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-bold text-white flex items-center gap-2">
+                      <Facebook className="size-4 text-blue-400" />
+                      Facebook Messenger
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Atender clientes que entrarem em contato pela Página do Facebook.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={facebookEnabled}
+                    onCheckedChange={setFacebookEnabled}
+                  />
+                </div>
+
+                {facebookEnabled && (
+                  <div className="pt-3 border-t border-white/[0.06] space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-slate-300">Página do Facebook Vinculada</Label>
+                      <Input
+                        value={facebookPageName}
+                        onChange={(e) => setFacebookPageName(e.target.value)}
+                        placeholder="Ex: Minha Loja Oficial"
+                        className="bg-black/40 border-white/10 text-white text-xs h-10 rounded-xl focus:border-blue-500 font-mono"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* REGRAS GERAIS: HANDOFF HUMANO */}
+              <div className="p-4 rounded-2xl bg-[#070b12] border border-white/10 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-slate-200">
+                    Transferência para Atendente Humano
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Se o cliente pedir para falar com uma pessoa em qualquer canal, o agente pausa a IA e avisa a equipe.
+                  </p>
+                </div>
+                <Switch
+                  checked={humanHandoffEnabled}
+                  onCheckedChange={setHumanHandoffEnabled}
+                />
               </div>
             </div>
           )}

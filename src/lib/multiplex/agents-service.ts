@@ -21,6 +21,10 @@ export interface CustomAgent {
   active: boolean;
   whatsappEnabled: boolean;
   whatsappNumber?: string;
+  instagramEnabled?: boolean;
+  instagramUsername?: string;
+  facebookEnabled?: boolean;
+  facebookPageName?: string;
   humanHandoffEnabled: boolean;
   knowledgeFiles: { name: string; size: string; type: string }[];
   welcomeMessage: string;
@@ -105,10 +109,10 @@ OBJETIVOS:
     ],
   },
   {
-    name: "Agente de Vendas WhatsApp",
+    name: "Agente de Vendas Multicanal",
     role: "Especialista em Vendas & Conversão",
-    description: "Atende clientes no WhatsApp, apresenta produtos do catálogo, calcula frete e envia links de pagamento rápidos.",
-    systemPrompt: `Você é o Agente Oficial de Vendas da empresa via WhatsApp, operando no HUG IA Core.
+    description: "Atende clientes no WhatsApp, Instagram e Facebook, apresenta produtos do catálogo, calcula frete e envia links de pagamento rápidos.",
+    systemPrompt: `Você é o Agente Oficial de Vendas da empresa multicanal (WhatsApp, Instagram e Facebook), operando no HUG IA Core.
 OBJETIVOS:
 1. Atender os clientes com extrema cordialidade, objetividade e dinamismo.
 2. Identificar rapidamente o produto ou serviço que o cliente deseja.
@@ -120,6 +124,11 @@ OBJETIVOS:
     temperature: 0.6,
     active: true,
     whatsappEnabled: true,
+    whatsappNumber: "(66) 99273-4632",
+    instagramEnabled: true,
+    instagramUsername: "@empresa",
+    facebookEnabled: true,
+    facebookPageName: "Página Oficial",
     humanHandoffEnabled: true,
     knowledgeFiles: [],
     welcomeMessage: "Olá! Sou o assistente de vendas da empresa. Como posso te ajudar hoje a encontrar o que procura?",
@@ -145,6 +154,11 @@ OBJETIVOS:
     temperature: 0.5,
     active: true,
     whatsappEnabled: true,
+    whatsappNumber: "(66) 99273-4632",
+    instagramEnabled: true,
+    instagramUsername: "@empresa",
+    facebookEnabled: true,
+    facebookPageName: "Página Oficial",
     humanHandoffEnabled: true,
     knowledgeFiles: [],
     welcomeMessage: "Olá! Sou o assistente de suporte e pós-venda. Tem alguma dúvida sobre seu pedido ou entrega?",

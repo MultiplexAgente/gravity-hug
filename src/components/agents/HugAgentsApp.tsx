@@ -34,6 +34,9 @@ import {
   Globe,
   Move,
   Search,
+  Share2,
+  Instagram,
+  Facebook,
 } from "lucide-react";
 import hugLogo from "@/assets/hug-icon.jpg";
 import { Button } from "@/components/ui/button";
@@ -46,6 +49,7 @@ import {
 } from "@/lib/multiplex/agents-service";
 import { AgentModalEditor } from "./AgentModalEditor";
 import { DesktopFSModal } from "./DesktopFSModal";
+import { ChannelsModal } from "./ChannelsModal";
 import { AIThinkingProcess, type ThinkingStep } from "./AIThinkingProcess";
 import { getToken, clearToken } from "@/lib/multiplex/client";
 import { toast } from "sonner";
@@ -91,6 +95,9 @@ export function HugAgentsApp({ onLogout }: Props) {
   // Ferramentas Desktop do Windows (Criar Pastas, Mover Arquivos, Localizar)
   const [modalDesktopFSAberto, setModalDesktopFSAberto] = useState(false);
   const [abaDesktopFS, setAbaDesktopFS] = useState<"criar" | "mover" | "buscar" | "explorar">("criar");
+
+  // Modal de Canais & Integrações (WhatsApp, Instagram, Facebook)
+  const [modalCanaisAberto, setModalCanaisAberto] = useState(false);
 
   // Raciocínio ao Vivo & Timer estilo Antigravity
   const [etapasThinkingAtivas, setEtapasThinkingAtivas] = useState<string[]>([]);
@@ -505,6 +512,17 @@ export function HugAgentsApp({ onLogout }: Props) {
                 </div>
                 <span className="font-medium">Pastas & Disco D:</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setModalCanaisAberto(true)}
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-1"
+              >
+                <div className="size-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
+                  <Share2 className="size-3.5" />
+                </div>
+                <span className="font-medium">Canais (WhatsApp, Insta, Face)</span>
+              </button>
             </div>
           </div>
 
@@ -546,22 +564,6 @@ export function HugAgentsApp({ onLogout }: Props) {
                 })}
               </div>
             )}
-          </div>
-
-          {/* SEÇÃO 3: CANAL WHATSAPP & INTEGRAÇÕES */}
-          <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
-            <div className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Canais & Integrações
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                <Smartphone className="size-3.5 text-emerald-400" /> WhatsApp
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono">
-                Online
-              </span>
-            </div>
           </div>
         </div>
 
@@ -621,6 +623,14 @@ export function HugAgentsApp({ onLogout }: Props) {
 
           {/* Ações do Topo */}
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setModalCanaisAberto(true)}
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+              title="Canais & Integrações (WhatsApp, Instagram, Facebook)"
+            >
+              <Share2 className="size-4" />
+            </button>
             <Link
               to="/"
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
@@ -848,6 +858,10 @@ export function HugAgentsApp({ onLogout }: Props) {
         open={modalDesktopFSAberto}
         onClose={() => setModalDesktopFSAberto(false)}
         abaInicial={abaDesktopFS}
+      />
+      <ChannelsModal
+        open={modalCanaisAberto}
+        onClose={() => setModalCanaisAberto(false)}
       />
     </div>
   );
