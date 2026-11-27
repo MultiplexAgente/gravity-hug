@@ -11,6 +11,7 @@ function createWindow() {
     minHeight: 720,
     title: "HUG Desktop IDE - Motor de Execucao Windows",
     backgroundColor: "#03060a",
+    icon: path.join(__dirname, "../public/favicon.png"),
     darkTheme: true,
     autoHideMenuBar: true,
     webPreferences: {
