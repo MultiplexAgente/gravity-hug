@@ -56,6 +56,40 @@ export interface AgentConversation {
   pinned?: boolean;
 }
 
+/**
+ * Gera o título oficial da conversa extraindo as primeiras 5 palavras
+ * da PRIMEIRA mensagem enviada pelo usuário na conversa.
+ */
+export function gerarTituloDaConversa(mensagens: AgentChatMessage[]): string {
+  if (!Array.isArray(mensagens) || mensagens.length === 0) {
+    return "Nova conversa";
+  }
+
+  // Ordena cronologicamente para garantir que seja a primeiríssima mensagem do usuário
+  const msgsOrdenadas = [...mensagens].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  const primeiraMsgUser = msgsOrdenadas.find((m) => m.role === "user" && m.content && m.content.trim().length > 0);
+  if (!primeiraMsgUser || !primeiraMsgUser.content) {
+    return "Nova conversa";
+  }
+
+  const textoLimpo = primeiraMsgUser.content
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/[\r\n]+/g, " ");
+
+  const palavras = textoLimpo.split(/\s+/).filter(Boolean);
+  if (palavras.length <= 5) {
+    return textoLimpo.slice(0, 36);
+  }
+
+  // Pega exatamente as 5 primeiras palavras enviadas pelo usuário
+  const primeiras5 = palavras.slice(0, 5).join(" ");
+  return primeiras5.length > 34 ? primeiras5.slice(0, 34) + "..." : primeiras5;
+}
+
 export const OFFICIAL_AGENT_TEMPLATES: Omit<CustomAgent, "id" | "createdAt" | "updatedAt">[] = [
   {
     name: "Desktop OS & Arquivos",
@@ -380,11 +414,12 @@ export const HugAgentsService = {
 
   /**
    * Sanitiza conversas removendo base64 gigantes antes de persistir no localStorage
-   * para evitar estouro de cota (QuotaExceededError de 5MB)
+   * e garante que o título seja rigorosamente extraído da PRIMEIRA mensagem do usuário
    */
   sanitizarConversas(conversas: AgentConversation[]): AgentConversation[] {
     return conversas.map((c) => ({
       ...c,
+      title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : (c.title || "Nova conversa"),
       messages: (c.messages || []).map((m) => ({
         ...m,
         attachments: m.attachments?.map((a) => ({
@@ -404,7 +439,11 @@ export const HugAgentsService = {
       const raw = safeGetItem(CHAVE_CONVERSATIONS_STORAGE(userId));
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((c: AgentConversation) => ({
+        ...c,
+        title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : (c.title || "Nova conversa"),
+      }));
     } catch {
       return [];
     }

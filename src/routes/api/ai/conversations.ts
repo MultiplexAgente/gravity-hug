@@ -28,18 +28,32 @@ function lerConversas(email: string): any[] {
 function salvarConversas(email: string, conversas: any[]): void {
   try {
     const file = obterCaminhoUsuario(email);
-    // Remove base64 gigantes de dataUrl para economizar espaço e garantir velocidade
-    const sanitizadas = conversas.map((c) => ({
-      ...c,
-      messages: (c.messages || []).map((m: any) => ({
-        ...m,
-        attachments: m.attachments?.map((a: any) => ({
-          name: a.name,
-          type: a.type,
-          dataUrl: (a.dataUrl && a.dataUrl.length < 50000) ? a.dataUrl : undefined,
+    // Remove base64 gigantes de dataUrl e garante título baseado na 1ª mensagem do usuário
+    const sanitizadas = conversas.map((c) => {
+      let title = c.title || "Nova conversa";
+      if (Array.isArray(c.messages) && c.messages.length > 0) {
+        const msgsOrd = [...c.messages].sort(
+          (a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        const firstUser = msgsOrd.find((m: any) => m.role === "user" && m.content && m.content.trim().length > 0);
+        if (firstUser && firstUser.content) {
+          const palavras = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ").split(/\s+/).filter(Boolean);
+          title = palavras.length <= 5 ? palavras.join(" ") : palavras.slice(0, 5).join(" ") + "...";
+        }
+      }
+      return {
+        ...c,
+        title,
+        messages: (c.messages || []).map((m: any) => ({
+          ...m,
+          attachments: m.attachments?.map((a: any) => ({
+            name: a.name,
+            type: a.type,
+            dataUrl: (a.dataUrl && a.dataUrl.length < 50000) ? a.dataUrl : undefined,
+          })),
         })),
-      })),
-    }));
+      };
+    });
     fs.writeFileSync(file, JSON.stringify(sanitizadas, null, 2), "utf-8");
   } catch (err) {
     console.error("[Conversations API: Erro ao salvar no disco]", err);

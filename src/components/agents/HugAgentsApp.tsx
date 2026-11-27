@@ -46,6 +46,7 @@ import {
   AgentConversation,
   AgentChatMessage,
   OFFICIAL_AGENT_TEMPLATES,
+  gerarTituloDaConversa,
 } from "@/lib/multiplex/agents-service";
 import { AgentModalEditor } from "./AgentModalEditor";
 import { ChannelsModal } from "./ChannelsModal";
@@ -302,11 +303,9 @@ export function HugAgentsApp({ onLogout }: Props) {
         setConversaAtivaId(convId);
       }
 
-      // Preserva o título original se já existir, em vez de sobrescrever a cada mensagem
+      // O título da conversa DEVE vir SEMPRE da primeira mensagem enviada pelo usuário (5 primeiras palavras)
       const convExistente = conversas.find((c) => c.id === convId);
-      const tituloConversa =
-        convExistente?.title ||
-        (texto.slice(0, 36) + (texto.length > 36 ? "..." : "") || "Conversa com Agente");
+      const tituloConversa = gerarTituloDaConversa(mensagensFinais);
 
       const conversaSalva: AgentConversation = {
         id: convId,
