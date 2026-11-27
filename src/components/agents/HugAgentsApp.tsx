@@ -31,6 +31,9 @@ import {
   FolderPlus,
   FolderKanban,
   FolderOpen,
+  Folder,
+  SquarePen,
+  PanelLeft,
   Globe,
   Move,
   Search,
@@ -69,6 +72,7 @@ const ICON_MAP: Record<string, any> = {
   FolderKanban,
   FolderOpen,
   FolderPlus,
+  Folder,
   Search,
   Move,
   Share2,
@@ -502,14 +506,14 @@ export function HugAgentsApp({ onLogout }: Props) {
             </button>
           </div>
 
-          <Button
+          <button
             type="button"
             onClick={() => handleNovoChat()}
-            className="w-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 font-bold h-10 rounded-xl text-xs gap-2 transition-all justify-start px-3.5 shadow-sm"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] text-white font-medium text-xs transition-colors"
           >
-            <Plus className="size-4 text-emerald-400" />
-            Novo chat
-          </Button>
+            <SquarePen className="size-4 text-slate-300" />
+            <span>Novo chat</span>
+          </button>
         </div>
 
         {/* Rolagem Central da Sidebar */}
@@ -610,30 +614,26 @@ export function HugAgentsApp({ onLogout }: Props) {
                           handleNovoChat(ag);
                         }
                       }}
-                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all group ${
+                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left cursor-pointer transition-all group ${
                         selecionado
-                          ? "bg-white/[0.08] text-white border border-white/[0.12]"
-                          : "hover:bg-white/[0.03] text-slate-300"
+                          ? "bg-white/[0.08] text-white font-medium"
+                          : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className={`size-8 rounded-lg overflow-hidden shrink-0 border transition-all flex items-center justify-center p-0.5 bg-[#070b12] ${
-                            selecionado
-                              ? "border-cyan-400/60 shadow-sm shadow-cyan-500/30 ring-1 ring-cyan-500/40"
-                              : "border-white/10 opacity-80"
+                        <IconComp
+                          className={`size-4 shrink-0 transition-colors ${
+                            selecionado ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"
                           }`}
-                        >
-                          <img src="/hug-atom-icon.png" alt={ag.name} className="size-full object-contain" />
-                        </div>
+                        />
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold truncate leading-tight">{ag.name}</p>
+                          <p className="text-xs truncate leading-tight">{ag.name}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1">
                         {ag.whatsappEnabled && (
-                          <span className="size-2 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
+                          <span className="size-1.5 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
                         )}
                         <button
                           type="button"
@@ -709,10 +709,10 @@ export function HugAgentsApp({ onLogout }: Props) {
 
             {agenteAtivo ? (
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-9 rounded-xl overflow-hidden shrink-0 border border-cyan-500/30 shadow-md shadow-cyan-950/40 bg-[#070b12] flex items-center justify-center p-0.5">
-                  <img src="/hug-atom-icon.png" alt="HUG" className="size-full object-contain" />
+                <div className="size-8 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-slate-200 shrink-0">
+                  <ActiveIcon className="size-4" />
                 </div>
-                <h2 className="text-xs sm:text-sm font-bold text-white truncate">
+                <h2 className="text-xs sm:text-sm font-semibold text-white truncate">
                   {agenteAtivo.name}
                 </h2>
               </div>
@@ -770,8 +770,8 @@ export function HugAgentsApp({ onLogout }: Props) {
                   className={`flex gap-3 sm:gap-4 ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   {!isUser && (
-                    <div className="size-9 rounded-xl overflow-hidden shrink-0 mt-0.5 border border-cyan-500/30 shadow-md shadow-cyan-950/40 bg-[#070b12] flex items-center justify-center p-0.5">
-                      <img src="/hug-atom-icon.png" alt="HUG" className="size-full object-contain" />
+                    <div className="size-7 rounded-full bg-white/[0.08] border border-white/[0.12] flex items-center justify-center text-slate-200 shrink-0 mt-0.5 shadow-sm">
+                      <ActiveIcon className="size-3.5" />
                     </div>
                   )}
 
