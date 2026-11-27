@@ -393,9 +393,9 @@ export function HugAgentsApp({ onLogout }: Props) {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 group">
               <img
-                src={hugLogo}
+                src="/hug-atom-icon.svg"
                 alt="HUG"
-                className="size-7 rounded-xl object-cover"
+                className="size-7 rounded-xl object-contain"
               />
               <span className="text-sm font-bold tracking-wider text-white">
                 HUG <span className="text-emerald-400 font-mono text-xs">AGENTS</span>
@@ -468,7 +468,6 @@ export function HugAgentsApp({ onLogout }: Props) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold truncate leading-tight">{ag.name}</p>
-                        <p className="text-[10px] text-slate-500 truncate">{ag.role}</p>
                       </div>
                     </div>
 
@@ -527,18 +526,13 @@ export function HugAgentsApp({ onLogout }: Props) {
               Canais & Integrações
             </div>
 
-            <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                  <Smartphone className="size-3.5 text-emerald-400" /> WhatsApp
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono">
-                  Online
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Seus agentes atendem clientes e recebem pedidos diretamente no número da empresa.
-              </p>
+            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
+                <Smartphone className="size-3.5 text-emerald-400" /> WhatsApp
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono">
+                Online
+              </span>
             </div>
           </div>
         </div>
@@ -588,18 +582,13 @@ export function HugAgentsApp({ onLogout }: Props) {
                 <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                   <ActiveIcon className="size-4" />
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xs sm:text-sm font-bold text-white truncate">
-                      {agenteAtivo.name}
-                    </h2>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono hidden sm:inline-block">
-                      {agenteAtivo.model}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 truncate hidden sm:block">
-                    {agenteAtivo.role}
-                  </p>
+                <div className="flex items-center gap-2 min-w-0">
+                  <h2 className="text-xs sm:text-sm font-bold text-white truncate">
+                    {agenteAtivo.name}
+                  </h2>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono hidden sm:inline-block">
+                    {agenteAtivo.model}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -618,8 +607,8 @@ export function HugAgentsApp({ onLogout }: Props) {
               className="h-8 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm transition-all"
             >
               <HardDrive className="size-3.5" />
-              <span className="hidden sm:inline">Desktop OS: Pastas & Arquivos</span>
-              <span className="sm:hidden">Desktop OS</span>
+              <span className="hidden sm:inline">Pastas & Arquivos</span>
+              <span className="sm:hidden">Disco D:</span>
             </Button>
 
             {agenteAtivo && (
@@ -634,7 +623,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                 className="border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs h-8 px-3 rounded-xl gap-1.5"
               >
                 <Sliders className="size-3.5 text-emerald-400" />
-                Configurar Agente
+                Configurar
               </Button>
             )}
 
@@ -656,29 +645,19 @@ export function HugAgentsApp({ onLogout }: Props) {
           className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-6 max-w-4xl mx-auto w-full"
         >
           {mensagens.length === 0 ? (
-            /* TELA INICIAL QUANDO NÃO HÁ MENSAGENS */
-            <div className="h-full flex flex-col justify-center items-center text-center my-auto py-12 space-y-6">
-              <div className="relative">
-                <div className="size-16 rounded-3xl bg-card border border-border flex items-center justify-center text-foreground shadow-xl">
-                  <ActiveIcon className="size-8" />
-                </div>
+            /* TELA INICIAL LIMPA SEM TEXTOS REDUNDANTES */
+            <div className="h-full flex flex-col justify-center items-center text-center my-auto py-12 space-y-5">
+              <div className="size-16 rounded-3xl bg-card border border-border flex items-center justify-center text-foreground shadow-xl">
+                <ActiveIcon className="size-8 text-emerald-400" />
               </div>
 
-              <div className="max-w-md space-y-2">
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  {agenteAtivo?.name || "HUG Agents"}
-                </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {agenteAtivo?.description || "Canal de atendimento e automação conectado."}
-                </p>
-                <p className="text-xs text-emerald-400/90 font-medium italic pt-1">
-                  "{agenteAtivo?.welcomeMessage}"
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                {agenteAtivo?.name || "HUG Agents"}
+              </h3>
 
-              {/* Cards de Atalhos Rápidos */}
+              {/* Cards de Atalhos Rápidos e Diretos */}
               {agenteAtivo?.quickPrompts && agenteAtivo.quickPrompts.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl w-full pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full pt-2">
                   {agenteAtivo.quickPrompts.map((prompt, idx) => (
                     <button
                       key={idx}
@@ -686,9 +665,9 @@ export function HugAgentsApp({ onLogout }: Props) {
                       onClick={() => {
                         setTextoInput(prompt);
                       }}
-                      className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/40 hover:bg-emerald-500/5 text-left text-xs text-slate-300 hover:text-white transition-all group"
+                      className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/40 hover:bg-emerald-500/5 text-left text-xs text-slate-300 hover:text-white transition-all group"
                     >
-                      <p className="font-medium group-hover:text-emerald-300 transition-colors">
+                      <p className="font-semibold group-hover:text-emerald-300 transition-colors">
                         {prompt}
                       </p>
                     </button>
@@ -821,59 +800,6 @@ export function HugAgentsApp({ onLogout }: Props) {
                 ))}
               </div>
             )}
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none">
-              <button
-                type="button"
-                onClick={() => {
-                  setAbaDesktopFS("criar");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
-              >
-                <FolderPlus className="size-3" /> Criar Pasta no Disco D:
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAbaDesktopFS("mover");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
-              >
-                <Move className="size-3" /> Mover Arquivo
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAbaDesktopFS("buscar");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
-              >
-                <Search className="size-3" /> Localizar no PC
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAbaDesktopFS("autofill");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors"
-              >
-                <Globe className="size-3" /> Cadastro Web (Netflix, etc.)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAbaDesktopFS("explorar");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors"
-              >
-                <FolderOpen className="size-3" /> Explorar Disco D:
-              </button>
-            </div>
 
             <form
               onSubmit={handleEnviarMensagem}

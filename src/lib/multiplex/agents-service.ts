@@ -71,18 +71,18 @@ OBJETIVOS:
     whatsappEnabled: false,
     humanHandoffEnabled: false,
     knowledgeFiles: [],
-    welcomeMessage: "Olá! Sou o Agente HUG Desktop OS. Posso criar pastas, mover arquivos, localizar documentos e organizar seus projetos no Windows. Como posso te ajudar agora?",
+    welcomeMessage: "Agente HUG Desktop pronto para comandos de arquivos e pastas no Windows.",
     quickPrompts: [
-      "Criar pasta D:\\Desenvolvimento\\Projetos\\NovaPasta",
-      "Listar pastas em D:\\Desenvolvimento\\Projetos",
-      "Onde está o arquivo ...",
-      "Mover arquivo de uma pasta para outra",
+      "Criar nova pasta",
+      "Listar pastas no Disco D:",
+      "Localizar arquivo no PC",
+      "Mover arquivo de pasta",
     ],
   },
   {
     name: "HUG Browser & Autofill",
-    role: "Especialista em Automação Web & Cadastros",
-    description: "Acessa o Google Chrome no seu computador, preenche formulários de cadastro e login automaticamente e pausa obrigatoriamente na tela de pagamento para sua segurança.",
+    role: "Automação Web",
+    description: "Automação de navegador e cadastros.",
     systemPrompt: `Você é o Agente HUG Browser & Autofill, especialista em automação e preenchimento de formulários web no navegador.
 OBJETIVOS:
 1. Abrir o Google Chrome no computador e acessar portais solicitados (Netflix, Spotify, etc.).
@@ -96,12 +96,12 @@ OBJETIVOS:
     whatsappEnabled: false,
     humanHandoffEnabled: false,
     knowledgeFiles: [],
-    welcomeMessage: "Olá! Sou o Agente HUG Browser & Autofill. Posso acessar o navegador no seu PC e preencher seus dados de login ou cadastro (como na Netflix, Spotify, etc.), pausando com segurança antes do pagamento. O que deseja cadastrar?",
+    welcomeMessage: "Agente de automação web pronto para navegar e preencher cadastros.",
     quickPrompts: [
-      "Crie uma conta na Netflix para mim e pare na parte do pagamento",
-      "Acesse o Spotify e inicie o cadastro",
-      "Preencha o formulário de cadastro na Amazon",
-      "Abrir portal de login no navegador",
+      "Criar conta na Netflix (parar no pagamento)",
+      "Acessar Spotify e iniciar cadastro",
+      "Preencher cadastro web",
+      "Abrir portal de login",
     ],
   },
   {
