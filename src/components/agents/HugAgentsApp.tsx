@@ -610,14 +610,9 @@ export function HugAgentsApp({ onLogout }: Props) {
                 <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                   <ActiveIcon className="size-4" />
                 </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-white truncate">
-                    {agenteAtivo.name}
-                  </h2>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono hidden sm:inline-block">
-                    {agenteAtivo.model}
-                  </span>
-                </div>
+                <h2 className="text-xs sm:text-sm font-bold text-white truncate">
+                  {agenteAtivo.name}
+                </h2>
               </div>
             ) : (
               <span className="text-xs font-bold text-white">HUG</span>
@@ -644,35 +639,16 @@ export function HugAgentsApp({ onLogout }: Props) {
           className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-6 max-w-4xl mx-auto w-full"
         >
           {mensagens.length === 0 ? (
-            /* TELA INICIAL LIMPA SEM TEXTOS REDUNDANTES */
-            <div className="h-full flex flex-col justify-center items-center text-center my-auto py-12 space-y-5">
-              <div className="size-16 rounded-3xl bg-card border border-border flex items-center justify-center text-foreground shadow-xl">
-                <ActiveIcon className="size-8 text-emerald-400" />
-              </div>
-
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                {agenteAtivo?.name || "HUG"}
-              </h3>
-
-              {/* Cards de Atalhos Rápidos e Diretos */}
-              {agenteAtivo?.quickPrompts && agenteAtivo.quickPrompts.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full pt-2">
-                  {agenteAtivo.quickPrompts.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setTextoInput(prompt);
-                      }}
-                      className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/40 hover:bg-emerald-500/5 text-left text-xs text-slate-300 hover:text-white transition-all group"
-                    >
-                      <p className="font-semibold group-hover:text-emerald-300 transition-colors">
-                        {prompt}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              )}
+            /* TELA INICIAL LIMPA */
+            <div className="h-full flex flex-col justify-center items-center text-center my-auto py-20">
+              <img
+                src="/hug-atom-icon.svg"
+                alt="HUG"
+                className="size-16 object-contain opacity-80 mb-3"
+              />
+              <h2 className="text-xl font-bold tracking-tight text-white">
+                HUG
+              </h2>
             </div>
           ) : (
             /* LISTA DE MENSAGENS DO CHAT */
@@ -840,11 +816,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                 type="text"
                 value={textoInput}
                 onChange={(e) => setTextoInput(e.target.value)}
-                placeholder={
-                  agenteAtivo
-                    ? `Pergunte ou simule um atendimento com ${agenteAtivo.name}...`
-                    : "Digite uma mensagem..."
-                }
+                placeholder="Digite sua mensagem..."
                 className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none"
               />
 
@@ -857,10 +829,6 @@ export function HugAgentsApp({ onLogout }: Props) {
                 <Send className="size-4" />
               </button>
             </form>
-
-            <div className="flex justify-between items-center text-[10px] text-slate-500 px-2">
-              <span>HUG • Conectado</span>
-            </div>
           </div>
         </div>
       </main>
