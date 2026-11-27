@@ -9,7 +9,7 @@ function createWindow() {
     height: 940,
     minWidth: 1024,
     minHeight: 720,
-    title: "HUG Desktop IDE - Motor de Execucao Windows",
+    title: "HUG",
     backgroundColor: "#03060a",
     icon: path.join(__dirname, "../public/favicon.png"),
     darkTheme: true,
@@ -20,7 +20,7 @@ function createWindow() {
     },
   });
 
-  // URL do HUG Agents rodando localmente
+  // URL do HUG rodando localmente
   const targetUrl = process.env.HUG_DESKTOP_URL || "http://localhost:3000/agents";
   mainWindow.loadURL(targetUrl);
 

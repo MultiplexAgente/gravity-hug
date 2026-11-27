@@ -54,10 +54,10 @@ export interface AgentConversation {
 
 export const OFFICIAL_AGENT_TEMPLATES: Omit<CustomAgent, "id" | "createdAt" | "updatedAt">[] = [
   {
-    name: "HUG Desktop OS & Arquivos",
+    name: "Desktop OS & Arquivos",
     role: "Gerenciador do Sistema de Arquivos Windows",
     description: "Cria pastas no disco D:, move arquivos e documentos, busca caminhos exatos no PC e organiza seus projetos locais.",
-    systemPrompt: `Você é o Agente HUG Desktop OS, especialista oficial em automação e gerenciamento do sistema de arquivos do Windows no computador.
+    systemPrompt: `Você é o Agente Desktop OS, especialista oficial em automação e gerenciamento do sistema de arquivos do Windows no computador.
 OBJETIVOS:
 1. Criar pastas no disco D:\\Desenvolvimento\\Projetos com rapidez quando solicitado.
 2. Mover, renomear e organizar arquivos e pastas locais.
@@ -71,7 +71,7 @@ OBJETIVOS:
     whatsappEnabled: false,
     humanHandoffEnabled: false,
     knowledgeFiles: [],
-    welcomeMessage: "Agente HUG Desktop pronto para comandos de arquivos e pastas no Windows.",
+    welcomeMessage: "Pronto para comandos de arquivos e pastas no Windows.",
     quickPrompts: [
       "Criar nova pasta",
       "Listar pastas no Disco D:",
@@ -80,10 +80,10 @@ OBJETIVOS:
     ],
   },
   {
-    name: "HUG Browser & Autofill",
+    name: "Browser & Autofill",
     role: "Automação Web",
     description: "Automação de navegador e cadastros.",
-    systemPrompt: `Você é o Agente HUG Browser & Autofill, especialista em automação e preenchimento de formulários web no navegador.
+    systemPrompt: `Você é o Agente Browser & Autofill, especialista em automação e preenchimento de formulários web no navegador.
 OBJETIVOS:
 1. Abrir o Google Chrome no computador e acessar portais solicitados (Netflix, Spotify, etc.).
 2. Preencher dados de cadastro (email, senha provisória, nome).
@@ -96,7 +96,7 @@ OBJETIVOS:
     whatsappEnabled: false,
     humanHandoffEnabled: false,
     knowledgeFiles: [],
-    welcomeMessage: "Agente de automação web pronto para navegar e preencher cadastros.",
+    welcomeMessage: "Pronto para navegar e preencher cadastros.",
     quickPrompts: [
       "Criar conta na Netflix (parar no pagamento)",
       "Acessar Spotify e iniciar cadastro",
@@ -280,7 +280,15 @@ export const HugAgentsService = {
             }
           }
 
-          if (!hasDesktop || !hasBrowser) {
+          let mudou = !hasDesktop || !hasBrowser;
+          parsed.forEach((a: any) => {
+            if (a.name && /^HUG\s+/i.test(a.name)) {
+              a.name = a.name.replace(/^HUG\s+/i, "");
+              mudou = true;
+            }
+          });
+
+          if (mudou) {
             safeSetItem(CHAVE_AGENTS_STORAGE(userId), JSON.stringify(parsed));
           }
           return parsed;

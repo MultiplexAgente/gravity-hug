@@ -7,15 +7,15 @@ import { AgentsAuthView } from "@/components/agents/AgentsAuthView";
 export const Route = createFileRoute("/agents")({
   head: () => ({
     meta: [
-      { title: "HUG Agents — Atendimento e Vendas" },
+      { title: "HUG" },
       {
         name: "description",
-        content: "Plataforma de automação e atendimento HUG.",
+        content: "HUG",
       },
-      { property: "og:title", content: "HUG Agents" },
+      { property: "og:title", content: "HUG" },
       {
         property: "og:description",
-        content: "Plataforma de atendimento e gestão HUG.",
+        content: "HUG",
       },
     ],
   }),
@@ -47,7 +47,7 @@ function AgentsPage() {
   if (autenticado === null) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[#03060a] text-xs text-slate-400">
-        Carregando HUG Agents...
+        Carregando HUG...
       </div>
     );
   }

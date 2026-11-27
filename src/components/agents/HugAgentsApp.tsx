@@ -129,6 +129,7 @@ export function HugAgentsApp({ onLogout }: Props) {
       setConversaAtivaId(listaConversas[0].id);
       setMensagens(listaConversas[0].messages || []);
     }
+    document.title = "HUG";
   }, []);
 
   // 2. ROLAGEM SUAVE INTELIGENTE (sem atrapalhar se o usuário estiver rolando para cima)
@@ -398,7 +399,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                 className="size-7 rounded-xl object-contain"
               />
               <span className="text-sm font-bold tracking-wider text-white">
-                HUG <span className="text-emerald-400 font-mono text-xs">AGENTS</span>
+                HUG
               </span>
             </Link>
             <button
@@ -554,7 +555,7 @@ export function HugAgentsApp({ onLogout }: Props) {
               type="button"
               onClick={onLogout}
               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/[0.04] transition-colors"
-              title="Sair do HUG Agents"
+              title="Sair do HUG"
             >
               <LogOut className="size-4" />
             </button>
@@ -592,7 +593,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                 </div>
               </div>
             ) : (
-              <span className="text-xs font-bold text-white">HUG Agents</span>
+              <span className="text-xs font-bold text-white">HUG</span>
             )}
           </div>
 
@@ -652,7 +653,7 @@ export function HugAgentsApp({ onLogout }: Props) {
               </div>
 
               <h3 className="text-xl font-bold text-white tracking-tight">
-                {agenteAtivo?.name || "HUG Agents"}
+                {agenteAtivo?.name || "HUG"}
               </h3>
 
               {/* Cards de Atalhos Rápidos e Diretos */}
@@ -860,7 +861,7 @@ export function HugAgentsApp({ onLogout }: Props) {
             </form>
 
             <div className="flex justify-between items-center text-[10px] text-slate-500 px-2">
-              <span>HUG Plataforma • Conectado</span>
+              <span>HUG • Conectado</span>
             </div>
           </div>
         </div>

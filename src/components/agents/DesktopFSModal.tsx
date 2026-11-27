@@ -250,7 +250,7 @@ export function DesktopFSModal({ open, onClose, abaInicial = "criar" }: Props) {
               </div>
               <div>
                 <DialogTitle className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  HUG Desktop OS — Gerenciador de Arquivos & Pastas
+                  Pastas & Arquivos Windows
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-400 mt-0.5">
                   Criação de pastas no disco, movimentação de arquivos e localização no Windows.

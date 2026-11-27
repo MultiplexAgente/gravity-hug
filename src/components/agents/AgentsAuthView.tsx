@@ -48,9 +48,9 @@ export function AgentsAuthView({ onSuccess }: Props) {
       localStorage.setItem("hug_agents_user_name", nome.trim() || email.trim().split("@")[0] || "Usuário");
 
       if (modo === "login") {
-        toast.success("Bem-vindo ao HUG Agents!");
+        toast.success("Bem-vindo ao HUG!");
       } else {
-        toast.success("Conta criada com sucesso! Ambiente de agentes pronto.");
+        toast.success("Conta criada com sucesso!");
       }
 
       onSuccess();
@@ -84,18 +84,15 @@ export function AgentsAuthView({ onSuccess }: Props) {
           {/* Logo e Cabeçalho */}
           <div className="flex flex-col items-center text-center space-y-3">
             <img
-              src={hugLogo}
-              alt="HUG Agents"
-              className="size-16 rounded-2xl object-cover shadow-lg"
+              src="/hug-atom-icon.svg"
+              alt="HUG"
+              className="size-16 rounded-2xl object-contain shadow-lg"
             />
 
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">
-                HUG Agents
+                HUG
               </h1>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                Acesso ao ambiente de atendimento e automação.
-              </p>
             </div>
 
             {/* Alternador de Abas */}
@@ -198,7 +195,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
                 "Acessando ambiente..."
               ) : modo === "login" ? (
                 <>
-                  Entrar no HUG Agents
+                  Entrar no HUG
                   <ArrowRight className="size-4" />
                 </>
               ) : (

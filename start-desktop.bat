@@ -1,9 +1,8 @@
 @echo off
-title HUG Desktop IDE - Launcher
+title HUG
 chcp 65001 >nul
 echo ========================================================
-echo   INICIANDO HUG DESKTOP IDE (MOTOR WINDOWS)
-echo   Sistema de Arquivos D: + Automacao de Navegador Chrome
+echo   INICIANDO HUG
 echo ========================================================
 echo.
 
@@ -19,7 +18,7 @@ if %errorlevel% neq 0 (
     echo [1/2] Servidor local HUG ja esta ativo na porta 3000.
 )
 
-echo [2/2] Abrindo janela nativa HUG Desktop...
+echo [2/2] Abrindo janela nativa HUG...
 npx electron electron/main.cjs
 
 echo.
