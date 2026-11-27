@@ -62,19 +62,20 @@ export class DesktopFSTools {
 
       const termoLower = termoLimpo.toLowerCase();
 
-      // Diretórios base para varredura rápida
+      // Diretórios base para varredura rápida (Desktop tem prioridade máxima)
       const bases: string[] = [];
       if (diretorioInicial && fs.existsSync(diretorioInicial)) {
         bases.push(path.resolve(diretorioInicial));
       } else {
+        const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
         const candidatas = [
+          path.join(userProfile, "OneDrive", "Área de Trabalho"),
+          path.join(userProfile, "Desktop"),
           "D:\\Desenvolvimento\\Projetos",
           "D:\\Desenvolvimento",
           "D:\\",
-          path.join(process.env.USERPROFILE || "", "OneDrive", "Área de Trabalho"),
-          path.join(process.env.USERPROFILE || "", "Desktop"),
-          path.join(process.env.USERPROFILE || "", "Pictures"),
-          path.join(process.env.USERPROFILE || "", "Documents"),
+          path.join(userProfile, "Pictures"),
+          path.join(userProfile, "Documents"),
         ];
         for (const c of candidatas) {
           if (c && fs.existsSync(c)) {
@@ -163,6 +164,31 @@ export class DesktopFSTools {
         }
       }
 
+      // Ordenação rigorosa por relevância:
+      // 1º: Nome com igualdade exata (case-insensitive)
+      // 2º: Diretórios com match exato antes de arquivos
+      // 3º: Nome começa com o termo de busca
+      // 4º: Diretórios antes de arquivos comuns
+      encontrados.sort((a, b) => {
+        const aExact = a.nome.toLowerCase() === termoLower;
+        const bExact = b.nome.toLowerCase() === termoLower;
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        if (aExact && bExact) {
+          if (a.eDiretorio && !b.eDiretorio) return -1;
+          if (!a.eDiretorio && b.eDiretorio) return 1;
+        }
+
+        const aStarts = a.nome.toLowerCase().startsWith(termoLower);
+        const bStarts = b.nome.toLowerCase().startsWith(termoLower);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        if (a.eDiretorio && !b.eDiretorio) return -1;
+        if (!a.eDiretorio && b.eDiretorio) return 1;
+        return 0;
+      });
+
       return {
         sucesso: true,
         acao: "buscar",
@@ -182,7 +208,7 @@ export class DesktopFSTools {
   }
 
   public static normalizarCaminhoWindows(caminhoInput: string): string {
-    let p = caminhoInput.trim().replace(/^['"]|['"]$/g, "");
+    let p = (caminhoInput || "").trim().replace(/^['"]|['"]$/g, "");
     p = p
       .replace(/Ã\s*rea/g, "Área")
       .replace(/Ã¡/g, "á")
@@ -198,19 +224,53 @@ export class DesktopFSTools {
     const standardDesktop = path.join(userProfile, "Desktop");
     const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
 
+    // Normaliza placeholders fictícios gerados por IA como "YourUsername", "username", "usuario"
+    p = p.replace(/^[a-zA-Z]:[\\/]Users[\\/](?:YourUsername|username|user|usuario|seu_usuario)[\\/]/i, `${userProfile}\\`);
+
+    // Normaliza caminhos absolutos para Área de Trabalho / Desktop
+    p = p.replace(/^[a-zA-Z]:[\\/]Users[\\/][^\\/]+[\\/]Desktop(?=[\\/]|$)/i, desktopDir);
+    p = p.replace(/^[a-zA-Z]:[\\/]Users[\\/][^\\/]+[\\/]OneDrive[\\/](?:Área de Trabalho|Desktop)(?=[\\/]|$)/i, desktopDir);
+
     if (fs.existsSync(p)) {
       return p;
     }
 
-    if (/(?:trabalho|desktop)/i.test(p)) {
+    // Se o usuário falou em "home", "área de trabalho", "desktop"
+    if (/(?:trabalho|desktop|home|área|area)/i.test(p)) {
       let nome = path.basename(p.replace(/[\\/]+$/, ""))
-        .replace(/^(?:abra|abrir|crie|criar|fazer|nova\s+pasta|pasta)\s+/i, "")
+        .replace(/^(?:abra|abrir|crie|criar|fazer|nova\s+pasta|pasta|arquivo)\s+/i, "")
         .replace(/\s+(?:na|no|em|da|de)?\s*(?:[aãáÃ]\s*rea|[aãáÃ]rea)?\s*(?:de\s*)?trabalho.*$/i, "")
         .replace(/\s+(?:no|em|na)?\s*desktop.*$/i, "")
-        .replace(/.*(?:trabalho|desktop)[\\/\s:]*/i, "")
-        .replace(/^(?:na|no|em|da|de|pasta)\s+/i, "")
+        .replace(/\s+(?:na|no|em)?\s*home.*$/i, "")
+        .replace(/.*(?:trabalho|desktop|home)[\\/\s:]*/i, "")
+        .replace(/^(?:na|no|em|da|de|pasta|arquivo)\s+/i, "")
         .trim();
-      return path.join(desktopDir, nome || "NovaPasta");
+      const candidatoDesktop = path.join(desktopDir, nome || "NovaPasta");
+      if (fs.existsSync(candidatoDesktop)) return candidatoDesktop;
+      return candidatoDesktop;
+    }
+
+    // Se veio apenas o nome da pasta ou arquivo simples (sem unidade de disco)
+    const nomeLimpo = path.basename(p.replace(/[\\/]+$/, ""))
+      .replace(/^(?:abra|abrir|crie|criar|fazer|pasta|arquivo)\s+/i, "")
+      .trim();
+
+    if (nomeLimpo) {
+      // 1. Testa se existe diretamente no Desktop do usuário
+      const noDesktop = path.join(desktopDir, nomeLimpo);
+      if (fs.existsSync(noDesktop)) return noDesktop;
+
+      // 2. Testa no D:\Desenvolvimento\Projetos
+      const noProjetos = path.join("D:\\Desenvolvimento\\Projetos", nomeLimpo);
+      if (fs.existsSync(noProjetos)) return noProjetos;
+
+      // 3. Testa no D:\Desenvolvimento
+      const noDev = path.join("D:\\Desenvolvimento", nomeLimpo);
+      if (fs.existsSync(noDev)) return noDev;
+
+      // 4. Testa na raiz do usuário
+      const noUser = path.join(userProfile, nomeLimpo);
+      if (fs.existsSync(noUser)) return noUser;
     }
 
     if (!/^[a-zA-Z]:[\\/]/.test(p)) {
@@ -223,7 +283,7 @@ export class DesktopFSTools {
   }
 
   /**
-   * Abre uma pasta ou arquivo diretamente no Windows Explorer
+   * Abre uma pasta ou arquivo diretamente no Windows Explorer ou aplicativo padrão
    */
   public static async abrirNoExplorer(caminho: string): Promise<RespostaOperacaoFS> {
     try {
@@ -239,34 +299,53 @@ export class DesktopFSTools {
           return {
             sucesso: false,
             acao: "abrir",
-            mensagem: `Caminho não encontrado no computador: ${p}`,
+            mensagem: `Caminho ou arquivo não encontrado no computador: ${p}`,
           };
         }
       }
 
-      // Executa abertura garantida no Windows Explorer
-      const { spawn, exec } = await import("node:child_process");
-      try {
-        const child = spawn("explorer.exe", [p], { detached: true, stdio: "ignore" });
-        child.unref();
-      } catch {}
+      const s = fs.statSync(p);
+      const isFile = s.isFile();
 
-      try {
-        const safePath = p.replace(/'/g, "''");
-        exec(`powershell.exe -NoProfile -Command "Start-Process explorer.exe -ArgumentList @('${safePath}')"`);
-      } catch {}
+      // Executa abertura garantida no Windows Explorer / Aplicação Padrão
+      const { spawn, exec } = await import("node:child_process");
+      const safePath = p.replace(/'/g, "''");
+
+      if (isFile) {
+        // Se for arquivo: abre no aplicativo padrão do Windows
+        try {
+          exec(`powershell.exe -NoProfile -Command "Start-Process -FilePath '${safePath}'"`);
+        } catch {}
+        // E também destaca no Windows Explorer
+        try {
+          const child = spawn("explorer.exe", [`/select,${p}`], { detached: true, stdio: "ignore" });
+          child.unref();
+        } catch {}
+      } else {
+        // Se for pasta: abre a pasta no Windows Explorer
+        try {
+          const child = spawn("explorer.exe", [p], { detached: true, stdio: "ignore" });
+          child.unref();
+        } catch {}
+
+        try {
+          exec(`powershell.exe -NoProfile -Command "Start-Process explorer.exe -ArgumentList @('${safePath}')"`);
+        } catch {}
+      }
 
       return {
         sucesso: true,
         acao: "abrir",
-        mensagem: `A pasta "${path.basename(p)}" foi aberta com sucesso na sua tela no Windows Explorer (${p}).`,
-        dados: { caminho: p },
+        mensagem: isFile
+          ? `O arquivo "${path.basename(p)}" foi aberto na sua tela com o aplicativo padrão (${p}).`
+          : `A pasta "${path.basename(p)}" foi aberta com sucesso na sua tela no Windows Explorer (${p}).`,
+        dados: { caminho: p, eArquivo: isFile },
       };
     } catch (err: any) {
       return {
         sucesso: false,
         acao: "abrir",
-        mensagem: `Erro ao abrir Explorer: ${err?.message}`,
+        mensagem: `Erro ao abrir: ${err?.message}`,
         erro: err?.message,
       };
     }

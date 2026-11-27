@@ -76,7 +76,11 @@ DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 1. REGRA SUPREMA: NUNCA faça nada que o usuário não mandou explicitamente, e NUNCA diga ou prometa que vai fazer algo que não foi ordenado.
 2. É expressamente proibido dizer: "Vou recriar a pasta", "Vou criar novamente", "Deixe-me corrigir criando...", ou assumir iniciativas voluntárias não solicitadas.
 3. NUNCA FINJA OU SIMULE AÇÕES: Você JAMAIS deve responder afirmando que criou, abriu, moveu ou apagou uma pasta ou arquivo sem ter executado a respectiva ferramenta ('criar_pasta', 'abrir_pasta_explorer', 'mover_arquivo') e recebido a confirmação real do sistema operacional.
-4. CONTINUIDADE RIGOROSA DO CONTEXTO: Leia com atenção extrema as mensagens anteriores. Se você acabou de criar ou mencionar uma pasta (ex: "HIG") e em seguida o usuário diz "abra a pasta para mim" ou "a que você acabou de criar", VOCÊ JÁ SABE que é a pasta "HIG"! NUNCA pergunte "qual o nome da pasta?". Chame imediatamente 'abrir_pasta_explorer' para a pasta que já estava no contexto!
+4. CONTINUIDADE RIGOROSA DO CONTEXTO & MEMÓRIA: Leia com atenção extrema as mensagens anteriores.
+   - "Área de Trabalho", "Desktop" e "Home" referem-se ao mesmo local principal no Windows do usuário (Área de Trabalho / OneDrive).
+   - Se o usuário falar "abra a pasta para mim", "a que você acabou de criar", "a que está na home", "abra a pasta HUG", "abra o arquivo X": VOCÊ JÁ SABE o que ele quer! Chame IMEDIATAMENTE 'abrir_pasta_explorer' passando o nome da pasta ou arquivo.
+   - NUNCA pergunte "qual o nome da pasta?" ou "qual a localização?".
+   - NUNCA responda dizendo "Vou abrir... um momento por favor" ou "Deixe-me abrir...": você DEVE invocar a ferramenta no mesmo instante!
 5. Converse de forma natural, humana, segura, direta e profissional.
 6. NUNCA comece suas respostas com frases robóticas ou templates repetitivos.
 7. Responda PRIMEIRO e OBJETIVAMENTE ao que foi perguntado.
@@ -85,7 +89,7 @@ DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
 - Você tem ferramentas nativas para interagir com o computador do usuário: buscar_arquivos, abrir_pasta_explorer, mover_arquivo, criar_pasta e listar_diretorio.
 - Quando o usuário mandar criar uma pasta (ex: "crie uma pasta HIG na minha área de trabalho"): CHAME OBRIGATORIAMENTE a ferramenta 'criar_pasta' passando o nome e local.
-- Quando o usuário solicitar abrir uma pasta (ex: "abra a pasta para mim"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer' ou 'buscar_arquivos'.
+- Quando o usuário solicitar abrir uma pasta ou arquivo (ex: "abra a pasta para mim", "abra a pasta HUG", "abra o arquivo"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer' ou 'buscar_arquivos'.
 - Quando o usuário solicitar mover arquivos: CHAME OBRIGATORIAMENTE 'mover_arquivo'.`;
 
 async function transcreverAudioWhisper(
@@ -325,7 +329,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               content: any;
             }> = [
               { role: "system", content: HUG_INSTITUCIONAL_SYSTEM_PROMPT },
-              ...history.slice(-8).map((item) => ({
+              ...history.slice(-40).map((item) => ({
                 role: item.role as "user" | "assistant",
                 content: item.content,
               })),
@@ -354,11 +358,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 type: "function",
                 function: {
                   name: "abrir_pasta_explorer",
-                  description: "Abre uma pasta ou arquivo diretamente no Windows Explorer na tela do usuário.",
+                  description: "Abre uma pasta ou arquivo diretamente no Windows Explorer ou no aplicativo padrão do Windows na tela do usuário. Aceita tanto o caminho completo quanto o nome simples da pasta/arquivo (ex: 'HUG', 'Loca Tudo', 'relatorio.pdf').",
                   parameters: {
                     type: "object",
                     properties: {
-                      caminho: { type: "string", description: "Caminho completo da pasta ou arquivo a abrir" },
+                      caminho: { type: "string", description: "Nome da pasta/arquivo ou caminho a abrir" },
                     },
                     required: ["caminho"],
                   },
@@ -517,6 +521,54 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 if (followUpResp.ok) {
                   const followUpJson = await followUpResp.json();
                   messageObj = followUpJson.choices?.[0]?.message;
+                }
+              } else {
+                // Se a IA não executou tool_calls, mas a mensagem do usuário ou o texto retornado indicam ordem/promessa de abrir
+                const querAbrir = /(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?/i.test(combinedMessage);
+                const prometeuAbrir = /vou\s+abri[-a-z]*|abrir[-a-z]*\s+para\s+voc[êe]|vou\s+localizar\s+e\s+abrir/i.test(messageObj?.content || "");
+
+                if (querAbrir || prometeuAbrir) {
+                  let termoAlvo = "";
+                  // Extrai o nome da pasta da mensagem do usuário
+                  const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*["']?([^"'\n\r\?\!]+)["']?/i);
+                  if (mUser && mUser[1]) {
+                    termoAlvo = mUser[1].trim()
+                      .replace(/^(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+est[áa]\s+no\s+desktop|a\s+pasta\s+)/i, "")
+                      .replace(/\s+(?:na\s+home|no\s+desktop|na\s+[áa]rea\s+de\s+trabalho).*$/i, "")
+                      .trim();
+                  }
+                  // Extrai da promessa da IA se houver
+                  if (!termoAlvo && prometeuAbrir) {
+                    const mPromessa = (messageObj?.content || "").match(/pasta\s+["']?([a-zA-Z0-9_\-]+)["']?/i);
+                    if (mPromessa && mPromessa[1]) {
+                      termoAlvo = mPromessa[1].trim();
+                    }
+                  }
+                  // Se ainda não achou, busca no histórico recente
+                  if (!termoAlvo || termoAlvo.length < 2) {
+                    for (let i = history.length - 1; i >= 0; i--) {
+                      const hMatch = history[i].content.match(/["']([a-zA-Z0-9_\-]+)["']/);
+                      if (hMatch && hMatch[1]) {
+                        termoAlvo = hMatch[1];
+                        break;
+                      }
+                    }
+                  }
+
+                  if (termoAlvo) {
+                    const openExec = await DesktopFSTools.abrirNoExplorer(termoAlvo);
+                    if (openExec.sucesso) {
+                      return Response.json({
+                        ok: true,
+                        reply: openExec.mensagem,
+                        transcription: audioTranscription || undefined,
+                        modelUsed: visionOrChatModel,
+                        requestId: `comp_${Date.now().toString(36)}`,
+                        conversationId: convId,
+                        viaGateway: false,
+                      });
+                    }
+                  }
                 }
               }
 
