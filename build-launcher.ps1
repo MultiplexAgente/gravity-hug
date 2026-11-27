@@ -13,14 +13,13 @@ if (Test-Path $out) {
         $destExe = Join-Path $desktopPath 'HUG.exe'
         Copy-Item -Path $out -Destination $destExe -Force
         
-        $wsh = New-Object -ComObject WScript.Shell
-        $shortcut = $wsh.CreateShortcut((Join-Path $desktopPath 'HUG.lnk'))
-        $shortcut.TargetPath = $destExe
-        $shortcut.WorkingDirectory = 'D:\Desenvolvimento\Projetos\multiplex-ia'
-        $shortcut.IconLocation = "$ico,0"
-        $shortcut.Description = 'HUG Desktop - Plataforma Inteligente'
-        $shortcut.Save()
-        Write-Host "HUG.exe e atalho HUG atualizados em: $desktopPath"
+        # Remove atalho duplicado antigo caso exista
+        $oldLnk = Join-Path $desktopPath 'HUG.lnk'
+        if (Test-Path $oldLnk) {
+            Remove-Item -Path $oldLnk -Force -ErrorAction SilentlyContinue
+        }
+        
+        Write-Host "HUG.exe unico atualizado na Area de Trabalho: $destExe"
     }
 } else {
     Write-Error "Falha ao compilar HUG.exe"
