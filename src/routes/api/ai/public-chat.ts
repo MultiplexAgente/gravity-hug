@@ -102,9 +102,11 @@ GERAÇÃO DE IMAGENS:
   CHAME OBRIGATORIAMENTE A FERRAMENTA 'gerar_imagem'!
 - NUNCA diga que não pode ou não tem capacidade para gerar imagens! Você SEMPRE pode gerar usando a ferramenta 'gerar_imagem'.
 
-AUTOMAÇÃO & TESTE DE NAVEGADOR WEB (GOOGLE CHROME):
-- Você tem a ferramenta nativa 'navegar_e_testar_web' que abre o Google Chrome visível na tela do computador do usuário, navega para qualquer site ou localhost (ex: http://localhost:3000), inspeciona a página, captura erros de console/JavaScript, clica em botões, preenche campos e tira prints/screenshots para auditoria visual!
-- Quando o usuário mandar abrir o navegador, testar página, navegar para um site ou inspecionar uma URL:
+AUTOMAÇÃO & ABERTURA DE NAVEGADOR WEB (GOOGLE CHROME):
+- Você tem as ferramentas nativas 'abrir_navegador' e 'navegar_e_testar_web'!
+- Quando o usuário mandar abrir o navegador, abrir o Chrome, abrir a internet, navegar ou acessar uma URL na tela (ex: "abra o navegador chrome", "abra o navegador", "abra o chrome"):
+  CHAME OBRIGATORIAMENTE A FERRAMENTA 'abrir_navegador'!
+- Quando o usuário mandar inspecionar, auditar ou testar uma página web local ou remota:
   CHAME OBRIGATORIAMENTE A FERRAMENTA 'navegar_e_testar_web'!`;
 
 async function estamparMarcaHug(imageBuffer: Buffer): Promise<Buffer> {
@@ -643,6 +645,19 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               {
                 type: "function",
                 function: {
+                  name: "abrir_navegador",
+                  description: "Abre o navegador web (Google Chrome) diretamente na tela do computador do usuário. Use SEMPRE que o usuário mandar abrir o navegador, abrir o Chrome, abrir a internet, navegar ou acessar uma URL na tela.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      url: { type: "string", description: "URL ou site a abrir (opcional, padrão: https://www.google.com)" },
+                    },
+                  },
+                },
+              },
+              {
+                type: "function",
+                function: {
                   name: "navegar_e_testar_web",
                   description: "Abre o navegador Google Chrome no computador do usuário, acessa qualquer site ou endereço local (ex: 'http://localhost:3000' ou 'google.com'), inspeciona erros de console/JavaScript, clica em botões, preenche campos e tira print/screenshot para auditoria visual. Use SEMPRE que o usuário mandar abrir o navegador, testar página, navegar para um site ou inspecionar uma URL.",
                   parameters: {
@@ -744,6 +759,9 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   } else if (fnName === "mover_arquivo") {
                     const res = await DesktopFSTools.moverArquivo(args.origem, args.destino);
                     toolResult = JSON.stringify(res);
+                  } else if (fnName === "abrir_navegador") {
+                    const res = await BrowserAutomationTools.abrirNavegador(args.url);
+                    toolResult = JSON.stringify(res);
                   } else if (fnName === "gerar_imagem") {
                     const res = await gerarImagemHelper(args.prompt, args.titulo);
                     if (res.sucesso && res.anexo) {
@@ -816,13 +834,35 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   }
                 }
 
-                // Verificação de intenção de automação/teste de navegador web (Chrome)
-                const querNavegarOuTestarWeb =
-                  /(?:navegador|browser|chrome|site|p[áa]gina|pagina|localhost|http|www|web)\b/i.test(combinedMessage) &&
-                  /(?:abra|abrir|teste|testar|acesse|acessar|inspecione|inspecionar|navegue|navegar|verifique|verificar)/i.test(combinedMessage) &&
+                // 1. Verificação de intenção de abrir o navegador Chrome diretamente na tela do usuário
+                const querAbrirNavegador =
+                  /(?:navegador|browser|chrome|crhome|google\s+chrome|internet|web)\b/i.test(combinedMessage) &&
+                  /(?:abra|abrir|open|inicie|iniciar|start|acesse|acessar|carregue|carregar)/i.test(combinedMessage) &&
                   !/(?:pasta|pastas|diret[oó]rio|arquivo|arquivos)\s+(?:da|do|de|chamad)/i.test(combinedMessage);
 
-                if (querNavegarOuTestarWeb) {
+                if (querAbrirNavegador) {
+                  let urlDetectada: string | undefined = undefined;
+                  const urlMatch = combinedMessage.match(/(https?:\/\/[^\s]+|localhost:\d+|127\.0\.0\.1:\d+|[a-zA-Z0-9_\-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
+                  if (urlMatch && urlMatch[0]) {
+                    urlDetectada = urlMatch[0];
+                  }
+                  const resNav = await BrowserAutomationTools.abrirNavegador(urlDetectada);
+                  return Response.json({
+                    ok: true,
+                    reply: resNav.mensagem,
+                    transcription: audioTranscription || undefined,
+                    modelUsed: "hug-browser-launcher",
+                    requestId: `comp_${Date.now().toString(36)}`,
+                    conversationId: convId,
+                    viaGateway: false,
+                  });
+                }
+
+                // 2. Verificação de intenção de automação/teste profundo de página web
+                const querTestarWeb =
+                  /(?:teste|testar|inspecione|inspecionar|verifique|verificar)\s+(?:a\s+)?(?:p[áa]gina|pagina|site|url|web|localhost)/i.test(combinedMessage);
+
+                if (querTestarWeb) {
                   let urlDetectada = "http://localhost:3000";
                   const urlMatch = combinedMessage.match(/(https?:\/\/[^\s]+|localhost:\d+|127\.0\.0\.1:\d+|[a-zA-Z0-9_\-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
                   if (urlMatch && urlMatch[0]) {
@@ -845,34 +885,46 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   }
                 }
 
-                const querAbrir =
-                  /(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?/i.test(combinedMessage) ||
+                // 3. Verificação de intenção de abrir pastas ou arquivos no Windows Explorer
+                const querAbrirPastaOuArquivo =
+                  !querAbrirNavegador &&
+                  (/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem)/i.test(combinedMessage) ||
                   /(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+voc[êe]\s+criou|criou\s+agora)/i.test(combinedMessage) ||
-                  /n[ãa]o\s+abriu/i.test(combinedMessage);
+                  /(?:abra|abrir)\s+(?:a\s+pasta\s+)?(?:de\s+imagens\s+)?(?:da\s+)?([a-zA-Z0-9_\- ]+)/i.test(combinedMessage) ||
+                  /n[ãa]o\s+abriu/i.test(combinedMessage));
 
                 const prometeuAbrir =
+                  !querAbrirNavegador &&
                   /vou\s+abri[-a-z]*|abrir[-a-z]*\s+para\s+voc[êe]|vou\s+localizar\s+e\s+abrir|aberta\s+no\s+windows\s+explorer/i.test(messageObj?.content || "");
 
-                if (querAbrir || prometeuAbrir) {
+                if (querAbrirPastaOuArquivo || prometeuAbrir) {
                   let termoAlvo = "";
 
+                  // Se o usuário falou especificamente de uma empresa/pasta (ex: Loca Tudo Ferramentas, Loca Tudo)
+                  const mLocaTudo = combinedMessage.match(/(?:loca\s+tudo(?:\s+ferramentas)?|hug|hig|agro|safra)/i);
+                  if (mLocaTudo) {
+                    termoAlvo = mLocaTudo[0].trim();
+                  }
+
                   // 1. Aspas na mensagem da IA (ex: pasta chamada "HUG")
-                  const aspasMatch = (messageObj?.content || "").match(/["']([a-zA-Z0-9_\- ]{2,40})["']/);
-                  if (aspasMatch && aspasMatch[1] && !["abrir", "explorer", "windows"].includes(aspasMatch[1].toLowerCase())) {
-                    termoAlvo = aspasMatch[1].trim();
+                  if (!termoAlvo) {
+                    const aspasMatch = (messageObj?.content || "").match(/["']([a-zA-Z0-9_\- ]{2,40})["']/);
+                    if (aspasMatch && aspasMatch[1] && !["abrir", "explorer", "windows", "hig"].includes(aspasMatch[1].toLowerCase())) {
+                      termoAlvo = aspasMatch[1].trim();
+                    }
                   }
 
                   // 2. Pasta chamada ...
                   if (!termoAlvo) {
                     const mPromessa = (messageObj?.content || "").match(/pasta\s+(?:chamada\s+)?["']?([a-zA-Z0-9_\- ]+?)["']?(?:\s+na|\s+no|\s+localizada|\.|\,|$)/i);
-                    if (mPromessa && mPromessa[1]) {
+                    if (mPromessa && mPromessa[1] && !mPromessa[1].toLowerCase().includes("hig")) {
                       termoAlvo = mPromessa[1].trim();
                     }
                   }
 
                   // 3. Extrai da instrução do usuário
                   if (!termoAlvo) {
-                    const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*["']?([^"'\n\r\?\!]+)["']?/i);
+                    const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*(?:de\s+imagens\s+da\s+|de\s+|da\s+|do\s+)?["']?([^"'\n\r\?\!]+)["']?/i);
                     if (mUser && mUser[1]) {
                       termoAlvo = mUser[1]
                         .replace(/^(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+est[áa]\s+no\s+desktop|a\s+pasta\s+)/i, "")

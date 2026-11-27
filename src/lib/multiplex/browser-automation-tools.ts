@@ -100,6 +100,44 @@ export class BrowserAutomationTools {
   }
 
   /**
+   * Abre o Google Chrome diretamente na tela do usuário de forma nativa e visível
+   */
+  public static async abrirNavegador(url?: string): Promise<{ sucesso: boolean; mensagem: string }> {
+    try {
+      const urlAlvo = this.normalizarUrl(url || "https://www.google.com");
+      const chromePath = this.obterCaminhoNavegador();
+      const { spawn, exec } = await import("node:child_process");
+
+      if (fs.existsSync(chromePath)) {
+        const child = spawn(chromePath, [urlAlvo], { detached: true, stdio: "ignore" });
+        child.unref();
+      } else {
+        exec(`start "" "${urlAlvo}"`);
+      }
+
+      return {
+        sucesso: true,
+        mensagem: `O navegador Google Chrome foi aberto diretamente na sua tela acessando ${urlAlvo}.`,
+      };
+    } catch (err: any) {
+      const { exec } = await import("node:child_process");
+      const urlAlvo = this.normalizarUrl(url || "https://www.google.com");
+      try {
+        exec(`start "" "${urlAlvo}"`);
+        return {
+          sucesso: true,
+          mensagem: `O navegador padrão do sistema foi aberto na sua tela acessando ${urlAlvo}.`,
+        };
+      } catch {
+        return {
+          sucesso: false,
+          mensagem: `Erro ao abrir navegador: ${err?.message}`,
+        };
+      }
+    }
+  }
+
+  /**
    * Abre o navegador na área de trabalho, acessa a página, inspeciona o carregamento,
    * captura logs de console/erros, clica/preenche se solicitado e tira screenshot para validação visual.
    */
