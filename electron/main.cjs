@@ -1,9 +1,13 @@
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, nativeImage } = require("electron");
 const path = require("path");
 
 let mainWindow;
 
 function createWindow() {
+  const iconPath = process.platform === "win32"
+    ? path.join(__dirname, "../public/favicon.ico")
+    : path.join(__dirname, "../public/favicon.png");
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 940,
@@ -11,7 +15,7 @@ function createWindow() {
     minHeight: 720,
     title: "HUG",
     backgroundColor: "#03060a",
-    icon: path.join(__dirname, "../public/favicon.png"),
+    icon: iconPath,
     darkTheme: true,
     autoHideMenuBar: true,
     webPreferences: {
@@ -19,6 +23,8 @@ function createWindow() {
       contextIsolation: false,
     },
   });
+
+  mainWindow.setIcon(iconPath);
 
   // URL do HUG rodando localmente
   const targetUrl = process.env.HUG_DESKTOP_URL || "http://localhost:3000/agents";
