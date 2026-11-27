@@ -487,7 +487,7 @@ export function HugAgentsApp({ onLogout }: Props) {
               <img
                 src="/hug-atom-icon.png"
                 alt="HUG"
-                className="size-7 rounded-xl object-contain"
+                className="size-8 rounded-xl object-contain shadow-md shadow-cyan-950/30"
               />
               <span className="text-sm font-bold tracking-wider text-white">
                 HUG
@@ -618,13 +618,13 @@ export function HugAgentsApp({ onLogout }: Props) {
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
-                          className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          className={`size-8 rounded-lg overflow-hidden shrink-0 border transition-all flex items-center justify-center p-0.5 bg-[#070b12] ${
                             selecionado
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-white/5 text-slate-400"
+                              ? "border-cyan-400/60 shadow-sm shadow-cyan-500/30 ring-1 ring-cyan-500/40"
+                              : "border-white/10 opacity-80"
                           }`}
                         >
-                          <IconComp className="size-3.5" />
+                          <img src="/hug-atom-icon.png" alt={ag.name} className="size-full object-contain" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-semibold truncate leading-tight">{ag.name}</p>
@@ -709,8 +709,8 @@ export function HugAgentsApp({ onLogout }: Props) {
 
             {agenteAtivo ? (
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                  <ActiveIcon className="size-4" />
+                <div className="size-9 rounded-xl overflow-hidden shrink-0 border border-cyan-500/30 shadow-md shadow-cyan-950/40 bg-[#070b12] flex items-center justify-center p-0.5">
+                  <img src="/hug-atom-icon.png" alt="HUG" className="size-full object-contain" />
                 </div>
                 <h2 className="text-xs sm:text-sm font-bold text-white truncate">
                   {agenteAtivo.name}
@@ -770,8 +770,8 @@ export function HugAgentsApp({ onLogout }: Props) {
                   className={`flex gap-3 sm:gap-4 ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   {!isUser && (
-                    <div className="size-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-1">
-                      <ActiveIcon className="size-4" />
+                    <div className="size-9 rounded-xl overflow-hidden shrink-0 mt-0.5 border border-cyan-500/30 shadow-md shadow-cyan-950/40 bg-[#070b12] flex items-center justify-center p-0.5">
+                      <img src="/hug-atom-icon.png" alt="HUG" className="size-full object-contain" />
                     </div>
                   )}
 

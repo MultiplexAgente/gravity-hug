@@ -100,7 +100,7 @@ REGRAS MANDATÓRIAS E INEGOCIÁVEIS:
 4. Mantenha continuidade do contexto: se você acabou de criar ou falar de uma pasta (ex: "HIG") e logo depois o usuário disser "abra a pasta para mim", abra a mesma pasta do contexto sem perguntar o nome novamente.
 5. Se o usuário pedir para criar na Área de Trabalho (Desktop), crie na Área de Trabalho. Se pedir no Disco D, crie no Disco D.
 6. Seja direto, conciso e objetivo.`,
-    avatarIcon: "HardDrive",
+    avatarIcon: "Atom",
     model: "hug-fast",
     temperature: 0.2,
     active: true,
