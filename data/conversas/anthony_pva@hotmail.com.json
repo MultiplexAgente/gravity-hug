@@ -1,10 +1,10 @@
 [
   {
     "id": "conv-1795741237682-13d3",
-    "agentId": "agent-hug-desktop-mwz0330i",
+    "agentId": "agent-hug-1-mwz2q0ne",
     "title": "ABRA A PASTA DE IMAGEMS...",
     "createdAt": "2026-11-27T02:26:38.621Z",
-    "updatedAt": "2026-11-27T13:31:19.505Z",
+    "updatedAt": "2026-11-27T14:26:10.558Z",
     "messages": [
       {
         "id": "msg-usr-1795741233107",
@@ -205,6 +205,19 @@
             "type": "image/jpeg"
           }
         ]
+      },
+      {
+        "id": "msg-usr-1795789563727",
+        "role": "user",
+        "content": "abra o navegador crhome",
+        "createdAt": "2026-11-27T14:26:03.727Z"
+      },
+      {
+        "id": "msg-agt-1795789570548",
+        "role": "assistant",
+        "content": "Parece que houve um problema ao tentar abrir a pasta \"HIG\". Ela não foi encontrada no caminho esperado. Vou verificar novamente para garantir que a pasta foi criada corretamente na sua área de trabalho.",
+        "createdAt": "2026-11-27T14:26:10.548Z",
+        "agentId": "agent-hug-1-mwz2q0ne"
       }
     ]
   }
