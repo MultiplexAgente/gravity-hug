@@ -335,6 +335,30 @@ export const HugAgentsService = {
               a.name = a.name.replace(/^HUG\s+/i, "");
               mudou = true;
             }
+            if (a.name && (a.name.includes("Desktop") || a.name.includes("Pastas")) && a.avatarIcon !== "HardDrive") {
+              a.avatarIcon = "HardDrive";
+              mudou = true;
+            }
+            if (a.name && (a.name.includes("Browser") || a.name.includes("Autofill")) && a.avatarIcon !== "Globe") {
+              a.avatarIcon = "Globe";
+              mudou = true;
+            }
+            if (a.name && a.name.includes("Vendas") && a.avatarIcon !== "ShoppingBag") {
+              a.avatarIcon = "ShoppingBag";
+              mudou = true;
+            }
+            if (a.name && a.name.includes("Suporte") && a.avatarIcon !== "ShieldCheck") {
+              a.avatarIcon = "ShieldCheck";
+              mudou = true;
+            }
+            if (a.name && (a.name.includes("Farmacêutico") || a.name.includes("Clínico")) && a.avatarIcon !== "Store") {
+              a.avatarIcon = "Store";
+              mudou = true;
+            }
+            if (a.name && (a.name.includes("Financeiro") || a.name.includes("Cobrança")) && a.avatarIcon !== "Wallet") {
+              a.avatarIcon = "Wallet";
+              mudou = true;
+            }
           });
 
           if (mudou) {
@@ -458,12 +482,36 @@ export const HugAgentsService = {
           const locais = this.obterConversas(userId);
           const map = new Map<string, AgentConversation>();
           for (const c of data.conversations) map.set(c.id, c);
-          for (const c of locais) map.set(c.id, c);
-          const mescladas = Array.from(map.values()).sort(
-            (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
-          );
-          safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(this.sanitizarConversas(mescladas)));
-          return mescladas;
+          for (const c of locais) {
+            const doServidor = map.get(c.id);
+            if (doServidor) {
+              const msgsServidor = doServidor.messages || [];
+              const msgsLocais = c.messages || [];
+              const maisCompleto = msgsLocais.length >= msgsServidor.length ? msgsLocais : msgsServidor;
+              map.set(c.id, {
+                ...doServidor,
+                ...c,
+                messages: maisCompleto,
+                title: gerarTituloDaConversa(maisCompleto),
+              });
+            } else {
+              map.set(c.id, {
+                ...c,
+                title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : (c.title || "Nova conversa"),
+              });
+            }
+          }
+          const mescladas = Array.from(map.values())
+            .map((c) => ({
+              ...c,
+              title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : (c.title || "Nova conversa"),
+            }))
+            .sort(
+              (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+            );
+          const sanitizadas = this.sanitizarConversas(mescladas);
+          safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(sanitizadas));
+          return sanitizadas;
         }
       }
     } catch {}
@@ -477,6 +525,9 @@ export const HugAgentsService = {
 
     const sanitizada: AgentConversation = {
       ...conversa,
+      title: conversa.messages && conversa.messages.length > 0
+        ? gerarTituloDaConversa(conversa.messages)
+        : (conversa.title || "Nova conversa"),
       updatedAt: new Date().toISOString(),
     };
 

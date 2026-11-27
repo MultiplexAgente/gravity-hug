@@ -64,6 +64,14 @@ const ICON_MAP: Record<string, any> = {
   Wallet,
   MessageSquare,
   FileText,
+  HardDrive,
+  Globe,
+  FolderKanban,
+  FolderOpen,
+  FolderPlus,
+  Search,
+  Move,
+  Share2,
 };
 
 export function HugAgentsApp({ onLogout }: Props) {
@@ -146,7 +154,11 @@ export function HugAgentsApp({ onLogout }: Props) {
     const listaAgentes = HugAgentsService.obterAgentes(email);
     setAgentes(listaAgentes);
 
-    const listaConversas = HugAgentsService.obterConversas(email);
+    // Carrega conversas garantindo que o título venha SEMPRE da 1ª mensagem do usuário
+    const listaConversas = HugAgentsService.obterConversas(email).map((c) => ({
+      ...c,
+      title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : c.title,
+    }));
     setConversas(listaConversas);
 
     if (listaConversas.length > 0) {
@@ -171,7 +183,11 @@ export function HugAgentsApp({ onLogout }: Props) {
     // Sincroniza em segundo plano com o disco D: para nunca perder histórico
     HugAgentsService.sincronizarConversasServidor(email).then((sincronizadas) => {
       if (sincronizadas && sincronizadas.length > 0) {
-        setConversas(sincronizadas);
+        const comTitulosAtualizados = sincronizadas.map((c) => ({
+          ...c,
+          title: c.messages && c.messages.length > 0 ? gerarTituloDaConversa(c.messages) : c.title,
+        }));
+        setConversas(comTitulosAtualizados);
       }
     });
 

@@ -19,7 +19,24 @@ function lerConversas(email: string): any[] {
     if (!fs.existsSync(file)) return [];
     const content = fs.readFileSync(file, "utf-8");
     const parsed = JSON.parse(content);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((c: any) => {
+      let title = c.title;
+      if (Array.isArray(c.messages) && c.messages.length > 0) {
+        const msgsOrd = [...c.messages].sort(
+          (a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        const firstUser = msgsOrd.find((m: any) => m.role === "user" && m.content && m.content.trim().length > 0);
+        if (firstUser && firstUser.content) {
+          const palavras = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ").split(/\s+/).filter(Boolean);
+          title = palavras.length <= 5 ? palavras.join(" ") : palavras.slice(0, 5).join(" ") + "...";
+        }
+      }
+      return {
+        ...c,
+        title: title || "Nova conversa",
+      };
+    });
   } catch {
     return [];
   }

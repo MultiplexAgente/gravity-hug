@@ -22,6 +22,7 @@ import {
   Phone,
   Layers,
   HardDrive,
+  Globe,
   FolderKanban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const ICONES_DISPONIVEIS = [
   { id: "MessageSquare", label: "Atendimento", Icon: MessageSquare },
   { id: "FileText", label: "Contratos", Icon: FileText },
   { id: "HardDrive", label: "Desktop OS", Icon: HardDrive },
+  { id: "Globe", label: "Browser & Web", Icon: Globe },
   { id: "FolderKanban", label: "Pastas / Arquivos", Icon: FolderKanban },
 ];
 
