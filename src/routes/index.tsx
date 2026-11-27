@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
-import hugLogo from "@/assets/hug-icon.jpg";
+import hugLogo from "/hug-atom-icon.png";
 import agroSafra from "@/assets/agro-safra.jpg";
 import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 import { SmoothScroll } from "@/components/cinematic/SmoothScroll";

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { api, setToken } from "@/lib/multiplex/client";
-import hugLogo from "@/assets/hug-icon.jpg";
+import hugLogo from "/hug-atom-icon.png";
 
 export const Route = createFileRoute("/entrar")({
   head: () => ({

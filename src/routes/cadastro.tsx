@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import hugLogo from "@/assets/hug-icon.jpg";
+import hugLogo from "/hug-atom-icon.png";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({

@@ -481,8 +481,8 @@ function CompanyPage() {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4">
         <div className="mb-6 flex flex-col items-center text-center">
-          <BonaParticleAtom className="h-9 w-9 text-emerald-400 mb-2" />
-          <h1 className="text-2xl font-black tracking-widest">HUG ERP</h1>
+          <img src="/hug-atom-icon.png" alt="HUG" className="size-10 rounded-xl object-contain mb-2" />
+          <h1 className="text-2xl font-black tracking-widest">HUG</h1>
           <p className="text-xs text-muted-foreground mt-1">Configurações da Empresa e Catálogo</p>
         </div>
         <form onSubmit={signIn} className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-6 backdrop-blur">

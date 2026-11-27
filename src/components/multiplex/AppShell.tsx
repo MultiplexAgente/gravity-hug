@@ -101,7 +101,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
         {/* TOPO DA SIDEBAR */}
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-foreground">
-            <BonaParticleAtom className="h-6 w-6 text-emerald-400" />
+            <img src="/hug-atom-icon.png" alt="HUG" className="h-6 w-6 rounded-lg object-contain" />
             <span className="text-base font-black tracking-widest text-foreground leading-none">HUG</span>
           </Link>
           <div className="flex items-center gap-1">
