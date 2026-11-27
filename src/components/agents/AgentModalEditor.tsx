@@ -215,6 +215,8 @@ export function AgentModalEditor({
     toast.success("Documento de conhecimento adicionado.");
   }
 
+  if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in">
       <div className="relative w-full max-w-2xl bg-[#090e17] border border-white/10 rounded-3xl shadow-2xl shadow-black overflow-hidden flex flex-col max-h-[90vh]">
