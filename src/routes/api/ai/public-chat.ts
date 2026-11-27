@@ -447,6 +447,15 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   let toolResult = "";
                   if (fnName === "buscar_arquivos") {
                     const res = await DesktopFSTools.buscarArquivos(args.termo);
+                    // Se a mensagem do usuário indica intenção de abrir ("abra", "abrir", "mostrar"), abre no Explorer imediatamente
+                    if (res.sucesso && Array.isArray(res.dados) && res.dados.length > 0 && /(?:abra|abrir|open|mostr(?:e|ar))/i.test(combinedMessage)) {
+                      const primeiroDir = res.dados.find((d: any) => d.eDiretorio) || res.dados[0];
+                      if (primeiroDir && primeiroDir.caminhoCompleto) {
+                        const openRes = await DesktopFSTools.abrirNoExplorer(primeiroDir.caminhoCompleto);
+                        (res as any).abertoNoWindowsExplorer = openRes.sucesso;
+                        (res as any).pastaAberta = primeiroDir.caminhoCompleto;
+                      }
+                    }
                     toolResult = JSON.stringify(res);
                   } else if (fnName === "abrir_pasta_explorer") {
                     const res = await DesktopFSTools.abrirNoExplorer(args.caminho);

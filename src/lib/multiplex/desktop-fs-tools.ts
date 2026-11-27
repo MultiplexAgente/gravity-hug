@@ -118,7 +118,22 @@ export class DesktopFSTools {
 
             const fullPath = path.join(itemAtual.dir, nome);
 
-            if (nome.toLowerCase().includes(termoLower)) {
+            const nomeLower = nome.toLowerCase();
+            const stopwords = new Set([
+              "pasta", "pastas", "imagem", "imagens", "imagems", "foto", "fotos",
+              "arquivo", "arquivos", "abrir", "abra", "encontrar", "buscar", "mostrar",
+              "para", "com", "dos", "das", "da", "do", "de"
+            ]);
+            const palavrasChave = termoLower
+              .split(/[\s_\-]+/)
+              .filter((p) => p.length >= 3 && !stopwords.has(p));
+
+            const matchExato = nomeLower.includes(termoLower);
+            const matchKeywords =
+              palavrasChave.length > 0 &&
+              palavrasChave.filter((p) => nomeLower.includes(p)).length >= Math.min(2, palavrasChave.length);
+
+            if (matchExato || matchKeywords) {
               let tamanho = 0;
               let modificado = "";
               try {

@@ -26,7 +26,7 @@ function AgentsPage() {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Verifica se existe token ativo ou sessão do HUG Agents salva
+    // Verifica se existe token ativo ou sessão do HUG salva
     const token = getToken();
     const email = localStorage.getItem("hug_agents_user_email");
     if (token || email) {
@@ -57,6 +57,6 @@ function AgentsPage() {
     return <AgentsAuthView onSuccess={() => setAutenticado(true)} />;
   }
 
-  // Se autenticado, abre a aplicação independente HUG Agents
+  // Se autenticado, abre a aplicação independente HUG
   return <HugAgentsApp onLogout={handleLogout} />;
 }
