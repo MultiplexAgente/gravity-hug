@@ -442,9 +442,8 @@ export function HugAgentsApp({ onLogout }: Props) {
       {/* SIDEBAR ESQUERDA ESTILO CHATGPT                                */}
       {/* ============================================================== */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 sm:w-80 bg-[#070b12] border-r border-white/[0.08] flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
-          sidebarAberta ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-72 sm:w-80 bg-[#070b12] border-r border-white/[0.08] flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${sidebarAberta ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Topo da Sidebar: Logo & Botão Novo Chat */}
         <div className="p-3.5 border-b border-white/[0.08] space-y-3">
@@ -479,9 +478,53 @@ export function HugAgentsApp({ onLogout }: Props) {
         </div>
 
         {/* Rolagem Central da Sidebar */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-5 text-xs text-slate-400">
-          {/* SEÇÃO 1: MEUS AGENTES */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-6 text-xs text-slate-400">
+          {/* SEÇÃO 1: HISTÓRICO DE CONVERSAS (NO TOPO) */}
           <div className="space-y-1.5">
+            <div className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+              <span>Histórico de Conversas</span>
+              <span className="text-[10px] text-slate-600 font-normal">
+                {conversas.length} {conversas.length === 1 ? "chat" : "chats"}
+              </span>
+            </div>
+
+            {conversas.length === 0 ? (
+              <p className="px-2 text-[11px] text-slate-600 italic">Nenhuma conversa arquivada.</p>
+            ) : (
+              <div className="space-y-0.5 max-h-[300px] overflow-y-auto pr-0.5">
+                {conversas.map((c) => {
+                  const ativa = conversaAtivaId === c.id;
+                  return (
+                    <div
+                      key={c.id}
+                      onClick={() => handleSelecionarConversa(c)}
+                      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer transition-all ${
+                        ativa
+                          ? "bg-white/[0.08] text-white font-medium"
+                          : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <MessageSquare className="size-3.5 shrink-0 opacity-60 text-emerald-400" />
+                        <span className="truncate text-xs">{c.title}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => handleExcluirConversa(e, c.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-rose-400 transition-opacity"
+                        title="Excluir conversa"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* SEÇÃO 2: MEUS AGENTES (EMBAIXO DO HISTÓRICO DE CONVERSAS) */}
+          <div className="space-y-2 pt-3 border-t border-white/[0.06]">
             <div className="flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
               <span>Meus Agentes</span>
               <button
@@ -490,7 +533,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                   setAgenteParaEditar(null);
                   setModalEditorAberto(true);
                 }}
-                className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold"
+                className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold text-[11px]"
               >
                 <Plus className="size-3" /> Criar
               </button>
@@ -505,11 +548,9 @@ export function HugAgentsApp({ onLogout }: Props) {
                     key={ag.id}
                     onClick={() => {
                       if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
-                        // Se já está no agente ativo com mensagens, preserva a tela
                         return;
                       }
                       setAgenteAtivo(ag);
-                      // Busca a conversa mais recente desse agente
                       const convDoAgente = conversas.find((c) => c.agentId === ag.id);
                       if (convDoAgente) {
                         handleSelecionarConversa(convDoAgente);
@@ -570,46 +611,6 @@ export function HugAgentsApp({ onLogout }: Props) {
                 <span className="font-medium">Canais (WhatsApp, Insta, Face)</span>
               </button>
             </div>
-          </div>
-
-          {/* SEÇÃO 2: HISTÓRICO DE CONVERSAS */}
-          <div className="space-y-1.5">
-            <div className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Histórico de Conversas
-            </div>
-
-            {conversas.length === 0 ? (
-              <p className="px-2 text-[11px] text-slate-600 italic">Nenhuma conversa arquivada.</p>
-            ) : (
-              <div className="space-y-0.5">
-                {conversas.map((c) => {
-                  const ativa = conversaAtivaId === c.id;
-                  return (
-                    <div
-                      key={c.id}
-                      onClick={() => handleSelecionarConversa(c)}
-                      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer transition-all ${
-                        ativa
-                          ? "bg-white/[0.08] text-white font-medium"
-                          : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <MessageSquare className="size-3.5 shrink-0 opacity-60" />
-                        <span className="truncate text-xs">{c.title}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => handleExcluirConversa(e, c.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-rose-400 transition-opacity"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
 
@@ -723,11 +724,10 @@ export function HugAgentsApp({ onLogout }: Props) {
 
                   <div className={`space-y-1.5 max-w-[85%] sm:max-w-[78%] ${isUser ? "items-end" : "items-start"}`}>
                     <div
-                      className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${
-                        isUser
+                      className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${isUser
                           ? "bg-emerald-600 text-white rounded-tr-none shadow-md"
                           : "bg-[#090e17] border border-white/[0.08] text-slate-200 rounded-tl-none"
-                      }`}
+                        }`}
                     >
                       {msg.content}
 
@@ -855,11 +855,10 @@ export function HugAgentsApp({ onLogout }: Props) {
               <button
                 type="button"
                 onClick={alternarGravacaoAudio}
-                className={`p-2.5 rounded-xl transition-colors ${
-                  gravandoAudio
+                className={`p-2.5 rounded-xl transition-colors ${gravandoAudio
                     ? "text-rose-400 bg-rose-500/20 animate-pulse"
                     : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
-                }`}
+                  }`}
                 title={gravandoAudio ? "Parar gravação" : "Gravar mensagem de voz"}
               >
                 {gravandoAudio ? <MicOff className="size-4" /> : <Mic className="size-4" />}
