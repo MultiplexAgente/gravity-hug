@@ -263,7 +263,7 @@ function safeGetItem(key: string): string | null {
     if (typeof window !== "undefined" && window.localStorage) {
       return window.localStorage.getItem(key);
     }
-  } catch {}
+  } catch { }
   return memoryStore.get(key) || null;
 }
 
@@ -273,7 +273,7 @@ function safeSetItem(key: string, value: string): void {
       window.localStorage.setItem(key, value);
       return;
     }
-  } catch {}
+  } catch { }
   memoryStore.set(key, value);
 }
 
@@ -283,7 +283,7 @@ function safeRemoveItem(key: string): void {
       window.localStorage.removeItem(key);
       return;
     }
-  } catch {}
+  } catch { }
   memoryStore.delete(key);
 }
 
@@ -511,7 +511,7 @@ export const HugAgentsService = {
           return sanitizadas;
         }
       }
-    } catch {}
+    } catch { }
     return this.obterConversas(userId);
   },
 
@@ -545,9 +545,9 @@ export const HugAgentsService = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userEmail: userId, conversation: sanitizada }),
-        }).catch(() => {});
+        }).catch(() => { });
       }
-    } catch {}
+    } catch { }
 
     return atualizada;
   },
@@ -561,9 +561,9 @@ export const HugAgentsService = {
       if (typeof window !== "undefined") {
         fetch(`/api/ai/conversations?userEmail=${encodeURIComponent(userId)}&id=${encodeURIComponent(conversaId)}`, {
           method: "DELETE",
-        }).catch(() => {});
+        }).catch(() => { });
       }
-    } catch {}
+    } catch { }
 
     return filtrada;
   },

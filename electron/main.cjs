@@ -1,8 +1,13 @@
-const { app, BrowserWindow, shell, nativeImage } = require("electron");
+const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 const http = require("http");
 const fs = require("fs");
 const { spawn } = require("child_process");
+
+// Desabilita aceleração por hardware para evitar tela preta por incompatibilidade de GPU no Windows
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("no-sandbox");
 
 process.on("uncaughtException", (err) => {
   fs.writeFileSync(path.join(__dirname, "../electron-err.txt"), (err && err.stack) || String(err));
@@ -14,11 +19,11 @@ process.on("unhandledRejection", (err) => {
 let mainWindow;
 let viteServerProcess = null;
 
-// Verifica se o servidor local está ativo sem abrir nenhuma janela de console
+// Verifica se o servidor local está respondendo na porta 3000
 function checkServer(url) {
   return new Promise((resolve) => {
     const req = http.get(url, (res) => {
-      resolve(true);
+      resolve(res.statusCode >= 200 && res.statusCode < 400);
     });
     req.on("error", () => {
       resolve(false);
@@ -30,43 +35,44 @@ function checkServer(url) {
   });
 }
 
-// Inicia o servidor Vite em background 100% silencioso (sem CMD, sem janela, sem barra de tarefas)
+// Inicia o servidor Vite em background 100% silencioso (sem CMD, sem janela)
 async function ensureServerRunning() {
-  const targetUrl = process.env.HUG_DESKTOP_URL || "http://localhost:3000/agents";
   const isUp = await checkServer("http://localhost:3000/");
-  if (isUp) return;
+  if (isUp) return true;
 
   const viteCli = path.join(__dirname, "../node_modules/vite/bin/vite.js");
   const nodeBinary = fs.existsSync("C:\\Program Files\\nodejs\\node.exe")
     ? "C:\\Program Files\\nodejs\\node.exe"
     : "node";
 
-  // Inicia o processo com windowsHide = true para NUNCA abrir janela preta do CMD
-  viteServerProcess = spawn(nodeBinary, [viteCli, "dev", "--port", "3000"], {
-    cwd: path.join(__dirname, ".."),
-    windowsHide: true,
-    stdio: "ignore",
-    detached: true,
-  });
+  try {
+    viteServerProcess = spawn(nodeBinary, [viteCli, "dev", "--port", "3000"], {
+      cwd: path.join(__dirname, ".."),
+      windowsHide: true,
+      stdio: "ignore",
+      detached: true,
+    });
 
-  if (viteServerProcess && viteServerProcess.unref) {
-    viteServerProcess.unref();
+    if (viteServerProcess && viteServerProcess.unref) {
+      viteServerProcess.unref();
+    }
+  } catch (err) {
+    console.error("Falha ao iniciar processo do servidor local:", err);
   }
 
   // Aguarda até o servidor responder
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 25; i++) {
     await new Promise((r) => setTimeout(r, 400));
     const ok = await checkServer("http://localhost:3000/");
-    if (ok) break;
+    if (ok) return true;
   }
+  return false;
 }
 
 async function createWindow() {
   if (process.platform === "win32") {
     app.setAppUserModelId("com.hug.desktop");
   }
-
-  await ensureServerRunning();
 
   const iconIco = path.join(__dirname, "../public/favicon.ico");
   const iconPng = path.join(__dirname, "../public/hug-atom-icon.png");
@@ -80,21 +86,56 @@ async function createWindow() {
     title: "HUG",
     backgroundColor: "#03060a",
     icon: iconPath,
+    show: true,
     darkTheme: true,
     autoHideMenuBar: true,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
     },
   });
 
   mainWindow.setIcon(iconPath);
 
-  // URL do HUG rodando localmente
-  const targetUrl = process.env.HUG_DESKTOP_URL || "http://localhost:3000/agents";
-  mainWindow.loadURL(targetUrl);
+  const localUrl = "http://localhost:3000/agents";
+  const remoteFallbackUrl = "https://gravity-hug.lovable.app/agents";
+  const targetUrl = process.env.HUG_DESKTOP_URL || localUrl;
 
-  // Abre links externos no navegador padrao
+  let retries = 0;
+  const maxRetries = 10;
+
+  mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription, validatedURL) => {
+    console.warn(`[Electron] Falha ao carregar ${validatedURL} (${errorCode} - ${errorDescription})`);
+    if (retries < maxRetries) {
+      retries++;
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          console.log(`[Electron] Tentando reconectar ao HUG (tentativa ${retries}/${maxRetries})...`);
+          mainWindow.loadURL(localUrl);
+        }
+      }, 1200);
+    } else {
+      console.log("[Electron] Servidor local indisponível. Carregando versão web oficial de contingência...");
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.loadURL(remoteFallbackUrl);
+      }
+    }
+  });
+
+  // Garante que o servidor local esteja no ar antes de abrir
+  void ensureServerRunning().then((serverReady) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (serverReady) {
+        mainWindow.loadURL(targetUrl);
+      } else {
+        // Tenta carregar local, com fallback automático
+        mainWindow.loadURL(targetUrl);
+      }
+    }
+  });
+
+  // Abre links externos no navegador padrão do sistema operacional
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };

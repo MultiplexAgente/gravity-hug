@@ -1,4 +1,4 @@
-﻿$csc = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+$csc = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $src = 'D:\Desenvolvimento\Projetos\multiplex-ia\HUGLauncher.cs'
 $out = 'D:\Desenvolvimento\Projetos\multiplex-ia\HUG.exe'
 $ico = 'D:\Desenvolvimento\Projetos\multiplex-ia\public\favicon.ico'
@@ -7,32 +7,20 @@ $ico = 'D:\Desenvolvimento\Projetos\multiplex-ia\public\favicon.ico'
 
 if (Test-Path $out) {
     Write-Host "HUG.exe compilado com sucesso!"
-    $desktop1 = 'C:\Users\antho\OneDrive\Área de Trabalho'
-    $desktop2 = 'C:\Users\antho\Desktop'
+    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
     
-    if (Test-Path $desktop1) {
-        Copy-Item -Path $out -Destination (Join-Path $desktop1 'HUG.exe') -Force
+    if (Test-Path $desktopPath) {
+        $destExe = Join-Path $desktopPath 'HUG.exe'
+        Copy-Item -Path $out -Destination $destExe -Force
         
         $wsh = New-Object -ComObject WScript.Shell
-        $shortcut = $wsh.CreateShortcut((Join-Path $desktop1 'HUG.lnk'))
-        $shortcut.TargetPath = (Join-Path $desktop1 'HUG.exe')
+        $shortcut = $wsh.CreateShortcut((Join-Path $desktopPath 'HUG.lnk'))
+        $shortcut.TargetPath = $destExe
         $shortcut.WorkingDirectory = 'D:\Desenvolvimento\Projetos\multiplex-ia'
         $shortcut.IconLocation = "$ico,0"
         $shortcut.Description = 'HUG Desktop - Plataforma Inteligente'
         $shortcut.Save()
-        Write-Host "HUG.exe e atalho HUG criados na Area de Trabalho OneDrive"
-    }
-    
-    if (Test-Path $desktop2) {
-        Copy-Item -Path $out -Destination (Join-Path $desktop2 'HUG.exe') -Force
-        $wsh = New-Object -ComObject WScript.Shell
-        $shortcut = $wsh.CreateShortcut((Join-Path $desktop2 'HUG.lnk'))
-        $shortcut.TargetPath = (Join-Path $desktop2 'HUG.exe')
-        $shortcut.WorkingDirectory = 'D:\Desenvolvimento\Projetos\multiplex-ia'
-        $shortcut.IconLocation = "$ico,0"
-        $shortcut.Description = 'HUG Desktop - Plataforma Inteligente'
-        $shortcut.Save()
-        Write-Host "HUG.exe e atalho HUG criados na Area de Trabalho padrao"
+        Write-Host "HUG.exe e atalho HUG atualizados em: $desktopPath"
     }
 } else {
     Write-Error "Falha ao compilar HUG.exe"

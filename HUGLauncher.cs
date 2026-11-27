@@ -21,7 +21,7 @@ namespace HugDesktopLauncher
                 psi.WorkingDirectory = projectDir;
                 psi.UseShellExecute = false;
                 psi.CreateNoWindow = true;
-                psi.WindowStyle = ProcessWindowStyle.Hidden;
+                psi.WindowStyle = ProcessWindowStyle.Normal;
 
                 if (psi.EnvironmentVariables.ContainsKey("ELECTRON_RUN_AS_NODE"))
                 {
