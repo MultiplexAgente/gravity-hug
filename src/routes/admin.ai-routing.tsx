@@ -63,13 +63,13 @@ interface AdminPayload {
 export const Route = createFileRoute("/admin/ai-routing")({
   head: () => ({
     meta: [
-      { title: "Auditoria HUG AI | Motor Multiplex" },
+      { title: "Auditoria | HUG" },
       {
         name: "description",
         content:
-          "Painel técnico do Motor Multiplex AI no HUG: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
+          "Painel técnico no HUG: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
       },
-      { property: "og:title", content: "Auditoria HUG AI | Motor Multiplex" },
+      { property: "og:title", content: "Auditoria | HUG" },
       {
         property: "og:description",
         content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no HUG.",

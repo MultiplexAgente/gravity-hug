@@ -186,7 +186,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
           // BLINDAGEM DE SEGURANÇA: HUG AI Security & Anti-Fraud Shield
           const threat = HugAISecurityShield.inspecionarEntrada(combinedMessage, {
             identificadorCliente: convId,
-            nomeEmpresa: "HUG Agents & BonaSoft",
+            nomeEmpresa: "HUG",
           });
 
           if (threat.bloqueado) {
@@ -433,7 +433,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               const replyText = openAiJson.choices?.[0]?.message?.content?.trim();
 
               if (replyText) {
-                const outGuard = HugAISecurityShield.inspecionarSaida(replyText, "HUG Agents & BonaSoft");
+                const outGuard = HugAISecurityShield.inspecionarSaida(replyText, "HUG");
                 return Response.json({
                   ok: true,
                   reply: outGuard.textoSeguro,

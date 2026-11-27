@@ -394,7 +394,7 @@ export function HugAgentsApp({ onLogout }: Props) {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 group">
               <img
-                src="/hug-atom-icon.svg"
+                src="/hug-atom-icon.png"
                 alt="HUG"
                 className="size-7 rounded-xl object-contain"
               />
@@ -642,9 +642,9 @@ export function HugAgentsApp({ onLogout }: Props) {
             /* TELA INICIAL LIMPA */
             <div className="h-full flex flex-col justify-center items-center text-center my-auto py-20">
               <img
-                src="/hug-atom-icon.svg"
+                src="/hug-atom-icon.png"
                 alt="HUG"
-                className="size-16 object-contain opacity-80 mb-3"
+                className="size-16 object-contain mb-3"
               />
               <h2 className="text-xl font-bold tracking-tight text-white">
                 HUG

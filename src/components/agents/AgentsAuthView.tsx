@@ -1,18 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  Lock,
-  Mail,
-  ArrowRight,
-  User,
-  CheckCircle2,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import hugLogo from "@/assets/hug-icon.jpg";
 import { setToken } from "@/lib/multiplex/client";
 import { toast } from "sonner";
 
@@ -36,26 +26,24 @@ export function AgentsAuthView({ onSuccess }: Props) {
 
     try {
       if (!email.trim() || !password.trim()) {
-        throw new Error("Por favor, preencha email e senha.");
+        throw new Error("Preencha email e senha.");
       }
 
-      // Sessão de autenticação do HUG Agents
-      const tokenSintetico = `hug_agt_${Date.now()}_${btoa(email.trim())}`;
+      const tokenSintetico = `hug_${Date.now()}_${btoa(email.trim())}`;
       setToken(tokenSintetico);
 
-      // Salva dados do usuário no storage para persistência multiusuário
       localStorage.setItem("hug_agents_user_email", email.trim().toLowerCase());
       localStorage.setItem("hug_agents_user_name", nome.trim() || email.trim().split("@")[0] || "Usuário");
 
       if (modo === "login") {
         toast.success("Bem-vindo ao HUG!");
       } else {
-        toast.success("Conta criada com sucesso!");
+        toast.success("Conta criada!");
       }
 
       onSuccess();
     } catch (err: any) {
-      setErro(err?.message || "Erro ao autenticar. Verifique os dados inseridos.");
+      setErro(err?.message || "Erro ao autenticar.");
       toast.error(err?.message || "Falha na autenticação.");
     } finally {
       setCarregando(false);
@@ -64,7 +52,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
 
   return (
     <div className="min-h-screen bg-[#03060a] text-white flex flex-col justify-between p-4 sm:p-6 selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-hidden">
-      {/* Ambient Radial Glow */}
+      {/* Ambient Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] bg-gradient-to-tr from-emerald-600/15 via-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Barra Superior */}
@@ -74,7 +62,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
           className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors group"
         >
           <ArrowLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
-          Voltar à Homepage
+          Voltar
         </Link>
       </header>
 
@@ -84,7 +72,7 @@ export function AgentsAuthView({ onSuccess }: Props) {
           {/* Logo e Cabeçalho */}
           <div className="flex flex-col items-center text-center space-y-3">
             <img
-              src="/hug-atom-icon.svg"
+              src="/hug-atom-icon.png"
               alt="HUG"
               className="size-16 rounded-2xl object-contain shadow-lg"
             />
@@ -129,57 +117,50 @@ export function AgentsAuthView({ onSuccess }: Props) {
             </div>
           )}
 
-          {/* Formulário sem Código de Empresa e sem Sobreposição */}
+          {/* Formulário Limpo e Direto */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {modo === "cadastro" && (
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-300">Seu Nome Completo</Label>
-                <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
-                  <User className="size-4 text-slate-400 shrink-0" />
-                  <input
-                    type="text"
-                    required
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="Como gostaria de ser chamado"
-                    className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal"
-                  />
-                </div>
+                <Label className="text-xs font-medium text-slate-300">Nome</Label>
+                <input
+                  type="text"
+                  required
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Seu nome"
+                  className="w-full h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                />
               </div>
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-300">Email de Acesso</Label>
-              <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
-                <Mail className="size-4 text-slate-400 shrink-0" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal"
-                />
-              </div>
+              <Label className="text-xs font-medium text-slate-300">Email</Label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+              />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-300">Senha de Acesso</Label>
-              <div className="relative flex items-center gap-3 h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/25 transition-all">
-                <Lock className="size-4 text-slate-400 shrink-0" />
+              <Label className="text-xs font-medium text-slate-300">Senha</Label>
+              <div className="relative flex items-center h-11 px-3.5 rounded-xl border border-white/10 bg-black/40 focus-within:border-emerald-500 transition-all">
                 <input
                   type={mostrarSenha ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 focus:!outline-none focus:!ring-0 focus:!border-0 leading-normal tracking-wide"
+                  className="w-full !bg-transparent !border-0 !p-0 !outline-none !shadow-none !ring-0 text-sm text-white placeholder:text-slate-500 leading-normal tracking-wide"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenha(!mostrarSenha)}
                   className="text-slate-400 hover:text-white transition-colors p-1 shrink-0"
-                  title={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+                  title={mostrarSenha ? "Ocultar" : "Mostrar"}
                 >
                   {mostrarSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -189,21 +170,9 @@ export function AgentsAuthView({ onSuccess }: Props) {
             <Button
               type="submit"
               disabled={carregando}
-              className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold h-11 rounded-xl text-xs gap-2 transition-all mt-3 shadow-lg shadow-emerald-500/25 active:scale-98"
+              className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold h-11 rounded-xl text-xs transition-all mt-3 shadow-lg shadow-emerald-500/25 active:scale-98"
             >
-              {carregando ? (
-                "Acessando ambiente..."
-              ) : modo === "login" ? (
-                <>
-                  Entrar no HUG
-                  <ArrowRight className="size-4" />
-                </>
-              ) : (
-                <>
-                  Criar Minha Conta & Começar
-                  <CheckCircle2 className="size-4" />
-                </>
-              )}
+              {carregando ? "Carregando..." : modo === "login" ? "Entrar" : "Criar Conta"}
             </Button>
           </form>
         </div>

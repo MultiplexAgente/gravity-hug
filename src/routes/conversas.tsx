@@ -6,15 +6,15 @@ import { useChatWorkspace } from "@/components/multiplex/ChatWorkspace";
 export const Route = createFileRoute("/conversas")({
   head: () => ({
     meta: [
-      { title: "HUG AI | Assistente Inteligente Empresarial" },
+      { title: "HUG" },
       {
         name: "description",
-        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial (Motor Multiplex AI).",
+        content: "HUG",
       },
-      { property: "og:title", content: "HUG AI | Assistente Inteligente Empresarial" },
+      { property: "og:title", content: "HUG" },
       {
         property: "og:description",
-        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial (Motor Multiplex AI).",
+        content: "HUG",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
