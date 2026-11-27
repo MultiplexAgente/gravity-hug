@@ -103,7 +103,7 @@ export function HugAgentsApp({ onLogout }: Props) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   // Anexos
-  const [anexosPendentes, setAnexosPendentes] = useState<{ name: string; type: string }[]>([]);
+  const [anexosPendentes, setAnexosPendentes] = useState<{ name: string; type: string; dataUrl?: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Scroll da área de mensagens
@@ -206,12 +206,21 @@ export function HugAgentsApp({ onLogout }: Props) {
     setAnexosPendentes([]);
     setProcessando(true);
 
+    const imagensParaEnviar = anexosPendentes
+      .filter((a) => a.dataUrl && a.type.startsWith("image/"))
+      .map((a) => ({
+        name: a.name,
+        type: a.type,
+        dataUrl: a.dataUrl!,
+      }));
+
     try {
       const token = getToken();
       const resposta = await HugAgentsService.enviarMensagem({
         mensagem: texto,
         agente: agenteAtivo,
         historico: mensagens,
+        images: imagensParaEnviar,
         token,
       });
 
@@ -289,17 +298,78 @@ export function HugAgentsApp({ onLogout }: Props) {
     }
   }
 
-  // 8. ANEXO DE ARQUIVOS
+  // 8. ANEXO DE ARQUIVOS E IMAGENS
   function handleAnexarArquivo(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    const novos = Array.from(files).map((f) => ({
-      name: f.name,
-      type: f.type || "application/octet-stream",
-    }));
-    setAnexosPendentes((prev) => [...prev, ...novos]);
-    toast.success(`${novos.length} anexo(s) adicionado(s).`);
+    Array.from(files).forEach((f) => {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        const dataUrl = uploadEvent.target?.result as string;
+        setAnexosPendentes((prev) => [
+          ...prev,
+          {
+            name: f.name,
+            type: f.type || "application/octet-stream",
+            dataUrl,
+          },
+        ]);
+      };
+      reader.readAsDataURL(f);
+    });
+    toast.success(`${files.length} anexo(s) adicionado(s).`);
   }
+
+  // 8.1 COLAR IMAGEM DA ÁREA DE TRANSFERÊNCIA (CTRL+V)
+  function processarImagemClipboard(file: File) {
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const dataUrl = uploadEvent.target?.result as string;
+      setAnexosPendentes((prev) => [
+        ...prev,
+        {
+          name: file.name && file.name !== "image.png" ? file.name : `screenshot-${Date.now()}.png`,
+          type: file.type || "image/png",
+          dataUrl,
+        },
+      ]);
+      toast.success("Imagem colada da área de transferência!");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleColar(e: React.ClipboardEvent<HTMLInputElement>) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) {
+          processarImagemClipboard(file);
+          e.preventDefault();
+        }
+      }
+    }
+  }
+
+  // Captura global de Ctrl+V na página
+  useEffect(() => {
+    function handlePasteGlobal(e: ClipboardEvent) {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            processarImagemClipboard(file);
+          }
+        }
+      }
+    }
+
+    window.addEventListener("paste", handlePasteGlobal);
+    return () => window.removeEventListener("paste", handlePasteGlobal);
+  }, []);
 
   // 9. SALVAR AGENTE DO MODAL
   function handleSalvarAgente(agenteSalvo: CustomAgent) {
@@ -624,14 +694,21 @@ export function HugAgentsApp({ onLogout }: Props) {
 
                       {/* Anexos da Mensagem */}
                       {msg.attachments && msg.attachments.length > 0 && (
-                        <div className="pt-2 mt-2 border-t border-white/10 space-y-1">
+                        <div className="pt-2 mt-2 border-t border-white/10 space-y-2">
                           {msg.attachments.map((anexo, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-2 text-[11px] font-mono opacity-80"
-                            >
-                              <Paperclip className="size-3" />
-                              <span>{anexo.name}</span>
+                            <div key={i}>
+                              {anexo.dataUrl && anexo.type.startsWith("image/") ? (
+                                <img
+                                  src={anexo.dataUrl}
+                                  alt={anexo.name}
+                                  className="max-h-64 rounded-xl object-contain border border-white/15 shadow-md mt-1"
+                                />
+                              ) : (
+                                <div className="flex items-center gap-2 text-[11px] font-mono opacity-80">
+                                  <Paperclip className="size-3" />
+                                  <span>{anexo.name}</span>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -687,18 +764,27 @@ export function HugAgentsApp({ onLogout }: Props) {
                 {anexosPendentes.map((anexo, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 text-xs text-slate-200 font-mono"
+                    className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-white/10 text-xs text-slate-200 border border-white/10 shadow-sm"
                   >
-                    <Paperclip className="size-3 text-emerald-400" />
-                    <span className="truncate max-w-[140px]">{anexo.name}</span>
+                    {anexo.dataUrl && anexo.type.startsWith("image/") ? (
+                      <img
+                        src={anexo.dataUrl}
+                        alt={anexo.name}
+                        className="size-9 rounded-lg object-cover border border-white/20 shrink-0"
+                      />
+                    ) : (
+                      <Paperclip className="size-3.5 text-emerald-400 shrink-0 ml-1" />
+                    )}
+                    <span className="truncate max-w-[140px] font-mono text-[11px]">{anexo.name}</span>
                     <button
                       type="button"
                       onClick={() =>
                         setAnexosPendentes(anexosPendentes.filter((_, i) => i !== idx))
                       }
-                      className="text-slate-400 hover:text-white ml-1"
+                      className="text-slate-400 hover:text-rose-400 ml-1 p-0.5 transition-colors"
+                      title="Remover anexo"
                     >
-                      <X className="size-3" />
+                      <X className="size-3.5" />
                     </button>
                   </div>
                 ))}
@@ -745,7 +831,8 @@ export function HugAgentsApp({ onLogout }: Props) {
                 type="text"
                 value={textoInput}
                 onChange={(e) => setTextoInput(e.target.value)}
-                placeholder="Digite sua mensagem..."
+                onPaste={handleColar}
+                placeholder="Digite sua mensagem ou cole uma imagem (Ctrl+V)..."
                 className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none"
               />
 

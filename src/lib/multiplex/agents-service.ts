@@ -41,7 +41,7 @@ export interface AgentChatMessage {
   content: string;
   createdAt: string;
   agentId?: string;
-  attachments?: { name: string; type: string; url?: string }[];
+  attachments?: { name: string; type: string; url?: string; dataUrl?: string }[];
   tempoProcessamentoSegundos?: number;
   etapasPensamento?: { label: string; status: "concluido" | "em_andamento" | "pendente"; duracao?: string }[];
 }
@@ -426,6 +426,7 @@ export const HugAgentsService = {
     mensagem: string;
     agente: CustomAgent;
     historico: AgentChatMessage[];
+    images?: Array<{ name?: string; type?: string; dataUrl: string }>;
     token?: string | null;
   }): Promise<{ resposta: string; erro?: string }> {
     try {
@@ -454,6 +455,7 @@ TRANSBORDO HUMANO: ${params.agente.humanHandoffEnabled ? "ATIVO" : "DESATIVADO"}
         body: JSON.stringify({
           message: `${promptContexto}\n\nMENSAGEM DO USUÁRIO:\n${params.mensagem}`,
           history: historyFormatted,
+          images: params.images || [],
         }),
       });
 
