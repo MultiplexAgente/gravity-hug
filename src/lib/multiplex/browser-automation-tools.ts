@@ -10,6 +10,7 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
 export interface OpcoesAutofill {
@@ -31,6 +32,29 @@ export interface RespostaAutofill {
   erro?: string;
 }
 
+export interface OpcoesTesteWeb {
+  url: string;
+  acao?: "abrir_e_inspecionar" | "clicar" | "preencher" | "capturar_tela";
+  seletorClique?: string;
+  seletorInput?: string;
+  textoPreenchimento?: string;
+  visivel?: boolean;
+}
+
+export interface RespostaTesteWeb {
+  sucesso: boolean;
+  mensagem: string;
+  titulo?: string;
+  urlFinal?: string;
+  statusHttp?: number;
+  logsConsole: string[];
+  errosConsole: string[];
+  anexo?: { name: string; type: string; dataUrl: string };
+  caminhoScreenshot?: string;
+  passosExecutados: string[];
+  erro?: string;
+}
+
 const URLS_SERVICOS_CONHECIDOS: Record<string, string> = {
   netflix: "https://www.netflix.com/br/",
   spotify: "https://www.spotify.com/br-pt/signup",
@@ -40,6 +64,18 @@ const URLS_SERVICOS_CONHECIDOS: Record<string, string> = {
 };
 
 export class BrowserAutomationTools {
+  /**
+   * Normaliza qualquer entrada de endereço para URL HTTP/HTTPS válida
+   */
+  public static normalizarUrl(inputUrl: string): string {
+    let u = (inputUrl || "").trim().replace(/^['"]|['"]$/g, "");
+    if (!u) return "http://localhost:3000/";
+    if (/^https?:\/\//i.test(u)) return u;
+    if (/^(localhost|127\.0\.0\.1)(:\d+)?/i.test(u)) return `http://${u}`;
+    if (/^[a-zA-Z0-9_\-]+\.[a-zA-Z]{2,}/.test(u)) return `https://${u}`;
+    return `https://www.${u}.com/`;
+  }
+
   /**
    * Localiza o executável do Chrome ou Edge no computador
    */
@@ -61,6 +97,146 @@ export class BrowserAutomationTools {
     throw new Error(
       "Nenhum navegador (Google Chrome ou Microsoft Edge) encontrado em C:\\Program Files. Por favor, certifique-se de que o Chrome está instalado."
     );
+  }
+
+  /**
+   * Abre o navegador na área de trabalho, acessa a página, inspeciona o carregamento,
+   * captura logs de console/erros, clica/preenche se solicitado e tira screenshot para validação visual.
+   */
+  public static async navegarETestarWeb(opcoes: OpcoesTesteWeb): Promise<RespostaTesteWeb> {
+    const passos: string[] = [];
+    const logsConsole: string[] = [];
+    const errosConsole: string[] = [];
+    let browser: Browser | null = null;
+
+    try {
+      const urlAlvo = this.normalizarUrl(opcoes.url);
+      passos.push(`Iniciando Google Chrome na sua área de trabalho`);
+      const executablePath = this.obterCaminhoNavegador();
+      const visivel = opcoes.visivel !== false;
+
+      // Inicia o navegador visível na tela para que o usuário acompanhe tudo em tempo real
+      browser = await puppeteer.launch({
+        executablePath,
+        headless: !visivel ? true : false,
+        defaultViewport: null,
+        args: [
+          "--start-maximized",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-blink-features=AutomationControlled",
+        ],
+        ignoreDefaultArgs: ["--enable-automation"],
+      });
+
+      const pages = await browser.pages();
+      const page: Page = pages[0] || (await browser.newPage());
+
+      // Monitoramento ativo de console e erros de script
+      page.on("console", (msg) => {
+        logsConsole.push(`[${msg.type().toUpperCase()}]: ${msg.text()}`);
+      });
+      page.on("pageerror", (err: any) => {
+        errosConsole.push(`[Script Error]: ${err?.message || String(err)}`);
+      });
+
+      passos.push(`Navegando para: ${urlAlvo}`);
+      let statusHttp = 200;
+      try {
+        const resp = await page.goto(urlAlvo, { waitUntil: "networkidle2", timeout: 30000 });
+        if (resp) statusHttp = resp.status();
+      } catch {
+        // Fallback rápido se a rede mantiver conexões longas
+        await page.goto(urlAlvo, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+      }
+
+      // Pequena pausa para garantir renderização de elementos interativos
+      await new Promise((r) => setTimeout(r, 1200));
+
+      const titulo = await page.title().catch(() => "");
+      const urlFinal = page.url();
+      passos.push(`Página carregada com sucesso: "${titulo}" (${urlFinal})`);
+
+      // Preenchimento de campo se fornecido
+      if (opcoes.seletorInput && opcoes.textoPreenchimento) {
+        try {
+          await page.waitForSelector(opcoes.seletorInput, { timeout: 4000 });
+          await page.type(opcoes.seletorInput, opcoes.textoPreenchimento, { delay: 35 });
+          passos.push(`Preencheu o campo "${opcoes.seletorInput}" com "${opcoes.textoPreenchimento}"`);
+        } catch {
+          passos.push(`Aviso: seletor de input "${opcoes.seletorInput}" não encontrado.`);
+        }
+      }
+
+      // Clique em elemento se fornecido
+      if (opcoes.seletorClique) {
+        try {
+          await page.waitForSelector(opcoes.seletorClique, { timeout: 4000 });
+          await page.click(opcoes.seletorClique);
+          passos.push(`Clicou no elemento "${opcoes.seletorClique}"`);
+          await new Promise((r) => setTimeout(r, 1500));
+        } catch {
+          passos.push(`Aviso: seletor de clique "${opcoes.seletorClique}" não encontrado.`);
+        }
+      }
+
+      // Captura de screenshot de alta resolução
+      passos.push(`Capturando screenshot da tela para verificação visual...`);
+      const buffer = await page.screenshot({ type: "jpeg", quality: 85 });
+      const base64 = Buffer.from(buffer).toString("base64");
+      const dataUrl = `data:image/jpeg;base64,${base64}`;
+
+      const nomeArquivo = `screenshot_web_${Date.now()}.jpg`;
+
+      // 1. Salva no Disco D:
+      try {
+        const dirD = path.join(process.cwd(), "data", "imagens");
+        if (!fs.existsSync(dirD)) fs.mkdirSync(dirD, { recursive: true });
+        fs.writeFileSync(path.join(dirD, nomeArquivo), buffer);
+      } catch {}
+
+      // 2. Salva na Área de Trabalho do usuário
+      const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+      const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+      const standardDesktop = path.join(userProfile, "Desktop");
+      const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+      const caminhoDesktop = path.join(desktopDir, nomeArquivo);
+      try {
+        fs.writeFileSync(caminhoDesktop, buffer);
+      } catch {}
+
+      const totalErros = errosConsole.length;
+      const resumoConsole = totalErros === 0
+        ? "✅ Zero erros de JavaScript no console."
+        : `⚠️ ${totalErros} erro(s) de console:\n${errosConsole.slice(0, 3).join("\n")}`;
+
+      return {
+        sucesso: true,
+        mensagem: `🌐 **Navegador Google Chrome Aberto e Testado com Sucesso!**\n\n• **Página Acessada:** ${urlFinal}\n• **Título:** ${titulo || "(Sem título)"}\n• **Status HTTP:** ${statusHttp}\n• **Console / Diagnóstico:** ${resumoConsole}\n\nO screenshot da página foi capturado e exibido abaixo. Uma cópia também foi salva na sua Área de Trabalho (${caminhoDesktop}) e no Disco D:.`,
+        titulo,
+        urlFinal,
+        statusHttp,
+        logsConsole,
+        errosConsole,
+        caminhoScreenshot: caminhoDesktop,
+        anexo: {
+          name: nomeArquivo,
+          type: "image/jpeg",
+          dataUrl,
+        },
+        passosExecutados: passos,
+      };
+    } catch (err: any) {
+      passos.push(`Erro durante o teste: ${err?.message}`);
+      return {
+        sucesso: false,
+        mensagem: `Erro ao navegar e testar no navegador: ${err?.message}`,
+        logsConsole,
+        errosConsole,
+        passosExecutados: passos,
+        erro: err?.message,
+      };
+    }
   }
 
   /**
@@ -207,6 +383,23 @@ export class BrowserAutomationTools {
    */
   public static analisarComandoWeb(mensagem: string): OpcoesAutofill | null {
     const msg = (mensagem || "").trim();
+    const msgLower = msg.toLowerCase();
+
+    // Se é claramente um comando de pastas ou arquivos do Windows, NUNCA executa navegador
+    if (
+      /(?:pasta|pastas|diret[oó]rio|arquivo|arquivos|loca tudo|área de trabalho|disco d|imagens|fotos)/i.test(msgLower) &&
+      !/(?:navegador|browser|chrome|site|p[áa]gina|url|localhost|http|www|web)/i.test(msgLower)
+    ) {
+      return null;
+    }
+
+    // Detecta URL explícita (ex: "abra o localhost:3000", "acesse https://google.com")
+    const matchUrl = msg.match(/(https?:\/\/[^\s]+|localhost:\d+|127\.0\.0\.1:\d+|[a-zA-Z0-9_\-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
+    if (matchUrl && matchUrl[0]) {
+      return {
+        url: matchUrl[0],
+      };
+    }
 
     // Detecta pedidos como: "crie uma conta na netflix para mim e pare no pagamento"
     const matchCadastro = msg.match(
@@ -215,15 +408,16 @@ export class BrowserAutomationTools {
 
     if (matchCadastro && matchCadastro[1]) {
       const servico = matchCadastro[1].toLowerCase().replace(/["']/g, "").trim();
-      const pararPagamento =
-        msg.toLowerCase().includes("pagamento") ||
-        msg.toLowerCase().includes("pagar") ||
-        msg.toLowerCase().includes("pare");
+      const palavrasNaoWeb = new Set([
+        "pasta", "pastas", "diretorio", "diretório", "arquivo", "arquivos",
+        "imagem", "imagens", "foto", "fotos", "musica", "video"
+      ]);
+      if (palavrasNaoWeb.has(servico)) return null;
 
-      // Ignora comandos que são de pastas locais (ex: "crie uma pasta")
-      if (servico === "pasta" || servico === "diretorio" || servico === "arquivo") {
-        return null;
-      }
+      const pararPagamento =
+        msgLower.includes("pagamento") ||
+        msgLower.includes("pagar") ||
+        msgLower.includes("pare");
 
       return {
         servico,

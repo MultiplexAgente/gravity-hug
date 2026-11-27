@@ -98,7 +98,12 @@ GERAÇÃO DE IMAGENS:
 - Você TEM capacidade plena e integrada para gerar imagens de qualquer tema ou estilo (fotografia, 3D, arte, animais, produtos, pessoas, etc.)!
 - Quando o usuário mandar gerar, criar, desenhar ou produzir uma imagem (ex: "gere uma imagem de 2 macacos dançando"):
   CHAME OBRIGATORIAMENTE A FERRAMENTA 'gerar_imagem'!
-- NUNCA diga que não pode ou não tem capacidade para gerar imagens! Você SEMPRE pode gerar usando a ferramenta 'gerar_imagem'.`;
+- NUNCA diga que não pode ou não tem capacidade para gerar imagens! Você SEMPRE pode gerar usando a ferramenta 'gerar_imagem'.
+
+AUTOMAÇÃO & TESTE DE NAVEGADOR WEB (GOOGLE CHROME):
+- Você tem a ferramenta nativa 'navegar_e_testar_web' que abre o Google Chrome visível na tela do computador do usuário, navega para qualquer site ou localhost (ex: http://localhost:3000), inspeciona a página, captura erros de console/JavaScript, clica em botões, preenche campos e tira prints/screenshots para auditoria visual!
+- Quando o usuário mandar abrir o navegador, testar página, navegar para um site ou inspecionar uma URL:
+  CHAME OBRIGATORIAMENTE A FERRAMENTA 'navegar_e_testar_web'!`;
 
 async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Promise<{
   sucesso: boolean;
@@ -487,6 +492,24 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   },
                 },
               },
+              {
+                type: "function",
+                function: {
+                  name: "navegar_e_testar_web",
+                  description: "Abre o navegador Google Chrome no computador do usuário, acessa qualquer site ou endereço local (ex: 'http://localhost:3000' ou 'google.com'), inspeciona erros de console/JavaScript, clica em botões, preenche campos e tira print/screenshot para auditoria visual. Use SEMPRE que o usuário mandar abrir o navegador, testar página, navegar para um site ou inspecionar uma URL.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      url: { type: "string", description: "URL ou endereço web a testar e navegar (ex: 'http://localhost:3000', 'https://google.com')" },
+                      acao: { type: "string", description: "Ação: 'abrir_e_inspecionar', 'clicar', 'preencher'" },
+                      seletorClique: { type: "string", description: "Texto ou seletor do botão para clicar (opcional)" },
+                      seletorInput: { type: "string", description: "Seletor do campo a preencher (opcional)" },
+                      textoPreenchimento: { type: "string", description: "Texto a digitar no campo (opcional)" },
+                    },
+                    required: ["url"],
+                  },
+                },
+              },
             ];
 
             const payloadBody: any = {
@@ -579,6 +602,18 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                       anexosGerados.push(res.anexo);
                     }
                     toolResult = JSON.stringify({ sucesso: res.sucesso, mensagem: res.mensagem });
+                  } else if (fnName === "navegar_e_testar_web") {
+                    const res = await BrowserAutomationTools.navegarETestarWeb({
+                      url: args.url,
+                      acao: args.acao,
+                      seletorClique: args.seletorClique,
+                      seletorInput: args.seletorInput,
+                      textoPreenchimento: args.textoPreenchimento,
+                    });
+                    if (res.sucesso && res.anexo) {
+                      anexosGerados.push(res.anexo);
+                    }
+                    toolResult = JSON.stringify(res);
                   }
 
                   apiMessages.push({
@@ -626,6 +661,35 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                       attachments: [resImg.anexo],
                       transcription: audioTranscription || undefined,
                       modelUsed: "hug-image-generator",
+                      requestId: `comp_${Date.now().toString(36)}`,
+                      conversationId: convId,
+                      viaGateway: false,
+                    });
+                  }
+                }
+
+                // Verificação de intenção de automação/teste de navegador web (Chrome)
+                const querNavegarOuTestarWeb =
+                  /(?:navegador|browser|chrome|site|p[áa]gina|pagina|localhost|http|www|web)\b/i.test(combinedMessage) &&
+                  /(?:abra|abrir|teste|testar|acesse|acessar|inspecione|inspecionar|navegue|navegar|verifique|verificar)/i.test(combinedMessage) &&
+                  !/(?:pasta|pastas|diret[oó]rio|arquivo|arquivos)\s+(?:da|do|de|chamad)/i.test(combinedMessage);
+
+                if (querNavegarOuTestarWeb) {
+                  let urlDetectada = "http://localhost:3000";
+                  const urlMatch = combinedMessage.match(/(https?:\/\/[^\s]+|localhost:\d+|127\.0\.0\.1:\d+|[a-zA-Z0-9_\-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
+                  if (urlMatch && urlMatch[0]) {
+                    urlDetectada = urlMatch[0];
+                  }
+                  const resWeb = await BrowserAutomationTools.navegarETestarWeb({
+                    url: urlDetectada,
+                  });
+                  if (resWeb.sucesso) {
+                    return Response.json({
+                      ok: true,
+                      reply: resWeb.mensagem,
+                      attachments: resWeb.anexo ? [resWeb.anexo] : undefined,
+                      transcription: audioTranscription || undefined,
+                      modelUsed: "hug-browser-automator",
                       requestId: `comp_${Date.now().toString(36)}`,
                       conversationId: convId,
                       viaGateway: false,
