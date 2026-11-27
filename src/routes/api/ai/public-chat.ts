@@ -248,6 +248,29 @@ async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Prom
       }
     }
 
+    // Motor de contingência de altíssima qualidade (Flux / SDXL Master) com nologo=true E estampa exclusiva HUG
+    if (!rawBuf) {
+      try {
+        const promptFlux = encodeURIComponent(
+          `Masterpiece photography of ${promptOriginal}, sharp focus, hyperrealistic 8k, award-winning cinematic lighting, beautiful composition`
+        );
+        const seed = Math.floor(Math.random() * 9999999);
+        const engineUrl = `https://image.pollinations.ai/prompt/${promptFlux}?width=1024&height=1024&model=flux&nologo=true&enhance=true&seed=${seed}`;
+        
+        const resp = await fetch(engineUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          },
+        });
+
+        if (resp.ok) {
+          rawBuf = Buffer.from(await resp.arrayBuffer());
+        }
+      } catch (errFallback: any) {
+        console.warn("Falha no motor de contingência:", errFallback?.message);
+      }
+    }
+
     if (!rawBuf) {
       throw new Error("Não foi possível gerar a imagem através do motor de IA HUG.");
     }
@@ -885,7 +908,37 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   }
                 }
 
-                // 3. Verificação de intenção de abrir pastas ou arquivos no Windows Explorer
+                // 3. Verificação de intenção de criar pasta no sistema operacional
+                const querCriarPasta =
+                  /(?:crie|criar|fa[çc]a|fazer|monte|montar)\s+(?:uma\s+)?(?:pasta|diret[oó]rio)/i.test(combinedMessage);
+
+                if (querCriarPasta) {
+                  const mNome = combinedMessage.match(/(?:pasta|diret[oó]rio)\s+["']?([a-zA-Z0-9_\- ]+?)["']?(?:\s+na|\s+no|\s+em|\.|\!|\?|$)/i);
+                  const nomePasta = (mNome && mNome[1]) ? mNome[1].trim() : "Nova Pasta";
+                  
+                  // Se mencionar desktop ou área de trabalho, cria no Desktop do usuário
+                  let caminhoCriar = nomePasta;
+                  if (/(?:[áa]rea\s+de\s+trabalho|desktop|home)/i.test(combinedMessage)) {
+                    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+                    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+                    const standardDesktop = path.join(userProfile, "Desktop");
+                    const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+                    caminhoCriar = path.join(desktopDir, nomePasta);
+                  }
+
+                  const resCriar = await DesktopFSTools.criarPasta(caminhoCriar);
+                  return Response.json({
+                    ok: true,
+                    reply: resCriar.mensagem,
+                    transcription: audioTranscription || undefined,
+                    modelUsed: "hug-desktop-fs",
+                    requestId: `comp_${Date.now().toString(36)}`,
+                    conversationId: convId,
+                    viaGateway: false,
+                  });
+                }
+
+                // 4. Verificação de intenção de abrir pastas ou arquivos no Windows Explorer
                 const querAbrirPastaOuArquivo =
                   !querAbrirNavegador &&
                   (/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem)/i.test(combinedMessage) ||

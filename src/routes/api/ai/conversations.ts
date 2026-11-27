@@ -28,8 +28,8 @@ function lerConversas(email: string): any[] {
         );
         const firstUser = msgsOrd.find((m: any) => m.role === "user" && m.content && m.content.trim().length > 0);
         if (firstUser && firstUser.content) {
-          const palavras = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ").split(/\s+/).filter(Boolean);
-          title = palavras.length <= 5 ? palavras.join(" ") : palavras.slice(0, 5).join(" ") + "...";
+          const texto = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ");
+          title = texto.length <= 50 ? texto : texto.slice(0, 48).trim() + "...";
         }
       }
       return {
@@ -54,8 +54,8 @@ function salvarConversas(email: string, conversas: any[]): void {
         );
         const firstUser = msgsOrd.find((m: any) => m.role === "user" && m.content && m.content.trim().length > 0);
         if (firstUser && firstUser.content) {
-          const palavras = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ").split(/\s+/).filter(Boolean);
-          title = palavras.length <= 5 ? palavras.join(" ") : palavras.slice(0, 5).join(" ") + "...";
+          const texto = firstUser.content.trim().replace(/^["']|["']$/g, "").replace(/[\r\n]+/g, " ");
+          title = texto.length <= 50 ? texto : texto.slice(0, 48).trim() + "...";
         }
       }
       return {

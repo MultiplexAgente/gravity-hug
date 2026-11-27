@@ -57,8 +57,8 @@ export interface AgentConversation {
 }
 
 /**
- * Gera o título oficial da conversa extraindo as primeiras 5 palavras
- * da PRIMEIRA mensagem enviada pelo usuário na conversa.
+ * Gera o título oficial da conversa extraindo a PRIMEIRA mensagem enviada pelo usuário.
+ * O título NUNCA muda depois e preserva a frase completa (até 50 caracteres).
  */
 export function gerarTituloDaConversa(mensagens: AgentChatMessage[]): string {
   if (!Array.isArray(mensagens) || mensagens.length === 0) {
@@ -80,14 +80,11 @@ export function gerarTituloDaConversa(mensagens: AgentChatMessage[]): string {
     .replace(/^["']|["']$/g, "")
     .replace(/[\r\n]+/g, " ");
 
-  const palavras = textoLimpo.split(/\s+/).filter(Boolean);
-  if (palavras.length <= 5) {
-    return textoLimpo.slice(0, 36);
+  if (textoLimpo.length <= 50) {
+    return textoLimpo;
   }
 
-  // Pega exatamente as 5 primeiras palavras enviadas pelo usuário
-  const primeiras5 = palavras.slice(0, 5).join(" ");
-  return primeiras5.length > 34 ? primeiras5.slice(0, 34) + "..." : primeiras5;
+  return textoLimpo.slice(0, 48).trim() + "...";
 }
 
 export const OFFICIAL_AGENT_TEMPLATES: Omit<CustomAgent, "id" | "createdAt" | "updatedAt">[] = [

@@ -83,9 +83,8 @@ async function main() {
       ctx.imageSmoothingQuality = 'high';
       ctx.clearRect(0, 0, size, size);
       
-      // Recorta a área útil exata (15, 15, 226, 226) e projeta em (0, 0, size, size) com 1px de respiro para anti-aliasing
-      const pad = size >= 64 ? 2 : 1;
-      ctx.drawImage(img, 15, 15, 226, 226, pad, pad, size - pad * 2, size - pad * 2);
+      // Ocupa 100% da área (bleed total) sem nenhuma margem vazia para ter o mesmo tamanho de ícones do Chrome e Firefox na barra de tarefas
+      ctx.drawImage(img, 15, 15, 226, 226, 0, 0, size, size);
     };
   </script>
 </body>
@@ -94,7 +93,7 @@ async function main() {
   await page.setContent(html);
   await page.waitForFunction('window.__ready === true');
 
-  const sizes = [512, 256, 128, 64, 48, 32, 16];
+  const sizes = [512, 256, 128, 64, 48, 40, 32, 24, 16];
   const pngBuffers = [];
 
   for (const s of sizes) {

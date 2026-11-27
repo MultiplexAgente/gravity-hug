@@ -62,11 +62,15 @@ async function ensureServerRunning() {
 }
 
 async function createWindow() {
+  if (process.platform === "win32") {
+    app.setAppUserModelId("com.hug.desktop");
+  }
+
   await ensureServerRunning();
 
-  const iconPath = process.platform === "win32"
-    ? path.join(__dirname, "../public/favicon.ico")
-    : path.join(__dirname, "../public/favicon.png");
+  const iconIco = path.join(__dirname, "../public/favicon.ico");
+  const iconPng = path.join(__dirname, "../public/hug-atom-icon.png");
+  const iconPath = process.platform === "win32" && fs.existsSync(iconIco) ? iconIco : iconPng;
 
   mainWindow = new BrowserWindow({
     width: 1440,

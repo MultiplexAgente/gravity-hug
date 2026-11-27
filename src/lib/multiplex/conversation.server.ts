@@ -192,33 +192,18 @@ export async function ensureConversationTitle(
   const metadata = ((data as { metadata: Record<string, unknown> | null } | null)?.metadata ?? {}) as Record<string, unknown>;
   const current = metadata["title"];
   const currentTitle = typeof current === "string" ? current.trim() : "";
-  const aiTitled = metadata["title_ai"] === true;
 
-  if (aiTitled && currentTitle) return currentTitle;
-
-  // Após algumas mensagens, o título passa a ser gerado a partir do conteúdo real da conversa.
-  const rows = args.transcript ?? [];
-  if (rows.length >= 4) {
-    const aiTitle = await generateConversationTitle(rows);
-    if (aiTitle) {
-      await supabase
-        .from("conversations")
-        .update({
-          metadata: { ...metadata, title: aiTitle, title_ai: true },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("company_id", args.companyId)
-        .eq("id", args.conversationId);
-      return aiTitle;
-    }
+  // O título da conversa deve vir SEMPRE da PRIMEIRA mensagem enviada pelo usuário e nunca ser alterado posteriormente
+  if (currentTitle && currentTitle !== "Novo chat" && currentTitle !== "Nova conversa") {
+    return currentTitle;
   }
 
-  if (currentTitle && currentTitle !== "Novo chat") return currentTitle;
-
-  const source = args.firstUserMessage.replace(/\s+/g, " ").trim();
-  if (!source) return null;
-  const words = source.split(" ").slice(0, 7).join(" ");
-  const title = (words.length > 48 ? `${words.slice(0, 48).trim()}…` : words).replace(/[.!?,;:]+$/, "");
+  const source = (args.firstUserMessage || "").replace(/\s+/g, " ").trim();
+  if (!source) return currentTitle || "Nova conversa";
+  
+  // Extrai o texto limpo da primeira mensagem do usuário sem cortar artificialmente em 5 palavras
+  const clean = source.replace(/^["']|["']$/g, "").trim();
+  const title = clean.length > 50 ? `${clean.slice(0, 50).trim()}…` : clean;
   const finalTitle = title.charAt(0).toLocaleUpperCase("pt-BR") + title.slice(1);
 
   await supabase
