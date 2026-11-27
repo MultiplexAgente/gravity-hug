@@ -99,7 +99,8 @@ OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
 GERAÇÃO DE IMAGENS:
 - Você TEM capacidade plena e integrada para gerar imagens de qualquer tema ou estilo (fotografia, 3D, arte, animais, produtos, pessoas, etc.)!
 - Quando o usuário mandar gerar, criar, desenhar ou produzir uma imagem (ex: "gere uma imagem de 2 macacos dançando"):
-  CHAME OBRIGATORIAMENTE A FERRAMENTA 'gerar_imagem'!
+  CHAME OBRIGATORIAMENTE A FERRAMENTA 'gerar_imagem' EXATAMENTE 1 ÚNICA VEZ! NUNCA chame 'gerar_imagem' mais de uma vez na mesma resposta.
+- Se o usuário estiver fazendo uma pergunta sobre uma imagem já existente, reclamando ou tirando dúvidas (ex: "por que gerou várias?", "por que gerou várias imagens?", "ficou boa?", "cadê a imagem?"), NUNCA chame 'gerar_imagem', apenas responda ao usuário explicando a situação!
 - NUNCA diga que não pode ou não tem capacidade para gerar imagens! Você SEMPRE pode gerar usando a ferramenta 'gerar_imagem'.
 
 AUTOMAÇÃO & ABERTURA DE NAVEGADOR WEB (GOOGLE CHROME):
@@ -287,7 +288,7 @@ async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Prom
     const dataUrl = `data:image/jpeg;base64,${base64}`;
 
     const nomeBase = (tituloPt || "imagem_gerada").replace(/[^a-zA-Z0-9_\-]/g, "_").slice(0, 30);
-    const nomeArquivo = `${nomeBase}_${Date.now()}.jpg`;
+    const nomeArquivo = `${nomeBase}.jpg`;
 
     // Salva no Disco D:
     try {
@@ -303,13 +304,26 @@ async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Prom
       fs.writeFileSync(path.join(pubDir, nomeArquivo), bufFinal);
     } catch {}
 
-    // Salva na Área de Trabalho do usuário
+    // Salva na Área de Trabalho do usuário (garante 1 único arquivo limpo, substituindo duplicatas)
     const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
     const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
     const standardDesktop = path.join(userProfile, "Desktop");
     const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
     const caminhoDesktop = path.join(desktopDir, nomeArquivo);
     try {
+      if (fs.existsSync(desktopDir)) {
+        // Remove quaisquer versões antigas com timestamp que possam ter sido geradas antes
+        const prefixoBusca = nomeBase.slice(0, 15).toLowerCase();
+        const files = fs.readdirSync(desktopDir);
+        for (const file of files) {
+          const fileLower = file.toLowerCase();
+          if (fileLower.startsWith(prefixoBusca) && file !== nomeArquivo && (fileLower.endsWith(".jpg") || fileLower.endsWith(".png"))) {
+            try {
+              fs.unlinkSync(path.join(desktopDir, file));
+            } catch {}
+          }
+        }
+      }
       fs.writeFileSync(caminhoDesktop, bufFinal);
     } catch {}
 
@@ -746,6 +760,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
 
               // Execução real de ferramentas chamadas pela IA
               const anexosGerados: Array<{ name: string; type: string; dataUrl: string }> = [];
+              let jaGerouImagemNesteTurno = false;
 
               if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
                 apiMessages.push(messageObj);
@@ -786,11 +801,19 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                     const res = await BrowserAutomationTools.abrirNavegador(args.url);
                     toolResult = JSON.stringify(res);
                   } else if (fnName === "gerar_imagem") {
-                    const res = await gerarImagemHelper(args.prompt, args.titulo);
-                    if (res.sucesso && res.anexo) {
-                      anexosGerados.push(res.anexo);
+                    if (jaGerouImagemNesteTurno) {
+                      toolResult = JSON.stringify({
+                        sucesso: true,
+                        mensagem: "Apenas 1 imagem única é permitida e já foi gerada com sucesso para este pedido.",
+                      });
+                    } else {
+                      jaGerouImagemNesteTurno = true;
+                      const res = await gerarImagemHelper(args.prompt, args.titulo);
+                      if (res.sucesso && res.anexo) {
+                        anexosGerados.push(res.anexo);
+                      }
+                      toolResult = JSON.stringify({ sucesso: res.sucesso, mensagem: res.mensagem });
                     }
-                    toolResult = JSON.stringify({ sucesso: res.sucesso, mensagem: res.mensagem });
                   } else if (fnName === "navegar_e_testar_web") {
                     const res = await BrowserAutomationTools.navegarETestarWeb({
                       url: args.url,
@@ -831,10 +854,14 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   messageObj = followUpJson.choices?.[0]?.message;
                 }
               } else {
-                // Se a IA não executou tool_calls, verifica intenções explícitas de abrir ou gerar imagem
+                // Se a IA não executou tool_calls, verifica se há intenção legítima de gerar imagem
+                // NUNCA gera imagem se for pergunta, dúvida, reclamação ou citação
+                const ePerguntaOuReclamacao =
+                  /(?:por\s*que|pq|porque|cad[eê]|onde|como|qual|quais|ficou|t[aá]\s+feia|lixo|merda|porcaria|v[aá]rias|duplicad|duas|tr[eê]s|mais\s+de|repetid|\?)/i.test(combinedMessage);
+
                 const querGerarImagem =
-                  /(?:gere|gerar|crie|criar|fa[çc]a|fazer|desenhe|desenhar|produza|renderize|monte)\s+(?:uma\s+)?(?:imagem|foto|desenho|ilustra[çc][ãa]o|arte)/i.test(combinedMessage) ||
-                  /(?:imagem|foto|desenho|ilustra[çc][ãa]o)\s+(?:de|do|da|dos|das)\s+/i.test(combinedMessage);
+                  !ePerguntaOuReclamacao &&
+                  /(?:^|\b)(?:gere|gerar|crie|criar|desenhe|desenhar|produza|renderize|monte)\s+(?:uma\s+)?(?:imagem|foto|desenho|ilustra[çc][ãa]o|arte)/i.test(combinedMessage);
 
                 if (querGerarImagem) {
                   const promptVisual = combinedMessage
@@ -846,7 +873,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   if (resImg.sucesso && resImg.anexo) {
                     return Response.json({
                       ok: true,
-                      reply: `Aqui está a imagem gerada de "${promptVisual}"! A imagem foi salva na sua Área de Trabalho e no Disco D:.`,
+                      reply: `Aqui está a sua imagem de "${promptVisual}"! A imagem foi salva com sucesso na sua Área de Trabalho e no Disco D:.`,
                       attachments: [resImg.anexo],
                       transcription: audioTranscription || undefined,
                       modelUsed: "hug-image-generator",
