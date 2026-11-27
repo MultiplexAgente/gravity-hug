@@ -181,12 +181,54 @@ export class DesktopFSTools {
     }
   }
 
+  public static normalizarCaminhoWindows(caminhoInput: string): string {
+    let p = caminhoInput.trim().replace(/^['"]|['"]$/g, "");
+    p = p
+      .replace(/Ã\s*rea/g, "Área")
+      .replace(/Ã¡/g, "á")
+      .replace(/Ã©/g, "é")
+      .replace(/Ã­/g, "í")
+      .replace(/Ã³/g, "ó")
+      .replace(/Ãº/g, "ú")
+      .replace(/Ã£/g, "ã")
+      .replace(/Ã§/g, "ç");
+
+    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+    const standardDesktop = path.join(userProfile, "Desktop");
+    const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+
+    if (fs.existsSync(p)) {
+      return p;
+    }
+
+    if (/(?:trabalho|desktop)/i.test(p)) {
+      let nome = path.basename(p.replace(/[\\/]+$/, ""))
+        .replace(/^(?:abra|abrir|crie|criar|fazer|nova\s+pasta|pasta)\s+/i, "")
+        .replace(/\s+(?:na|no|em|da|de)?\s*(?:[aãáÃ]\s*rea|[aãáÃ]rea)?\s*(?:de\s*)?trabalho.*$/i, "")
+        .replace(/\s+(?:no|em|na)?\s*desktop.*$/i, "")
+        .replace(/.*(?:trabalho|desktop)[\\/\s:]*/i, "")
+        .replace(/^(?:na|no|em|da|de|pasta)\s+/i, "")
+        .trim();
+      return path.join(desktopDir, nome || "NovaPasta");
+    }
+
+    if (!/^[a-zA-Z]:[\\/]/.test(p)) {
+      const proj = path.join("D:\\Desenvolvimento\\Projetos", p);
+      if (fs.existsSync(proj)) return proj;
+      return proj;
+    }
+
+    return path.resolve(p);
+  }
+
   /**
    * Abre uma pasta ou arquivo diretamente no Windows Explorer
    */
   public static async abrirNoExplorer(caminho: string): Promise<RespostaOperacaoFS> {
     try {
-      let p = path.resolve(caminho);
+      let p = DesktopFSTools.normalizarCaminhoWindows(caminho);
+
       if (!fs.existsSync(p)) {
         // Tenta buscar no computador caso tenha vindo apenas o nome
         const busca = await DesktopFSTools.buscarArquivos(caminho, undefined, 5);
@@ -235,7 +277,7 @@ export class DesktopFSTools {
    */
   public static async criarPasta(caminhoPasta: string): Promise<RespostaOperacaoFS> {
     try {
-      const pastaDestino = path.resolve(caminhoPasta);
+      const pastaDestino = DesktopFSTools.normalizarCaminhoWindows(caminhoPasta);
 
       // Previne criação em caminhos críticos do sistema operacional
       if (/^[a-zA-Z]:\\Windows\\/i.test(pastaDestino) || /^[a-zA-Z]:\\Program Files/i.test(pastaDestino)) {
@@ -250,7 +292,7 @@ export class DesktopFSTools {
         return {
           sucesso: true,
           acao: "criar_pasta",
-          mensagem: `A pasta já existia: ${pastaDestino}`,
+          mensagem: `A pasta já existia no computador: ${pastaDestino}`,
           dados: { caminho: pastaDestino, jaExistia: true },
         };
       }

@@ -73,19 +73,20 @@ PROCESSAMENTO MULTIMODAL:
 - Quando o usuário enviar áudio: o sistema transcreve o áudio para você; responda diretamente ao que foi falado de maneira natural.
 
 DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
-1. Converse de forma natural, humana, segura, direta e profissional.
-2. NUNCA comece suas respostas com frases robóticas ou templates repetitivos (como "Com base nos registros operacionais...").
-3. NUNCA responda perguntas sobre sua identidade, sua empresa ou tecnologia usando textos sobre estoque ou caixa. Se perguntarem "Quem te desenvolveu?", responda exatamente sobre a BonaSoft e sua criação.
-4. Responda PRIMEIRO e OBJETIVAMENTE ao que foi perguntado. Não empurre vendas ou "falar com especialista" em todas as mensagens — seja útil e conversacional.
-5. Quando o visitante perguntar sobre preços ou contratação, seja claro e apresente os planos com transparência.
-6. Não invente capacidades que não existem; se não souber ou se o assunto estiver fora do ecossistema, responda com honestidade.
-7. Mantenha o contexto da conversa: use o histórico para entender referências a mensagens anteriores.
+1. REGRA SUPREMA: NUNCA faça nada que o usuário não mandou explicitamente, e NUNCA diga ou prometa que vai fazer algo que não foi ordenado.
+2. É expressamente proibido dizer: "Vou recriar a pasta", "Vou criar novamente", "Deixe-me corrigir criando...", ou assumir iniciativas voluntárias não solicitadas.
+3. NUNCA FINJA OU SIMULE AÇÕES: Você JAMAIS deve responder afirmando que criou, abriu, moveu ou apagou uma pasta ou arquivo sem ter executado a respectiva ferramenta ('criar_pasta', 'abrir_pasta_explorer', 'mover_arquivo') e recebido a confirmação real do sistema operacional.
+4. CONTINUIDADE RIGOROSA DO CONTEXTO: Leia com atenção extrema as mensagens anteriores. Se você acabou de criar ou mencionar uma pasta (ex: "HIG") e em seguida o usuário diz "abra a pasta para mim" ou "a que você acabou de criar", VOCÊ JÁ SABE que é a pasta "HIG"! NUNCA pergunte "qual o nome da pasta?". Chame imediatamente 'abrir_pasta_explorer' para a pasta que já estava no contexto!
+5. Converse de forma natural, humana, segura, direta e profissional.
+6. NUNCA comece suas respostas com frases robóticas ou templates repetitivos.
+7. Responda PRIMEIRO e OBJETIVAMENTE ao que foi perguntado.
 8. É TERMINANTEMENTE PROIBIDO usar ícones de IA, estrelas, faíscas ou sparkles (como ✨, ⭐ ou qualquer símbolo similar).
 
 OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
 - Você tem ferramentas nativas para interagir com o computador do usuário: buscar_arquivos, abrir_pasta_explorer, mover_arquivo, criar_pasta e listar_diretorio.
-- Quando o usuário solicitar abrir uma pasta (ex: "abra a pasta de imagens da Loca Tudo"): use buscar_arquivos ou abrir_pasta_explorer. A pasta será aberta no Windows Explorer na tela do usuário.
-- Quando o usuário solicitar mover arquivos (ex: "mova o arquivo X para a pasta Y"): use mover_arquivo informando origem e destino. A transferência real será executada no sistema operacional.`;
+- Quando o usuário mandar criar uma pasta (ex: "crie uma pasta HIG na minha área de trabalho"): CHAME OBRIGATORIAMENTE a ferramenta 'criar_pasta' passando o nome e local.
+- Quando o usuário solicitar abrir uma pasta (ex: "abra a pasta para mim"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer' ou 'buscar_arquivos'.
+- Quando o usuário solicitar mover arquivos: CHAME OBRIGATORIAMENTE 'mover_arquivo'.`;
 
 async function transcreverAudioWhisper(
   audioDataUrl: string,
@@ -298,10 +299,10 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             // Continua para a conexão direta com o modelo central aprovado
           }
 
-          // 4. CONEXÃO CONTINGENCIAL DIRETA COM O MODELO CENTRAL (COM SUPORTE TOTAL A VISÃO)
+          // 4. CONEXÃO CONTINGENCIAL DIRETA COM O MODELO CENTRAL (COM SUPORTE TOTAL A VISÃO E FERRAMENTAS)
           if (openAiKey) {
-            // Se houver imagens, utilizamos modelo com suporte a visão garantido (gpt-4o)
-            const visionOrChatModel = images.length > 0 ? "gpt-4o" : (process.env.OPENAI_MODEL || "gpt-4o");
+            // gpt-4o possui suporte pleno e nativo a ferramentas (tool_calls) e visão
+            const visionOrChatModel = "gpt-4o";
 
             // Monta payload de mensagens para chat/vision completions
             const userContentParts: Array<
@@ -367,11 +368,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 type: "function",
                 function: {
                   name: "criar_pasta",
-                  description: "Cria uma nova pasta no Disco D: do Windows.",
+                  description: "Cria uma nova pasta no computador do usuário no local solicitado (ex: na Área de Trabalho ou no Disco D). NUNCA afirme que criou uma pasta sem antes chamar esta função.",
                   parameters: {
                     type: "object",
                     properties: {
-                      caminho: { type: "string", description: "Caminho da pasta a criar" },
+                      caminho: { type: "string", description: "Nome ou caminho da pasta a criar (ex: 'HIG na Área de Trabalho' ou 'D:\\Desenvolvimento\\Projetos\\NovaPasta')" },
                     },
                     required: ["caminho"],
                   },
@@ -452,6 +453,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
             if (openAiResp.ok) {
               let openAiJson = await openAiResp.json();
               let messageObj = openAiJson.choices?.[0]?.message;
+              console.log("[AI Response Message]:", JSON.stringify(messageObj));
 
               // Execução real de ferramentas chamadas pela IA
               if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
