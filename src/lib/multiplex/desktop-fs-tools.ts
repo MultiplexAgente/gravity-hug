@@ -186,20 +186,38 @@ export class DesktopFSTools {
    */
   public static async abrirNoExplorer(caminho: string): Promise<RespostaOperacaoFS> {
     try {
-      const p = path.resolve(caminho);
+      let p = path.resolve(caminho);
       if (!fs.existsSync(p)) {
-        return {
-          sucesso: false,
-          acao: "abrir",
-          mensagem: `Caminho não encontrado no computador: ${p}`,
-        };
+        // Tenta buscar no computador caso tenha vindo apenas o nome
+        const busca = await DesktopFSTools.buscarArquivos(caminho, undefined, 5);
+        if (busca.sucesso && Array.isArray(busca.dados) && busca.dados.length > 0) {
+          const primeiroDir = busca.dados.find((d: any) => d.eDiretorio) || busca.dados[0];
+          p = primeiroDir.caminhoCompleto;
+        } else {
+          return {
+            sucesso: false,
+            acao: "abrir",
+            mensagem: `Caminho não encontrado no computador: ${p}`,
+          };
+        }
       }
-      const { exec } = await import("node:child_process");
-      exec(`explorer "${p}"`);
+
+      // Executa abertura garantida no Windows Explorer
+      const { spawn, exec } = await import("node:child_process");
+      try {
+        const child = spawn("explorer.exe", [p], { detached: true, stdio: "ignore" });
+        child.unref();
+      } catch {}
+
+      try {
+        const safePath = p.replace(/'/g, "''");
+        exec(`powershell.exe -NoProfile -Command "Start-Process explorer.exe -ArgumentList @('${safePath}')"`);
+      } catch {}
+
       return {
         sucesso: true,
         acao: "abrir",
-        mensagem: `Pasta aberta no Windows Explorer: ${p}`,
+        mensagem: `A pasta "${path.basename(p)}" foi aberta com sucesso na sua tela no Windows Explorer (${p}).`,
         dados: { caminho: p },
       };
     } catch (err: any) {
@@ -260,19 +278,29 @@ export class DesktopFSTools {
    */
   public static async moverArquivo(origem: string, destino: string): Promise<RespostaOperacaoFS> {
     try {
-      const pathOrigem = path.resolve(origem);
+      let pathOrigem = path.resolve(origem);
       let pathDestino = path.resolve(destino);
 
+      // Se a origem não existe diretamente como caminho absoluto, tenta buscar o arquivo pelo nome
       if (!fs.existsSync(pathOrigem)) {
-        return {
-          sucesso: false,
-          acao: "mover",
-          mensagem: `Arquivo ou pasta de origem não encontrado: ${pathOrigem}`,
-        };
+        const buscaOrigem = await DesktopFSTools.buscarArquivos(origem, undefined, 5);
+        if (buscaOrigem.sucesso && Array.isArray(buscaOrigem.dados) && buscaOrigem.dados.length > 0) {
+          pathOrigem = buscaOrigem.dados[0].caminhoCompleto;
+        } else {
+          return {
+            sucesso: false,
+            acao: "mover",
+            mensagem: `Arquivo ou pasta de origem não encontrado no computador: ${origem}`,
+          };
+        }
       }
 
-      // Se o destino for uma pasta existente, move para dentro dela mantendo o nome do arquivo
+      // Se o destino for uma pasta existente ou se terminar com barra/contra-barra
       if (fs.existsSync(pathDestino) && fs.statSync(pathDestino).isDirectory()) {
+        pathDestino = path.join(pathDestino, path.basename(pathOrigem));
+      } else if (!fs.existsSync(pathDestino) && !path.extname(pathDestino)) {
+        // Se destino não tem extensão, trata como diretório e cria
+        fs.mkdirSync(pathDestino, { recursive: true });
         pathDestino = path.join(pathDestino, path.basename(pathOrigem));
       }
 
@@ -298,7 +326,7 @@ export class DesktopFSTools {
       return {
         sucesso: true,
         acao: "mover",
-        mensagem: `Arquivo movido com sucesso para: ${pathDestino}`,
+        mensagem: `Arquivo "${path.basename(pathOrigem)}" movido com sucesso para: ${pathDestino}`,
         dados: {
           origem: pathOrigem,
           destino: pathDestino,

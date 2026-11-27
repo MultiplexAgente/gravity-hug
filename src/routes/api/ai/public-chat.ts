@@ -80,7 +80,12 @@ DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 5. Quando o visitante perguntar sobre preços ou contratação, seja claro e apresente os planos com transparência.
 6. Não invente capacidades que não existem; se não souber ou se o assunto estiver fora do ecossistema, responda com honestidade.
 7. Mantenha o contexto da conversa: use o histórico para entender referências a mensagens anteriores.
-8. É TERMINANTEMENTE PROIBIDO usar ícones de IA, estrelas, faíscas ou sparkles (como ✨, ⭐ ou qualquer símbolo similar).`;
+8. É TERMINANTEMENTE PROIBIDO usar ícones de IA, estrelas, faíscas ou sparkles (como ✨, ⭐ ou qualquer símbolo similar).
+
+OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
+- Você tem ferramentas nativas para interagir com o computador do usuário: buscar_arquivos, abrir_pasta_explorer, mover_arquivo, criar_pasta e listar_diretorio.
+- Quando o usuário solicitar abrir uma pasta (ex: "abra a pasta de imagens da Loca Tudo"): use buscar_arquivos ou abrir_pasta_explorer. A pasta será aberta no Windows Explorer na tela do usuário.
+- Quando o usuário solicitar mover arquivos (ex: "mova o arquivo X para a pasta Y"): use mover_arquivo informando origem e destino. A transferência real será executada no sistema operacional.`;
 
 async function transcreverAudioWhisper(
   audioDataUrl: string,
@@ -386,6 +391,21 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   },
                 },
               },
+              {
+                type: "function",
+                function: {
+                  name: "mover_arquivo",
+                  description: "Move ou transfere um arquivo ou pasta de um local para outro no computador do usuário (ex: mover arquivo para o Disco D:).",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      origem: { type: "string", description: "Caminho ou nome do arquivo/pasta de origem" },
+                      destino: { type: "string", description: "Caminho da pasta ou arquivo de destino" },
+                    },
+                    required: ["origem", "destino"],
+                  },
+                },
+              },
             ];
 
             const payloadBody: any = {
@@ -465,6 +485,9 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                     toolResult = JSON.stringify(res);
                   } else if (fnName === "listar_diretorio") {
                     const res = await DesktopFSTools.listarDiretorio(args.caminho);
+                    toolResult = JSON.stringify(res);
+                  } else if (fnName === "mover_arquivo") {
+                    const res = await DesktopFSTools.moverArquivo(args.origem, args.destino);
                     toolResult = JSON.stringify(res);
                   }
 
