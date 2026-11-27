@@ -370,6 +370,7 @@ interface ChatMessage {
   images?: ImagemAnexada[];
   audio?: AudioAnexado;
   transcription?: string;
+  attachments?: Array<{ name: string; type: string; dataUrl: string }>;
 }
 
 function HugAiHeroTester() {
@@ -614,7 +615,11 @@ function HugAiHeroTester() {
     historicoAtual: ChatMessage[],
     imagensEnviar: ImagemAnexada[],
     audioEnviar: AudioAnexado | null
-  ): Promise<{ reply: string; transcription?: string }> {
+  ): Promise<{
+    reply: string;
+    transcription?: string;
+    attachments?: Array<{ name: string; type: string; dataUrl: string }>;
+  }> {
     try {
       const payloadHistory = historicoAtual.slice(-8).map((m) => ({
         role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
@@ -647,6 +652,7 @@ function HugAiHeroTester() {
           return {
             reply: data.reply.trim(),
             transcription: data.transcription,
+            attachments: data.attachments,
           };
         }
         if (data.error) {
@@ -712,6 +718,7 @@ function HugAiHeroTester() {
         sender: "hug",
         text: resultado.reply,
         transcription: resultado.transcription,
+        attachments: resultado.attachments,
         timestamp: getHoraAtual(),
       };
 
@@ -896,6 +903,34 @@ function HugAiHeroTester() {
                     <div className="text-white text-sm sm:text-[15px] leading-relaxed select-text font-normal whitespace-pre-line">
                       {msg.text}
                     </div>
+
+                    {/* Imagens geradas pelo HUG Image Generator */}
+                    {msg.attachments && msg.attachments.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {msg.attachments.map((att, idx) => (
+                          <div
+                            key={idx}
+                            className="rounded-2xl overflow-hidden border border-white/10 bg-[#121212] p-1.5 max-w-sm shadow-lg"
+                          >
+                            <img
+                              src={att.dataUrl}
+                              alt={att.name}
+                              className="max-h-80 w-auto rounded-xl object-contain bg-black"
+                            />
+                            <div className="flex items-center justify-between text-[11px] text-[#a0a0a0] px-2 py-1 mt-1">
+                              <span className="truncate max-w-[220px]">{att.name}</span>
+                              <a
+                                href={att.dataUrl}
+                                download={att.name}
+                                className="text-[#00D6A0] hover:underline ml-2"
+                              >
+                                Baixar
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Barra de ações discretas abaixo da resposta: apenas Copiar */}
                     <div className="mt-2.5 flex items-center gap-2 text-[#8e8e8e]">
