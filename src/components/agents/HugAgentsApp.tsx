@@ -93,6 +93,26 @@ export function HugAgentsApp({ onLogout }: Props) {
   // Modal de Canais & Integrações (WhatsApp, Instagram, Facebook)
   const [modalCanaisAberto, setModalCanaisAberto] = useState(false);
 
+  // Controle de colapso da seção Meus Agentes (Ocultar / Mostrar com setinha)
+  const [agentesAbertos, setAgentesAbertos] = useState(() => {
+    try {
+      const salvo = localStorage.getItem("hug_sidebar_agentes_abertos");
+      return salvo !== null ? salvo === "true" : true;
+    } catch {
+      return true;
+    }
+  });
+
+  function toggleAgentes() {
+    setAgentesAbertos((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("hug_sidebar_agentes_abertos", String(next));
+      } catch {}
+      return next;
+    });
+  }
+
   // Gravação de Áudio
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -523,10 +543,26 @@ export function HugAgentsApp({ onLogout }: Props) {
             )}
           </div>
 
-          {/* SEÇÃO 2: MEUS AGENTES (EMBAIXO DO HISTÓRICO DE CONVERSAS) */}
+          {/* SEÇÃO 2: MEUS AGENTES (EMBAIXO DO HISTÓRICO DE CONVERSAS COM OPÇÃO DE OCULTAR/MOSTRAR) */}
           <div className="space-y-2 pt-3 border-t border-white/[0.06]">
             <div className="flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <span>Meus Agentes</span>
+              <button
+                type="button"
+                onClick={toggleAgentes}
+                className="flex items-center gap-1.5 hover:text-slate-300 transition-colors select-none group cursor-pointer"
+                title={agentesAbertos ? "Ocultar agentes" : "Mostrar agentes"}
+              >
+                <ChevronDown
+                  className={`size-3.5 transition-transform duration-200 text-slate-500 group-hover:text-slate-300 ${
+                    agentesAbertos ? "rotate-0" : "-rotate-90"
+                  }`}
+                />
+                <span>Meus Agentes</span>
+                <span className="text-[10px] text-slate-600 font-normal">
+                  ({agentes.length})
+                </span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -539,78 +575,80 @@ export function HugAgentsApp({ onLogout }: Props) {
               </button>
             </div>
 
-            <div className="space-y-1">
-              {agentes.map((ag) => {
-                const IconComp = ICON_MAP[ag.avatarIcon] || MessageSquare;
-                const selecionado = agenteAtivo?.id === ag.id;
-                return (
-                  <div
-                    key={ag.id}
-                    onClick={() => {
-                      if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
-                        return;
-                      }
-                      setAgenteAtivo(ag);
-                      const convDoAgente = conversas.find((c) => c.agentId === ag.id);
-                      if (convDoAgente) {
-                        handleSelecionarConversa(convDoAgente);
-                      } else {
-                        handleNovoChat(ag);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all group ${
-                      selecionado
-                        ? "bg-white/[0.08] text-white border border-white/[0.12]"
-                        : "hover:bg-white/[0.03] text-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          selecionado
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-white/5 text-slate-400"
-                        }`}
-                      >
-                        <IconComp className="size-3.5" />
+            {agentesAbertos && (
+              <div className="space-y-1 transition-all duration-200">
+                {agentes.map((ag) => {
+                  const IconComp = ICON_MAP[ag.avatarIcon] || MessageSquare;
+                  const selecionado = agenteAtivo?.id === ag.id;
+                  return (
+                    <div
+                      key={ag.id}
+                      onClick={() => {
+                        if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
+                          return;
+                        }
+                        setAgenteAtivo(ag);
+                        const convDoAgente = conversas.find((c) => c.agentId === ag.id);
+                        if (convDoAgente) {
+                          handleSelecionarConversa(convDoAgente);
+                        } else {
+                          handleNovoChat(ag);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all group ${
+                        selecionado
+                          ? "bg-white/[0.08] text-white border border-white/[0.12]"
+                          : "hover:bg-white/[0.03] text-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${
+                            selecionado
+                              ? "bg-emerald-500/20 text-emerald-400"
+                              : "bg-white/5 text-slate-400"
+                          }`}
+                        >
+                          <IconComp className="size-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold truncate leading-tight">{ag.name}</p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold truncate leading-tight">{ag.name}</p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-1">
-                      {ag.whatsappEnabled && (
-                        <span className="size-2 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAgenteParaEditar(ag);
-                          setModalEditorAberto(true);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-white transition-opacity"
-                        title="Configurar agente"
-                      >
-                        <Sliders className="size-3" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {ag.whatsappEnabled && (
+                          <span className="size-2 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAgenteParaEditar(ag);
+                            setModalEditorAberto(true);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-white transition-opacity"
+                          title="Configurar agente"
+                        >
+                          <Sliders className="size-3" />
+                        </button>
+                      </div>
                     </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => setModalCanaisAberto(true)}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
+                >
+                  <div className="size-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
+                    <Share2 className="size-3.5" />
                   </div>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={() => setModalCanaisAberto(true)}
-                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
-              >
-                <div className="size-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
-                  <Share2 className="size-3.5" />
-                </div>
-                <span className="font-medium">Canais (WhatsApp, Insta, Face)</span>
-              </button>
-            </div>
+                  <span className="font-medium">Canais (WhatsApp, Insta, Face)</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
