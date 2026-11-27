@@ -48,7 +48,6 @@ import {
   OFFICIAL_AGENT_TEMPLATES,
 } from "@/lib/multiplex/agents-service";
 import { AgentModalEditor } from "./AgentModalEditor";
-import { DesktopFSModal } from "./DesktopFSModal";
 import { ChannelsModal } from "./ChannelsModal";
 import { getToken, clearToken } from "@/lib/multiplex/client";
 import { toast } from "sonner";
@@ -90,10 +89,6 @@ export function HugAgentsApp({ onLogout }: Props) {
   // Modal Editor de Agentes
   const [modalEditorAberto, setModalEditorAberto] = useState(false);
   const [agenteParaEditar, setAgenteParaEditar] = useState<CustomAgent | null>(null);
-
-  // Ferramentas Desktop do Windows (Criar Pastas, Mover Arquivos, Localizar)
-  const [modalDesktopFSAberto, setModalDesktopFSAberto] = useState(false);
-  const [abaDesktopFS, setAbaDesktopFS] = useState<"criar" | "mover" | "buscar" | "explorar">("criar");
 
   // Modal de Canais & Integrações (WhatsApp, Instagram, Facebook)
   const [modalCanaisAberto, setModalCanaisAberto] = useState(false);
@@ -534,22 +529,8 @@ export function HugAgentsApp({ onLogout }: Props) {
 
               <button
                 type="button"
-                onClick={() => {
-                  setAbaDesktopFS("criar");
-                  setModalDesktopFSAberto(true);
-                }}
-                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
-              >
-                <div className="size-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-                  <HardDrive className="size-3.5" />
-                </div>
-                <span className="font-medium">Pastas & Disco D:</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setModalCanaisAberto(true)}
-                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-1"
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
               >
                 <div className="size-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
                   <Share2 className="size-3.5" />
@@ -885,11 +866,6 @@ export function HugAgentsApp({ onLogout }: Props) {
         onSave={handleSalvarAgente}
         onDelete={handleExcluirAgente}
         onDuplicate={handleDuplicarAgente}
-      />
-      <DesktopFSModal
-        open={modalDesktopFSAberto}
-        onClose={() => setModalDesktopFSAberto(false)}
-        abaInicial={abaDesktopFS}
       />
       <ChannelsModal
         open={modalCanaisAberto}
