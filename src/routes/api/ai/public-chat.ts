@@ -6,12 +6,12 @@ import { DesktopFSTools } from "@/lib/multiplex/desktop-fs-tools";
 import { BrowserAutomationTools } from "@/lib/multiplex/browser-automation-tools";
 
 const BodySchema = z.object({
-  message: z.string().max(4000).optional().default(""),
+  message: z.string().max(64000).optional().default(""),
   history: z
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string().max(4000),
+        content: z.string().max(64000),
       })
     )
     .optional()
@@ -334,11 +334,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 type: "function",
                 function: {
                   name: "buscar_arquivos",
-                  description: "Busca pastas ou arquivos no computador do usuário pelo nome ou termo.",
+                  description: "Busca pastas ou arquivos no computador do usuário pelo nome da pasta ou projeto principal (ex: se o usuário pedir 'pasta de imagens da Loca Tudo Ferramentas', use o termo 'Loca Tudo' ou 'Loca Tudo Ferramentas', nunca termos genéricos como 'imagens' ou 'pastas').",
                   parameters: {
                     type: "object",
                     properties: {
-                      termo: { type: "string", description: "Nome da pasta ou arquivo a buscar" },
+                      termo: { type: "string", description: "Nome específico da pasta ou arquivo (ex: 'Loca Tudo')" },
                     },
                     required: ["termo"],
                   },
