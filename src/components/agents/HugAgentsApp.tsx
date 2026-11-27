@@ -444,14 +444,13 @@ export function HugAgentsApp({ onLogout }: Props) {
                 const IconComp = ICON_MAP[ag.avatarIcon] || MessageSquare;
                 const selecionado = agenteAtivo?.id === ag.id;
                 return (
-                  <button
+                  <div
                     key={ag.id}
-                    type="button"
                     onClick={() => {
                       setAgenteAtivo(ag);
                       handleNovoChat(ag);
                     }}
-                    className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                    className={`w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all group ${
                       selecionado
                         ? "bg-white/[0.08] text-white border border-white/[0.12]"
                         : "hover:bg-white/[0.03] text-slate-300"
@@ -472,12 +471,40 @@ export function HugAgentsApp({ onLogout }: Props) {
                       </div>
                     </div>
 
-                    {ag.whatsappEnabled && (
-                      <span className="size-2 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
-                    )}
-                  </button>
+                    <div className="flex items-center gap-1">
+                      {ag.whatsappEnabled && (
+                        <span className="size-2 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAgenteParaEditar(ag);
+                          setModalEditorAberto(true);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-white transition-opacity"
+                        title="Configurar agente"
+                      >
+                        <Sliders className="size-3" />
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAbaDesktopFS("criar");
+                  setModalDesktopFSAberto(true);
+                }}
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
+              >
+                <div className="size-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                  <HardDrive className="size-3.5" />
+                </div>
+                <span className="font-medium">Pastas & Disco D:</span>
+              </button>
             </div>
           </div>
 
@@ -598,36 +625,7 @@ export function HugAgentsApp({ onLogout }: Props) {
           </div>
 
           {/* Ações do Topo */}
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              onClick={() => {
-                setAbaDesktopFS("criar");
-                setModalDesktopFSAberto(true);
-              }}
-              className="h-8 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm transition-all"
-            >
-              <HardDrive className="size-3.5" />
-              <span className="hidden sm:inline">Pastas & Arquivos</span>
-              <span className="sm:hidden">Disco D:</span>
-            </Button>
-
-            {agenteAtivo && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setAgenteParaEditar(agenteAtivo);
-                  setModalEditorAberto(true);
-                }}
-                className="border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs h-8 px-3 rounded-xl gap-1.5"
-              >
-                <Sliders className="size-3.5 text-emerald-400" />
-                Configurar
-              </Button>
-            )}
-
+          <div className="flex items-center gap-1">
             <Link
               to="/"
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
