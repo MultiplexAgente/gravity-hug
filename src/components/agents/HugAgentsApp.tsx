@@ -105,6 +105,16 @@ export function HugAgentsApp({ onLogout }: Props) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Função auxiliar de rolagem imediata para as mensagens mais recentes (fim do chat)
+  function rolarParaOFim(instantaneo: boolean = false) {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: instantaneo ? "auto" : "smooth" });
+    }
+  }
+
   // 1. CARREGAMENTO INICIAL
   useEffect(() => {
     const email = localStorage.getItem("hug_agents_user_email") || "usuario@empresa.com";
@@ -120,14 +130,19 @@ export function HugAgentsApp({ onLogout }: Props) {
 
     if (listaConversas.length > 0) {
       const convRecente = listaConversas[0];
+      const msgsOrdenadas = [...(convRecente.messages || [])].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
       setConversaAtivaId(convRecente.id);
-      setMensagens(convRecente.messages || []);
+      setMensagens(msgsOrdenadas);
       const agCorrespondente = listaAgentes.find((a) => a.id === convRecente.agentId);
       if (agCorrespondente) {
         setAgenteAtivo(agCorrespondente);
       } else if (listaAgentes.length > 0) {
         setAgenteAtivo(listaAgentes[0]);
       }
+      setTimeout(() => rolarParaOFim(true), 30);
+      setTimeout(() => rolarParaOFim(true), 120);
     } else if (listaAgentes.length > 0) {
       setAgenteAtivo(listaAgentes[0]);
     }
@@ -142,17 +157,24 @@ export function HugAgentsApp({ onLogout }: Props) {
     document.title = "HUG";
   }, []);
 
-  // 2. ROLAGEM SUAVE INTELIGENTE (sem atrapalhar se o usuário estiver rolando para cima)
+  // 2. ROLAGEM AUTOMÁTICA SEMPRE PARA O FIM (ÚLTIMAS MENSAGENS)
   useEffect(() => {
-    if (messagesEndRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const isPertoDoFim =
-        container.scrollHeight - container.scrollTop - container.clientHeight < 250;
-      if (isPertoDoFim) {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }
+    if (conversaAtivaId && mensagens.length > 0) {
+      rolarParaOFim(true);
+      const t1 = setTimeout(() => rolarParaOFim(true), 40);
+      const t2 = setTimeout(() => rolarParaOFim(true), 150);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
-  }, [mensagens, processando]);
+  }, [conversaAtivaId]);
+
+  useEffect(() => {
+    if (mensagens.length > 0) {
+      rolarParaOFim(false);
+    }
+  }, [mensagens.length, processando]);
 
   // 3. INICIAR NOVA CONVERSA
   function handleNovoChat(agenteSelecionado?: CustomAgent) {
@@ -169,10 +191,14 @@ export function HugAgentsApp({ onLogout }: Props) {
     }
   }
 
-  // 4. SELECIONAR CONVERSA EXISTENTE
+  // 4. SELECIONAR CONVERSA EXISTENTE (ABRE SEMPRE NAS ÚLTIMAS MENSAGENS ENVIADAS)
   function handleSelecionarConversa(conv: AgentConversation) {
+    // Ordena as mensagens estritamente pela data/hora (da mais antiga para a mais recente)
+    const msgsOrdenadas = [...(conv.messages || [])].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
     setConversaAtivaId(conv.id);
-    setMensagens(conv.messages || []);
+    setMensagens(msgsOrdenadas);
     const agCorrespondente = agentes.find((a) => a.id === conv.agentId);
     if (agCorrespondente) {
       setAgenteAtivo(agCorrespondente);
@@ -180,6 +206,9 @@ export function HugAgentsApp({ onLogout }: Props) {
     if (window.innerWidth < 768) {
       setSidebarAberta(false);
     }
+    // Força o scroll imediato para as mensagens mais recentes no rodapé
+    setTimeout(() => rolarParaOFim(true), 20);
+    setTimeout(() => rolarParaOFim(true), 100);
   }
 
   // 5. EXCLUIR CONVERSA
