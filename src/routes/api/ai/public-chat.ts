@@ -212,13 +212,14 @@ async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Prom
 
     if (apiKey) {
       const openai = new OpenAI({ apiKey });
-      const promptRefinado = `${promptOriginal}, high quality, photorealistic, 4k, cinematic details`;
+      const promptRefinado = `Award-winning master photography of ${promptOriginal}, highly detailed, sharp focus, intricate texture and lifelike features, volumetric cinematic studio lighting, ray tracing, 8k resolution, ultra-realistic masterpiece, natural joyful motion, vibrant clean composition.`;
       const modelList = [
-        "gpt-image-1.5",
-        "gpt-image-2",
         "gpt-image-2.5-flare",
+        "gpt-image-2.6-flare",
+        "gpt-image-2.5-sunburst",
+        "gpt-image-2",
+        "gpt-image-1.5",
         "chatgpt-image-latest",
-        "gpt-image-1-mini",
       ];
 
       for (const mod of modelList) {
@@ -268,6 +269,13 @@ async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Prom
       const dirD = path.join(process.cwd(), "data", "imagens");
       if (!fs.existsSync(dirD)) fs.mkdirSync(dirD, { recursive: true });
       fs.writeFileSync(path.join(dirD, nomeArquivo), bufFinal);
+    } catch {}
+
+    // Salva em public/imagens para acesso estático rápido
+    try {
+      const pubDir = path.join(process.cwd(), "public", "imagens");
+      if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
+      fs.writeFileSync(path.join(pubDir, nomeArquivo), bufFinal);
     } catch {}
 
     // Salva na Área de Trabalho do usuário
