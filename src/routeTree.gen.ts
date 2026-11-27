@@ -28,6 +28,7 @@ import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
 import { Route as ApiAiAgentsRouteImport } from './routes/api/ai/agents'
+import { Route as ApiAiConversationsRouteImport } from './routes/api/ai/conversations'
 import { Route as ApiAiModelsRouteImport } from './routes/api/ai/models'
 import { Route as ApiAiPublicChatRouteImport } from './routes/api/ai/public-chat'
 import { Route as ApiAiSuggestReplyRouteImport } from './routes/api/ai/suggest-reply'
@@ -141,6 +142,11 @@ const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
 const ApiAiAgentsRoute = ApiAiAgentsRouteImport.update({
   id: '/api/ai/agents',
   path: '/api/ai/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiConversationsRoute = ApiAiConversationsRouteImport.update({
+  id: '/api/ai/conversations',
+  path: '/api/ai/conversations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiModelsRoute = ApiAiModelsRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/agents': typeof ApiAiAgentsRoute
+  '/api/ai/conversations': typeof ApiAiConversationsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/agents': typeof ApiAiAgentsRoute
+  '/api/ai/conversations': typeof ApiAiConversationsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/agents': typeof ApiAiAgentsRoute
+  '/api/ai/conversations': typeof ApiAiConversationsRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/public-chat': typeof ApiAiPublicChatRoute
   '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/agents'
+    | '/api/ai/conversations'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/agents'
+    | '/api/ai/conversations'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/agents'
+    | '/api/ai/conversations'
     | '/api/ai/models'
     | '/api/ai/public-chat'
     | '/api/ai/suggest-reply'
@@ -505,6 +517,7 @@ export interface RootRouteChildren {
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
   ApiAiAgentsRoute: typeof ApiAiAgentsRoute
+  ApiAiConversationsRoute: typeof ApiAiConversationsRoute
   ApiAiModelsRoute: typeof ApiAiModelsRoute
   ApiAiPublicChatRoute: typeof ApiAiPublicChatRoute
   ApiAiSuggestReplyRoute: typeof ApiAiSuggestReplyRoute
@@ -659,6 +672,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai/agents'
       fullPath: '/api/ai/agents'
       preLoaderRoute: typeof ApiAiAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/conversations': {
+      id: '/api/ai/conversations'
+      path: '/api/ai/conversations'
+      fullPath: '/api/ai/conversations'
+      preLoaderRoute: typeof ApiAiConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/models': {
@@ -817,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
   ApiAiAgentsRoute: ApiAiAgentsRoute,
+  ApiAiConversationsRoute: ApiAiConversationsRoute,
   ApiAiModelsRoute: ApiAiModelsRoute,
   ApiAiPublicChatRoute: ApiAiPublicChatRoute,
   ApiAiSuggestReplyRoute: ApiAiSuggestReplyRoute,

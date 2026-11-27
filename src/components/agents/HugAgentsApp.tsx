@@ -123,14 +123,27 @@ export function HugAgentsApp({ onLogout }: Props) {
     const listaConversas = HugAgentsService.obterConversas(email);
     setConversas(listaConversas);
 
-    if (listaAgentes.length > 0) {
+    if (listaConversas.length > 0) {
+      const convRecente = listaConversas[0];
+      setConversaAtivaId(convRecente.id);
+      setMensagens(convRecente.messages || []);
+      const agCorrespondente = listaAgentes.find((a) => a.id === convRecente.agentId);
+      if (agCorrespondente) {
+        setAgenteAtivo(agCorrespondente);
+      } else if (listaAgentes.length > 0) {
+        setAgenteAtivo(listaAgentes[0]);
+      }
+    } else if (listaAgentes.length > 0) {
       setAgenteAtivo(listaAgentes[0]);
     }
 
-    if (listaConversas.length > 0) {
-      setConversaAtivaId(listaConversas[0].id);
-      setMensagens(listaConversas[0].messages || []);
-    }
+    // Sincroniza em segundo plano com o disco D: para nunca perder histórico
+    HugAgentsService.sincronizarConversasServidor(email).then((sincronizadas) => {
+      if (sincronizadas && sincronizadas.length > 0) {
+        setConversas(sincronizadas);
+      }
+    });
+
     document.title = "HUG";
   }, []);
 
@@ -242,14 +255,17 @@ export function HugAgentsApp({ onLogout }: Props) {
         setConversaAtivaId(convId);
       }
 
+      // Preserva o título original se já existir, em vez de sobrescrever a cada mensagem
+      const convExistente = conversas.find((c) => c.id === convId);
       const tituloConversa =
-        texto.slice(0, 36) + (texto.length > 36 ? "..." : "") || "Conversa com Agente";
+        convExistente?.title ||
+        (texto.slice(0, 36) + (texto.length > 36 ? "..." : "") || "Conversa com Agente");
 
       const conversaSalva: AgentConversation = {
         id: convId,
         agentId: agenteAtivo.id,
         title: tituloConversa,
-        createdAt: new Date().toISOString(),
+        createdAt: convExistente?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         messages: mensagensFinais,
       };
@@ -461,8 +477,18 @@ export function HugAgentsApp({ onLogout }: Props) {
                   <div
                     key={ag.id}
                     onClick={() => {
+                      if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
+                        // Se já está no agente ativo com mensagens, preserva a tela
+                        return;
+                      }
                       setAgenteAtivo(ag);
-                      handleNovoChat(ag);
+                      // Busca a conversa mais recente desse agente
+                      const convDoAgente = conversas.find((c) => c.agentId === ag.id);
+                      if (convDoAgente) {
+                        handleSelecionarConversa(convDoAgente);
+                      } else {
+                        handleNovoChat(ag);
+                      }
                     }}
                     className={`w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all group ${
                       selecionado

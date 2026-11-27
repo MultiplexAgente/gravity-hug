@@ -379,6 +379,24 @@ export const HugAgentsService = {
   },
 
   /**
+   * Sanitiza conversas removendo base64 gigantes antes de persistir no localStorage
+   * para evitar estouro de cota (QuotaExceededError de 5MB)
+   */
+  sanitizarConversas(conversas: AgentConversation[]): AgentConversation[] {
+    return conversas.map((c) => ({
+      ...c,
+      messages: (c.messages || []).map((m) => ({
+        ...m,
+        attachments: m.attachments?.map((a) => ({
+          name: a.name,
+          type: a.type,
+          dataUrl: a.dataUrl && a.dataUrl.length < 50000 ? a.dataUrl : undefined,
+        })),
+      })),
+    }));
+  },
+
+  /**
    * Conversas do usuário
    */
   obterConversas(userId: string = "default"): AgentConversation[] {
@@ -390,6 +408,27 @@ export const HugAgentsService = {
     } catch {
       return [];
     }
+  },
+
+  async sincronizarConversasServidor(userId: string = "default"): Promise<AgentConversation[]> {
+    try {
+      const resp = await fetch(`/api/ai/conversations?userEmail=${encodeURIComponent(userId)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.success && Array.isArray(data.conversations) && data.conversations.length > 0) {
+          const locais = this.obterConversas(userId);
+          const map = new Map<string, AgentConversation>();
+          for (const c of data.conversations) map.set(c.id, c);
+          for (const c of locais) map.set(c.id, c);
+          const mescladas = Array.from(map.values()).sort(
+            (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+          );
+          safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(this.sanitizarConversas(mescladas)));
+          return mescladas;
+        }
+      }
+    } catch {}
+    return this.obterConversas(userId);
   },
 
   salvarConversa(conversa: AgentConversation, userId: string = "default"): AgentConversation[] {
@@ -409,14 +448,36 @@ export const HugAgentsService = {
       atualizada = [sanitizada, ...lista];
     }
 
-    safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(atualizada));
+    const paraSalvar = this.sanitizarConversas(atualizada);
+    safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(paraSalvar));
+
+    // Backup assíncrono em disco D: via API local
+    try {
+      if (typeof window !== "undefined") {
+        fetch("/api/ai/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userEmail: userId, conversation: sanitizada }),
+        }).catch(() => {});
+      }
+    } catch {}
+
     return atualizada;
   },
 
   excluirConversa(conversaId: string, userId: string = "default"): AgentConversation[] {
     const lista = this.obterConversas(userId);
     const filtrada = lista.filter((c) => c.id !== conversaId);
-    safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(filtrada));
+    safeSetItem(CHAVE_CONVERSATIONS_STORAGE(userId), JSON.stringify(this.sanitizarConversas(filtrada)));
+
+    try {
+      if (typeof window !== "undefined") {
+        fetch(`/api/ai/conversations?userEmail=${encodeURIComponent(userId)}&id=${encodeURIComponent(conversaId)}`, {
+          method: "DELETE",
+        }).catch(() => {});
+      }
+    } catch {}
+
     return filtrada;
   },
 
