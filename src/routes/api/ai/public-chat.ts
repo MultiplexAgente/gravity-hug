@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import fs from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 import { providerApiKey } from "@/lib/multiplex/model-registry.server";
 import { HugAISecurityShield } from "@/lib/multiplex/ai-security";
@@ -90,7 +92,66 @@ OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
 - Você tem ferramentas nativas para interagir com o computador do usuário: buscar_arquivos, abrir_pasta_explorer, mover_arquivo, criar_pasta e listar_diretorio.
 - Quando o usuário mandar criar uma pasta (ex: "crie uma pasta HIG na minha área de trabalho"): CHAME OBRIGATORIAMENTE a ferramenta 'criar_pasta' passando o nome e local.
 - Quando o usuário solicitar abrir uma pasta ou arquivo (ex: "abra a pasta para mim", "abra a pasta HUG", "abra o arquivo"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer' ou 'buscar_arquivos'.
-- Quando o usuário solicitar mover arquivos: CHAME OBRIGATORIAMENTE 'mover_arquivo'.`;
+- Quando o usuário solicitar mover arquivos: CHAME OBRIGATORIAMENTE 'mover_arquivo'.
+
+GERAÇÃO DE IMAGENS:
+- Você TEM capacidade plena e integrada para gerar imagens de qualquer tema ou estilo (fotografia, 3D, arte, animais, produtos, pessoas, etc.)!
+- Quando o usuário mandar gerar, criar, desenhar ou produzir uma imagem (ex: "gere uma imagem de 2 macacos dançando"):
+  CHAME OBRIGATORIAMENTE A FERRAMENTA 'gerar_imagem'!
+- NUNCA diga que não pode ou não tem capacidade para gerar imagens! Você SEMPRE pode gerar usando a ferramenta 'gerar_imagem'.`;
+
+async function gerarImagemHelper(promptOriginal: string, tituloPt: string): Promise<{
+  sucesso: boolean;
+  mensagem: string;
+  anexo?: { name: string; type: string; dataUrl: string };
+  caminhoArquivo?: string;
+}> {
+  try {
+    const promptRefinado = `${promptOriginal}, high resolution, 4k, cinematic, realistic, beautiful details`;
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptRefinado)}?width=768&height=768&nologo=true`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Serviço de imagens retornou HTTP ${resp.status}`);
+    const buf = Buffer.from(await resp.arrayBuffer());
+    const base64 = buf.toString("base64");
+    const dataUrl = `data:image/jpeg;base64,${base64}`;
+
+    const nomeBase = (tituloPt || "imagem_gerada").replace(/[^a-zA-Z0-9_\-]/g, "_").slice(0, 30);
+    const nomeArquivo = `${nomeBase}_${Date.now()}.jpg`;
+
+    // Salva no Disco D:
+    try {
+      const dirD = path.join(process.cwd(), "data", "imagens");
+      if (!fs.existsSync(dirD)) fs.mkdirSync(dirD, { recursive: true });
+      fs.writeFileSync(path.join(dirD, nomeArquivo), buf);
+    } catch {}
+
+    // Salva na Área de Trabalho do usuário
+    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+    const standardDesktop = path.join(userProfile, "Desktop");
+    const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+    const caminhoDesktop = path.join(desktopDir, nomeArquivo);
+    try {
+      fs.writeFileSync(caminhoDesktop, buf);
+    } catch {}
+
+    return {
+      sucesso: true,
+      mensagem: `A imagem "${tituloPt}" foi gerada com sucesso e salva na sua Área de Trabalho (${caminhoDesktop}) e no Disco D:.`,
+      anexo: {
+        name: nomeArquivo,
+        type: "image/jpeg",
+        dataUrl,
+      },
+      caminhoArquivo: caminhoDesktop,
+    };
+  } catch (err: any) {
+    return {
+      sucesso: false,
+      mensagem: `Erro ao gerar imagem: ${err?.message}`,
+    };
+  }
+}
 
 async function transcreverAudioWhisper(
   audioDataUrl: string,
@@ -411,6 +472,21 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   },
                 },
               },
+              {
+                type: "function",
+                function: {
+                  name: "gerar_imagem",
+                  description: "Gera uma imagem realista, artística ou ilustrativa a partir de um prompt detalhado em texto. Use SEMPRE que o usuário mandar gerar, criar, fazer ou desenhar uma imagem.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      prompt: { type: "string", description: "Descrição em inglês do conteúdo visual a ser gerado (ex: 'two joyful chimpanzee monkeys dancing, realistic, colorful, cinematic, 4k')" },
+                      titulo: { type: "string", description: "Título amigável em português da imagem (ex: '2 Macacos Dançando')" },
+                    },
+                    required: ["prompt", "titulo"],
+                  },
+                },
+              },
             ];
 
             const payloadBody: any = {
@@ -460,6 +536,8 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               console.log("[AI Response Message]:", JSON.stringify(messageObj));
 
               // Execução real de ferramentas chamadas pela IA
+              const anexosGerados: Array<{ name: string; type: string; dataUrl: string }> = [];
+
               if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
                 apiMessages.push(messageObj);
 
@@ -495,6 +573,12 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   } else if (fnName === "mover_arquivo") {
                     const res = await DesktopFSTools.moverArquivo(args.origem, args.destino);
                     toolResult = JSON.stringify(res);
+                  } else if (fnName === "gerar_imagem") {
+                    const res = await gerarImagemHelper(args.prompt, args.titulo);
+                    if (res.sucesso && res.anexo) {
+                      anexosGerados.push(res.anexo);
+                    }
+                    toolResult = JSON.stringify({ sucesso: res.sucesso, mensagem: res.mensagem });
                   }
 
                   apiMessages.push({
@@ -523,35 +607,88 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   messageObj = followUpJson.choices?.[0]?.message;
                 }
               } else {
-                // Se a IA não executou tool_calls, mas a mensagem do usuário ou o texto retornado indicam ordem/promessa de abrir
-                const querAbrir = /(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?/i.test(combinedMessage);
-                const prometeuAbrir = /vou\s+abri[-a-z]*|abrir[-a-z]*\s+para\s+voc[êe]|vou\s+localizar\s+e\s+abrir/i.test(messageObj?.content || "");
+                // Se a IA não executou tool_calls, verifica intenções explícitas de abrir ou gerar imagem
+                const querGerarImagem =
+                  /(?:gere|gerar|crie|criar|fa[çc]a|fazer|desenhe|desenhar|produza|renderize|monte)\s+(?:uma\s+)?(?:imagem|foto|desenho|ilustra[çc][ãa]o|arte)/i.test(combinedMessage) ||
+                  /(?:imagem|foto|desenho|ilustra[çc][ãa]o)\s+(?:de|do|da|dos|das)\s+/i.test(combinedMessage);
+
+                if (querGerarImagem) {
+                  const promptVisual = combinedMessage
+                    .replace(/^(?:por\s+favor\s+)?(?:gere|gerar|crie|criar|fa[çc]a|fazer|desenhe|desenhar|produza|renderize|monte)\s+(?:uma\s+)?(?:imagem|foto|desenho|ilustra[çc][ãa]o|arte)?\s*(?:de|do|da|dos|das|sobre|com)?\s*/i, "")
+                    .replace(/[!\?.]+$/g, "")
+                    .trim() || combinedMessage;
+
+                  const resImg = await gerarImagemHelper(promptVisual, promptVisual.slice(0, 30));
+                  if (resImg.sucesso && resImg.anexo) {
+                    return Response.json({
+                      ok: true,
+                      reply: `Aqui está a imagem gerada de "${promptVisual}"! A imagem foi salva na sua Área de Trabalho e no Disco D:.`,
+                      attachments: [resImg.anexo],
+                      transcription: audioTranscription || undefined,
+                      modelUsed: "hug-image-generator",
+                      requestId: `comp_${Date.now().toString(36)}`,
+                      conversationId: convId,
+                      viaGateway: false,
+                    });
+                  }
+                }
+
+                const querAbrir =
+                  /(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?/i.test(combinedMessage) ||
+                  /(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+voc[êe]\s+criou|criou\s+agora)/i.test(combinedMessage) ||
+                  /n[ãa]o\s+abriu/i.test(combinedMessage);
+
+                const prometeuAbrir =
+                  /vou\s+abri[-a-z]*|abrir[-a-z]*\s+para\s+voc[êe]|vou\s+localizar\s+e\s+abrir|aberta\s+no\s+windows\s+explorer/i.test(messageObj?.content || "");
 
                 if (querAbrir || prometeuAbrir) {
                   let termoAlvo = "";
-                  // Extrai o nome da pasta da mensagem do usuário
-                  const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*["']?([^"'\n\r\?\!]+)["']?/i);
-                  if (mUser && mUser[1]) {
-                    termoAlvo = mUser[1].trim()
-                      .replace(/^(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+est[áa]\s+no\s+desktop|a\s+pasta\s+)/i, "")
-                      .replace(/\s+(?:na\s+home|no\s+desktop|na\s+[áa]rea\s+de\s+trabalho).*$/i, "")
-                      .trim();
+
+                  // 1. Aspas na mensagem da IA (ex: pasta chamada "HUG")
+                  const aspasMatch = (messageObj?.content || "").match(/["']([a-zA-Z0-9_\- ]{2,40})["']/);
+                  if (aspasMatch && aspasMatch[1] && !["abrir", "explorer", "windows"].includes(aspasMatch[1].toLowerCase())) {
+                    termoAlvo = aspasMatch[1].trim();
                   }
-                  // Extrai da promessa da IA se houver
-                  if (!termoAlvo && prometeuAbrir) {
-                    const mPromessa = (messageObj?.content || "").match(/pasta\s+["']?([a-zA-Z0-9_\-]+)["']?/i);
+
+                  // 2. Pasta chamada ...
+                  if (!termoAlvo) {
+                    const mPromessa = (messageObj?.content || "").match(/pasta\s+(?:chamada\s+)?["']?([a-zA-Z0-9_\- ]+?)["']?(?:\s+na|\s+no|\s+localizada|\.|\,|$)/i);
                     if (mPromessa && mPromessa[1]) {
                       termoAlvo = mPromessa[1].trim();
                     }
                   }
-                  // Se ainda não achou, busca no histórico recente
-                  if (!termoAlvo || termoAlvo.length < 2) {
-                    for (let i = history.length - 1; i >= 0; i--) {
-                      const hMatch = history[i].content.match(/["']([a-zA-Z0-9_\-]+)["']/);
-                      if (hMatch && hMatch[1]) {
-                        termoAlvo = hMatch[1];
-                        break;
-                      }
+
+                  // 3. Extrai da instrução do usuário
+                  if (!termoAlvo) {
+                    const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*["']?([^"'\n\r\?\!]+)["']?/i);
+                    if (mUser && mUser[1]) {
+                      termoAlvo = mUser[1]
+                        .replace(/^(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+est[áa]\s+no\s+desktop|a\s+pasta\s+)/i, "")
+                        .replace(/\s+(?:na\s+home|no\s+desktop|na\s+[áa]rea\s+de\s+trabalho).*$/i, "")
+                        .trim();
+                    }
+                  }
+
+                  // 4. Se o usuário falou da pasta recentemente criada na home/desktop
+                  if (!termoAlvo || /(?:home|desktop|[áa]rea\s+de\s+trabalho|criou|recente|pouco)/i.test(combinedMessage)) {
+                    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+                    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+                    const standardDesktop = path.join(userProfile, "Desktop");
+                    const dDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+                    if (fs.existsSync(dDir)) {
+                      try {
+                        const itens = fs.readdirSync(dDir, { withFileTypes: true })
+                          .filter((e) => e.isDirectory())
+                          .map((e) => ({
+                            nome: e.name,
+                            caminho: path.join(dDir, e.name),
+                            mtime: fs.statSync(path.join(dDir, e.name)).mtimeMs,
+                          }))
+                          .sort((a, b) => b.mtime - a.mtime);
+                        if (itens.length > 0) {
+                          termoAlvo = itens[0].caminho;
+                        }
+                      } catch {}
                     }
                   }
 
@@ -579,6 +716,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 return Response.json({
                   ok: true,
                   reply: outGuard.textoSeguro,
+                  attachments: anexosGerados.length > 0 ? anexosGerados : undefined,
                   transcription: audioTranscription || undefined,
                   modelUsed: visionOrChatModel,
                   requestId: `comp_${Date.now().toString(36)}`,

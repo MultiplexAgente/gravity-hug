@@ -159,15 +159,17 @@ export function HugAgentsApp({ onLogout }: Props) {
 
   // 2. ROLAGEM AUTOMÁTICA SEMPRE PARA O FIM (ÚLTIMAS MENSAGENS)
   useEffect(() => {
+    let t1: any;
+    let t2: any;
     if (conversaAtivaId && mensagens.length > 0) {
       rolarParaOFim(true);
-      const t1 = setTimeout(() => rolarParaOFim(true), 40);
-      const t2 = setTimeout(() => rolarParaOFim(true), 150);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
+      t1 = setTimeout(() => rolarParaOFim(true), 40);
+      t2 = setTimeout(() => rolarParaOFim(true), 150);
     }
+    return () => {
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+    };
   }, [conversaAtivaId]);
 
   useEffect(() => {
@@ -267,6 +269,7 @@ export function HugAgentsApp({ onLogout }: Props) {
         content: resposta.resposta,
         createdAt: new Date().toISOString(),
         agentId: agenteAtivo.id,
+        attachments: resposta.attachments && resposta.attachments.length > 0 ? resposta.attachments : undefined,
       };
 
       const mensagensFinais = [...novasMensagens, mensagemAssistente];

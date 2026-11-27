@@ -370,9 +370,6 @@ interface ChatMessage {
   images?: ImagemAnexada[];
   audio?: AudioAnexado;
   transcription?: string;
-  images?: ImagemAnexada[];
-  audio?: AudioAnexado;
-  transcription?: string;
 }
 
 function HugAiHeroTester() {

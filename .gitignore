@@ -36,4 +36,8 @@ dist-ssr
 *.sw?
 .chrome-profile/
 .chrome-profile-*/
+# Screenshots and generated media
 screenshots/
+data/imagens/*.jpg
+data/imagens/*.png
+data/imagens/*.jpeg

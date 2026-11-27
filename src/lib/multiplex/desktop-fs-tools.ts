@@ -28,7 +28,7 @@ export interface ResultadoArquivo {
 export interface RespostaOperacaoFS {
   sucesso: boolean;
   mensagem: string;
-  acao: "buscar" | "criar_pasta" | "mover" | "listar" | "ler";
+  acao: "buscar" | "criar_pasta" | "mover" | "listar" | "ler" | "abrir";
   dados?: any;
   erro?: string;
 }

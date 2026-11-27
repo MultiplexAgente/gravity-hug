@@ -490,7 +490,7 @@ export const HugAgentsService = {
     historico: AgentChatMessage[];
     images?: Array<{ name?: string; type?: string; dataUrl: string }>;
     token?: string | null;
-  }): Promise<{ resposta: string; erro?: string }> {
+  }): Promise<{ resposta: string; attachments?: Array<{ name: string; type: string; dataUrl: string }>; erro?: string }> {
     try {
       // Formata histórico prévio para o formato aceito pelo HUG IA Core
       const historyFormatted = params.historico.map((m) => ({
@@ -527,7 +527,7 @@ TRANSBORDO HUMANO: ${params.agente.humanHandoffEnabled ? "ATIVO" : "DESATIVADO"}
 
       const data = await resp.json();
       const resposta = data.reply || data.message || data.text || "Mensagem processada pelo agente.";
-      return { resposta };
+      return { resposta, attachments: data.attachments };
     } catch (err: any) {
       // Fallback inteligente para garantir resposta mesmo em modo offline/sem chaves no ambiente de teste
       const fallbackResposta = `Olá! Sou o agente **${params.agente.name}** operando no HUG IA Core.
