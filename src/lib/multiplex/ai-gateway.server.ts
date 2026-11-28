@@ -91,7 +91,7 @@ Gere a resposta sugerida:`;
         incomingText: question,
         systemPrompt,
         context: { contextText: context, tone, companyName, segment },
-        modelAlias: "gpt-6.2-astra",
+        modelAlias: "gpt-4o",
       }),
       signal: controller.signal,
     });
@@ -103,7 +103,7 @@ Gere a resposta sugerida:`;
         return {
           ok: true,
           reply: (coreData.text || coreData.texto).trim(),
-          modelUsed: coreData.model || coreData.modelo || "gpt-6.2-astra",
+          modelUsed: coreData.model || coreData.modelo || "gpt-4o",
           viaGateway: true,
         };
       }
@@ -122,7 +122,7 @@ Gere a resposta sugerida:`;
       incomingText: question,
       systemPrompt,
       context: { contextText: context, tone, companyName, segment },
-      modelAlias: "gpt-6.2-astra",
+      modelAlias: "gpt-4o",
     }, {
       "x-hug-core-key": "hug_core_internal_sec_2026",
     });
@@ -131,7 +131,7 @@ Gere a resposta sugerida:`;
       return {
         ok: true,
         reply: coreResult.texto.trim(),
-        modelUsed: coreResult.modelo || "gpt-6.2-astra",
+        modelUsed: coreResult.modelo || "gpt-4o",
         viaGateway: true,
       };
     }
@@ -175,7 +175,7 @@ Gere a resposta sugerida:`;
   if (openAiKey) {
     try {
       const openai = createOpenAI({ apiKey: openAiKey });
-      const model = openai("gpt-6.2-astra");
+      const model = openai("gpt-4o");
 
       const result = await generateText({
         model,
@@ -187,7 +187,7 @@ Gere a resposta sugerida:`;
         return {
           ok: true,
           reply: result.text.trim(),
-          modelUsed: "gpt-6.2-astra",
+          modelUsed: "gpt-4o",
           viaGateway: false,
         };
       }

@@ -407,7 +407,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
 
           const { message, history = [], conversationId, images = [], audio } = parsed.data;
           const convId = conversationId || `conv_pub_${Date.now().toString(36)}`;
-          const modelTarget = "gpt-6.2-astra";
+          const modelTarget = "gpt-4o";
 
           const openAiKey =
             providerApiKey("openai") ||
@@ -718,7 +718,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
               tools,
             };
 
-            // Modelos de raciocínio como gpt-6.2-astra, o1 e o3 não aceitam temperature customizada
+            // Modelos de raciocínio como gpt-4o, o1 e o3 não aceitam temperature customizada
             const isReasoning =
               visionOrChatModel.includes("astra") ||
               visionOrChatModel.startsWith("o1") ||
