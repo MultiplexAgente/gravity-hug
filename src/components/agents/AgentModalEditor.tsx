@@ -280,7 +280,7 @@ export function AgentModalEditor({
             }`}
           >
             <Smartphone className="size-3.5" />
-            Canais (WhatsApp, Insta, Face)
+            Canais (WhatsApp, Instagram, Facebook)
           </button>
           <button
             type="button"

@@ -658,7 +658,7 @@ export function HugAgentsApp({ onLogout }: Props) {
                 <div className="size-6 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
                   <Share2 className="size-3.5" />
                 </div>
-                <span className="font-medium text-[11px]">Canais (WhatsApp, Insta, Face)</span>
+                <span className="font-medium text-[11px]">Canais (WhatsApp, Instagram, Facebook)</span>
               </button>
             </div>
           )}
