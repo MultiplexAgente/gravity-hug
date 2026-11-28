@@ -935,45 +935,52 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   }
                 }
 
-                // 3. Verificação de intenção de criar pasta no sistema operacional
+                // 3. Verificação de intenção de criar pasta no sistema operacional (com verificação estrita de negação)
+                const temNegacaoCriar = /(?:n[ãa]o|nunca|jamais|sem\s+autoriza|n[ãa]o\s+mandei|n[ãa]o\s+autorizei|por\s*que|pq|porque|errad)/i.test(combinedMessage);
                 const querCriarPasta =
-                  /(?:crie|criar|fa[çc]a|fazer|monte|montar)\s+(?:uma\s+)?(?:pasta|diret[oó]rio)/i.test(combinedMessage);
+                  !temNegacaoCriar &&
+                  /(?:^|\b)(?:crie|criar|fa[çc]a|monte)\s+(?:uma\s+)?(?:pasta|diret[oó]rio)\s+["']?([a-zA-Z0-9_\- ]+)/i.test(combinedMessage);
 
                 if (querCriarPasta) {
                   const mNome = combinedMessage.match(/(?:pasta|diret[oó]rio)\s+["']?([a-zA-Z0-9_\- ]+?)["']?(?:\s+na|\s+no|\s+em|\.|\!|\?|$)/i);
-                  const nomePasta = (mNome && mNome[1]) ? mNome[1].trim() : "Nova Pasta";
+                  const nomePasta = (mNome && mNome[1]) ? mNome[1].trim() : "";
                   
-                  // Se mencionar desktop ou área de trabalho, cria no Desktop do usuário
-                  let caminhoCriar = nomePasta;
-                  if (/(?:[áa]rea\s+de\s+trabalho|desktop|home)/i.test(combinedMessage)) {
-                    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
-                    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
-                    const standardDesktop = path.join(userProfile, "Desktop");
-                    const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
-                    caminhoCriar = path.join(desktopDir, nomePasta);
-                  }
+                  if (nomePasta && !["nova pasta", "novapasta", "pasta", "diretorio", "diretório"].includes(nomePasta.toLowerCase())) {
+                    // Se mencionar desktop ou área de trabalho, cria no Desktop do usuário
+                    let caminhoCriar = nomePasta;
+                    if (/(?:[áa]rea\s+de\s+trabalho|desktop|home)/i.test(combinedMessage)) {
+                      const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
+                      const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
+                      const standardDesktop = path.join(userProfile, "Desktop");
+                      const desktopDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
+                      caminhoCriar = path.join(desktopDir, nomePasta);
+                    }
 
-                  const resCriar = await DesktopFSTools.criarPasta(caminhoCriar);
-                  return Response.json({
-                    ok: true,
-                    reply: resCriar.mensagem,
-                    transcription: audioTranscription || undefined,
-                    modelUsed: "hug-desktop-fs",
-                    requestId: `comp_${Date.now().toString(36)}`,
-                    conversationId: convId,
-                    viaGateway: false,
-                  });
+                    const resCriar = await DesktopFSTools.criarPasta(caminhoCriar);
+                    if (resCriar.sucesso) {
+                      return Response.json({
+                        ok: true,
+                        reply: resCriar.mensagem,
+                        transcription: audioTranscription || undefined,
+                        modelUsed: "hug-desktop-fs",
+                        requestId: `comp_${Date.now().toString(36)}`,
+                        conversationId: convId,
+                        viaGateway: false,
+                      });
+                    }
+                  }
                 }
 
                 // 4. Verificação de intenção de abrir pastas ou arquivos no Windows Explorer
+                const temNegacaoAbrir = /(?:n[ãa]o|nunca|jamais|sem\s+autoriza|n[ãa]o\s+mandei|n[ãa]o\s+autorizei|n[ãa]o\s+era|errad)/i.test(combinedMessage);
                 const querAbrirPastaOuArquivo =
+                  !temNegacaoAbrir &&
                   !querAbrirNavegador &&
-                  (/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem)/i.test(combinedMessage) ||
-                  /(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+voc[êe]\s+criou|criou\s+agora)/i.test(combinedMessage) ||
-                  /(?:abra|abrir)\s+(?:a\s+pasta\s+)?(?:de\s+imagens\s+)?(?:da\s+)?([a-zA-Z0-9_\- ]+)/i.test(combinedMessage) ||
-                  /n[ãa]o\s+abriu/i.test(combinedMessage));
+                  ((/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem)/i.test(combinedMessage) ||
+                    /(?:abra|abrir)\s+(?:a\s+pasta\s+)?(?:de\s+imagens\s+)?(?:da\s+)?([a-zA-Z0-9_\- ]+)/i.test(combinedMessage)));
 
                 const prometeuAbrir =
+                  !temNegacaoAbrir &&
                   !querAbrirNavegador &&
                   /vou\s+abri[-a-z]*|abrir[-a-z]*\s+para\s+voc[êe]|vou\s+localizar\s+e\s+abrir|aberta\s+no\s+windows\s+explorer/i.test(messageObj?.content || "");
 
@@ -989,7 +996,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   // 1. Aspas na mensagem da IA (ex: pasta chamada "HUG")
                   if (!termoAlvo) {
                     const aspasMatch = (messageObj?.content || "").match(/["']([a-zA-Z0-9_\- ]{2,40})["']/);
-                    if (aspasMatch && aspasMatch[1] && !["abrir", "explorer", "windows", "hig"].includes(aspasMatch[1].toLowerCase())) {
+                    if (aspasMatch && aspasMatch[1] && !["abrir", "explorer", "windows", "hig", "novapasta", "nova pasta"].includes(aspasMatch[1].toLowerCase())) {
                       termoAlvo = aspasMatch[1].trim();
                     }
                   }
@@ -997,7 +1004,7 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   // 2. Pasta chamada ...
                   if (!termoAlvo) {
                     const mPromessa = (messageObj?.content || "").match(/pasta\s+(?:chamada\s+)?["']?([a-zA-Z0-9_\- ]+?)["']?(?:\s+na|\s+no|\s+localizada|\.|\,|$)/i);
-                    if (mPromessa && mPromessa[1] && !mPromessa[1].toLowerCase().includes("hig")) {
+                    if (mPromessa && mPromessa[1] && !["hig", "novapasta", "nova pasta"].includes(mPromessa[1].toLowerCase())) {
                       termoAlvo = mPromessa[1].trim();
                     }
                   }
@@ -1006,33 +1013,13 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   if (!termoAlvo) {
                     const mUser = combinedMessage.match(/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio)?\s*(?:de\s+imagens\s+da\s+|de\s+|da\s+|do\s+)?["']?([^"'\n\r\?\!]+)["']?/i);
                     if (mUser && mUser[1]) {
-                      termoAlvo = mUser[1]
+                      const extraido = mUser[1]
                         .replace(/^(?:a\s+que\s+est[áa]\s+na\s+home|a\s+que\s+est[áa]\s+no\s+desktop|a\s+pasta\s+)/i, "")
                         .replace(/\s+(?:na\s+home|no\s+desktop|na\s+[áa]rea\s+de\s+trabalho).*$/i, "")
                         .trim();
-                    }
-                  }
-
-                  // 4. Se o usuário falou da pasta recentemente criada na home/desktop
-                  if (!termoAlvo || /(?:home|desktop|[áa]rea\s+de\s+trabalho|criou|recente|pouco)/i.test(combinedMessage)) {
-                    const userProfile = process.env.USERPROFILE || "C:\\Users\\antho";
-                    const oneDriveDesktop = path.join(userProfile, "OneDrive", "Área de Trabalho");
-                    const standardDesktop = path.join(userProfile, "Desktop");
-                    const dDir = fs.existsSync(oneDriveDesktop) ? oneDriveDesktop : standardDesktop;
-                    if (fs.existsSync(dDir)) {
-                      try {
-                        const itens = fs.readdirSync(dDir, { withFileTypes: true })
-                          .filter((e) => e.isDirectory())
-                          .map((e) => ({
-                            nome: e.name,
-                            caminho: path.join(dDir, e.name),
-                            mtime: fs.statSync(path.join(dDir, e.name)).mtimeMs,
-                          }))
-                          .sort((a, b) => b.mtime - a.mtime);
-                        if (itens.length > 0) {
-                          termoAlvo = itens[0].caminho;
-                        }
-                      } catch {}
+                      if (extraido && !["novapasta", "nova pasta", "pasta"].includes(extraido.toLowerCase())) {
+                        termoAlvo = extraido;
+                      }
                     }
                   }
 

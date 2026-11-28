@@ -245,7 +245,10 @@ export class DesktopFSTools {
         .replace(/.*(?:trabalho|desktop|home)[\\/\s:]*/i, "")
         .replace(/^(?:na|no|em|da|de|pasta|arquivo)\s+/i, "")
         .trim();
-      const candidatoDesktop = path.join(desktopDir, nome || "NovaPasta");
+      if (!nome || ["novapasta", "nova pasta", "pasta"].includes(nome.toLowerCase())) {
+        return "";
+      }
+      const candidatoDesktop = path.join(desktopDir, nome);
       if (fs.existsSync(candidatoDesktop)) return candidatoDesktop;
       return candidatoDesktop;
     }
@@ -287,7 +290,21 @@ export class DesktopFSTools {
    */
   public static async abrirNoExplorer(caminho: string): Promise<RespostaOperacaoFS> {
     try {
+      if (!caminho || !caminho.trim()) {
+        return {
+          sucesso: false,
+          acao: "abrir",
+          mensagem: "Caminho não fornecido.",
+        };
+      }
       let p = DesktopFSTools.normalizarCaminhoWindows(caminho);
+      if (!p) {
+        return {
+          sucesso: false,
+          acao: "abrir",
+          mensagem: `Caminho ou arquivo não encontrado no computador: ${caminho}`,
+        };
+      }
 
       if (!fs.existsSync(p)) {
         // Tenta buscar no computador caso tenha vindo apenas o nome
@@ -356,7 +373,22 @@ export class DesktopFSTools {
    */
   public static async criarPasta(caminhoPasta: string): Promise<RespostaOperacaoFS> {
     try {
+      if (!caminhoPasta || !caminhoPasta.trim()) {
+        return {
+          sucesso: false,
+          acao: "criar_pasta",
+          mensagem: "Operação cancelada: nenhum nome de pasta foi informado.",
+        };
+      }
+
       const pastaDestino = DesktopFSTools.normalizarCaminhoWindows(caminhoPasta);
+      if (!pastaDestino || ["novapasta", "nova pasta"].includes(path.basename(pastaDestino).toLowerCase())) {
+        return {
+          sucesso: false,
+          acao: "criar_pasta",
+          mensagem: "Operação cancelada: informe o nome específico da pasta que deseja criar.",
+        };
+      }
 
       // Previne criação em caminhos críticos do sistema operacional
       if (/^[a-zA-Z]:\\Windows\\/i.test(pastaDestino) || /^[a-zA-Z]:\\Program Files/i.test(pastaDestino)) {
