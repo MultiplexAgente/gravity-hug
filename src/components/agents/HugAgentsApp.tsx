@@ -516,155 +516,152 @@ export function HugAgentsApp({ onLogout }: Props) {
           </button>
         </div>
 
-        {/* Rolagem Central da Sidebar */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-6 text-xs text-slate-400">
-          {/* SEÇÃO 1: HISTÓRICO DE CONVERSAS (NO TOPO) */}
-          <div className="space-y-1.5">
-            <div className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-              <span>Histórico de Conversas</span>
-              <span className="text-[10px] text-slate-600 font-normal">
-                {conversas.length} {conversas.length === 1 ? "chat" : "chats"}
-              </span>
-            </div>
+        {/* Rolagem Central da Sidebar: Histórico de Conversas */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 text-xs text-slate-400 min-h-0">
+          <div className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span>Histórico de Conversas</span>
+            <span className="text-[10px] text-slate-600 font-normal">
+              {conversas.length} {conversas.length === 1 ? "chat" : "chats"}
+            </span>
+          </div>
 
-            {conversas.length === 0 ? (
-              <p className="px-2 text-[11px] text-slate-600 italic">Nenhuma conversa arquivada.</p>
-            ) : (
-              <div className="space-y-0.5 max-h-[300px] overflow-y-auto pr-0.5">
-                {conversas.map((c) => {
-                  const ativa = conversaAtivaId === c.id;
-                  return (
-                    <div
-                      key={c.id}
-                      onClick={() => handleSelecionarConversa(c)}
-                      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer transition-all ${
-                        ativa
-                          ? "bg-white/[0.08] text-white font-medium"
-                          : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
-                      }`}
+          {conversas.length === 0 ? (
+            <p className="px-2 text-[11px] text-slate-600 italic">Nenhuma conversa arquivada.</p>
+          ) : (
+            <div className="space-y-0.5 pr-0.5">
+              {conversas.map((c) => {
+                const ativa = conversaAtivaId === c.id;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => handleSelecionarConversa(c)}
+                    className={`group flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer transition-all ${
+                      ativa
+                        ? "bg-white/[0.08] text-white font-medium"
+                        : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <MessageSquare className="size-3.5 shrink-0 opacity-60 text-emerald-400" />
+                      <span className="truncate text-xs">{c.title}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => handleExcluirConversa(e, c.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-rose-400 transition-opacity"
+                      title="Excluir conversa"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <MessageSquare className="size-3.5 shrink-0 opacity-60 text-emerald-400" />
-                        <span className="truncate text-xs">{c.title}</span>
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* SEÇÃO 2: MEUS AGENTES (POSICIONADA NO RODAPÉ, ACIMA DO PERFIL DO USUÁRIO) */}
+        <div className="border-t border-white/[0.08] bg-[#060a10] p-3 space-y-2 shrink-0">
+          <div className="flex items-center justify-between px-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <button
+              type="button"
+              onClick={toggleAgentes}
+              className="flex items-center gap-1.5 hover:text-slate-300 transition-colors select-none group cursor-pointer"
+              title={agentesAbertos ? "Ocultar agentes" : "Mostrar agentes"}
+            >
+              <ChevronDown
+                className={`size-3.5 transition-transform duration-200 text-slate-500 group-hover:text-slate-300 ${
+                  agentesAbertos ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+              <span>Meus Agentes</span>
+              <span className="text-[10px] text-slate-600 font-normal">
+                ({agentes.length})
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAgenteParaEditar(null);
+                setModalEditorAberto(true);
+              }}
+              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold text-[11px]"
+            >
+              <Plus className="size-3" /> Criar
+            </button>
+          </div>
+
+          {agentesAbertos && (
+            <div className="space-y-1 transition-all duration-200 max-h-52 overflow-y-auto pr-0.5">
+              {agentes.map((ag) => {
+                const IconComp = ICON_MAP[ag.avatarIcon] || MessageSquare;
+                const selecionado = agenteAtivo?.id === ag.id;
+                return (
+                  <div
+                    key={ag.id}
+                    onClick={() => {
+                      if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
+                        return;
+                      }
+                      setAgenteAtivo(ag);
+                      const convDoAgente = conversas.find((c) => c.agentId === ag.id);
+                      if (convDoAgente) {
+                        handleSelecionarConversa(convDoAgente);
+                      } else {
+                        handleNovoChat(ag);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left cursor-pointer transition-all group ${
+                      selecionado
+                        ? "bg-white/[0.08] text-white font-medium"
+                        : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <IconComp
+                        className={`size-4 shrink-0 transition-colors ${
+                          selecionado ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"
+                        }`}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs truncate leading-tight">{ag.name}</p>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      {ag.whatsappEnabled && (
+                        <span className="size-1.5 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
+                      )}
                       <button
                         type="button"
-                        onClick={(e) => handleExcluirConversa(e, c.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-rose-400 transition-opacity"
-                        title="Excluir conversa"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAgenteParaEditar(ag);
+                          setModalEditorAberto(true);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-white transition-opacity"
+                        title="Configurar agente"
                       >
-                        <Trash2 className="size-3.5" />
+                        <Sliders className="size-3" />
                       </button>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* SEÇÃO 2: MEUS AGENTES (EMBAIXO DO HISTÓRICO DE CONVERSAS COM OPÇÃO DE OCULTAR/MOSTRAR) */}
-          <div className="space-y-2 pt-3 border-t border-white/[0.06]">
-            <div className="flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <button
-                type="button"
-                onClick={toggleAgentes}
-                className="flex items-center gap-1.5 hover:text-slate-300 transition-colors select-none group cursor-pointer"
-                title={agentesAbertos ? "Ocultar agentes" : "Mostrar agentes"}
-              >
-                <ChevronDown
-                  className={`size-3.5 transition-transform duration-200 text-slate-500 group-hover:text-slate-300 ${
-                    agentesAbertos ? "rotate-0" : "-rotate-90"
-                  }`}
-                />
-                <span>Meus Agentes</span>
-                <span className="text-[10px] text-slate-600 font-normal">
-                  ({agentes.length})
-                </span>
-              </button>
+                  </div>
+                );
+              })}
 
               <button
                 type="button"
-                onClick={() => {
-                  setAgenteParaEditar(null);
-                  setModalEditorAberto(true);
-                }}
-                className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold text-[11px]"
+                onClick={() => setModalCanaisAberto(true)}
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-1"
               >
-                <Plus className="size-3" /> Criar
+                <div className="size-6 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
+                  <Share2 className="size-3.5" />
+                </div>
+                <span className="font-medium text-[11px]">Canais (WhatsApp, Insta, Face)</span>
               </button>
             </div>
-
-            {agentesAbertos && (
-              <div className="space-y-1 transition-all duration-200">
-                {agentes.map((ag) => {
-                  const IconComp = ICON_MAP[ag.avatarIcon] || MessageSquare;
-                  const selecionado = agenteAtivo?.id === ag.id;
-                  return (
-                    <div
-                      key={ag.id}
-                      onClick={() => {
-                        if (agenteAtivo?.id === ag.id && mensagens.length > 0) {
-                          return;
-                        }
-                        setAgenteAtivo(ag);
-                        const convDoAgente = conversas.find((c) => c.agentId === ag.id);
-                        if (convDoAgente) {
-                          handleSelecionarConversa(convDoAgente);
-                        } else {
-                          handleNovoChat(ag);
-                        }
-                      }}
-                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left cursor-pointer transition-all group ${
-                        selecionado
-                          ? "bg-white/[0.08] text-white font-medium"
-                          : "hover:bg-white/[0.04] text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <IconComp
-                          className={`size-4 shrink-0 transition-colors ${
-                            selecionado ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"
-                          }`}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-xs truncate leading-tight">{ag.name}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {ag.whatsappEnabled && (
-                          <span className="size-1.5 rounded-full bg-emerald-400 shrink-0" title="WhatsApp Ativo" />
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAgenteParaEditar(ag);
-                            setModalEditorAberto(true);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-white transition-opacity"
-                          title="Configurar agente"
-                        >
-                          <Sliders className="size-3" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  onClick={() => setModalCanaisAberto(true)}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/[0.03] transition-colors mt-2"
-                >
-                  <div className="size-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
-                    <Share2 className="size-3.5" />
-                  </div>
-                  <span className="font-medium">Canais (WhatsApp, Insta, Face)</span>
-                </button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Rodapé da Sidebar: Perfil do Usuário & Sair */}
