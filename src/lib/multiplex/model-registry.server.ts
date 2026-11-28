@@ -47,12 +47,12 @@ export interface RegistryEntry {
 export const MODEL_REGISTRY: RegistryEntry[] = [
   // ---------- OPENAI (alias público: gpt) ----------
   {
-    alias: "gpt", provider: "openai", modelId: "gpt-6.2-astra", tier: "flagship", status: "active",
+    alias: "gpt", provider: "openai", modelId: "gpt-4o", tier: "flagship", status: "active",
     capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis", "vision"],
-    contextWindow: 200_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
+    contextWindow: 128_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
   },
   {
-    alias: "gpt", provider: "openai", modelId: "gpt-4o", tier: "flagship", status: "active",
+    alias: "gpt", provider: "openai", modelId: "chatgpt-4o-latest", tier: "flagship", status: "active",
     capabilities: ["chat", "tools", "reasoning", "long_text", "coding", "analysis", "vision"],
     contextWindow: 128_000, toolCalling: true, vision: true, reasoning: true, streaming: true, latencyClass: "standard",
   },
