@@ -90,10 +90,10 @@ DIRETRIZES DE COMPORTAMENTO CONVERSACIONAL (MUITO IMPORTANTE):
 7. Responda PRIMEIRO e OBJETIVAMENTE ao que foi perguntado.
 8. É TERMINANTEMENTE PROIBIDO usar ícones de IA, estrelas, faíscas ou sparkles (como ✨, ⭐ ou qualquer símbolo similar).
 
-OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS WINDOWS):
+OPERAÇÕES NO COMPUTADOR DO USUÁRIO (SISTEMA DE ARQUIVOS E SISTEMA WINDOWS):
 - Você tem ferramentas nativas para interagir com o computador do usuário: buscar_arquivos, abrir_pasta_explorer, mover_arquivo, criar_pasta e listar_diretorio.
 - Quando o usuário mandar criar uma pasta (ex: "crie uma pasta HIG na minha área de trabalho"): CHAME OBRIGATORIAMENTE a ferramenta 'criar_pasta' passando o nome e local.
-- Quando o usuário solicitar abrir uma pasta ou arquivo (ex: "abra a pasta para mim", "abra a pasta HUG", "abra o arquivo"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer' ou 'buscar_arquivos'.
+- Quando o usuário solicitar abrir uma pasta, arquivo ou console de sistema do Windows (ex: "abra a pasta para mim", "abra a pasta HUG", "abra os drivers do mouse", "abra o gerenciador de dispositivos", "abra os drivers da impressora"): CHAME OBRIGATORIAMENTE 'abrir_pasta_explorer'. O sistema suporta nativamente o Gerenciador de Dispositivos (devmgmt.msc), configurações de mouse (main.cpl), impressoras e periféricos!
 - Quando o usuário solicitar mover arquivos: CHAME OBRIGATORIAMENTE 'mover_arquivo'.
 
 GERAÇÃO DE IMAGENS:
@@ -611,11 +611,11 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 type: "function",
                 function: {
                   name: "abrir_pasta_explorer",
-                  description: "Abre uma pasta ou arquivo diretamente no Windows Explorer ou no aplicativo padrão do Windows na tela do usuário. Aceita tanto o caminho completo quanto o nome simples da pasta/arquivo (ex: 'HUG', 'Loca Tudo', 'relatorio.pdf').",
+                  description: "Abre uma pasta, arquivo ou console/utilitário administrativo do Windows na tela do usuário. Aceita pastas/arquivos ('HUG', 'Loca Tudo', 'relatorio.pdf') e utilitários do sistema operacional como 'Gerenciador de Dispositivos', 'Drivers do Mouse' (devmgmt.msc), 'Impressoras' ou 'Painel de Controle'.",
                   parameters: {
                     type: "object",
                     properties: {
-                      caminho: { type: "string", description: "Nome da pasta/arquivo ou caminho a abrir" },
+                      caminho: { type: "string", description: "Nome da pasta/arquivo ou utilitário do Windows (ex: 'Gerenciador de Dispositivos', 'Drivers do Mouse', 'HUG')" },
                     },
                     required: ["caminho"],
                   },
@@ -971,12 +971,13 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                   }
                 }
 
-                // 4. Verificação de intenção de abrir pastas ou arquivos no Windows Explorer
+                // 4. Verificação de intenção de abrir pastas, arquivos ou consoles do Windows Explorer/Sistema
                 const temNegacaoAbrir = /(?:n[ãa]o|nunca|jamais|sem\s+autoriza|n[ãa]o\s+mandei|n[ãa]o\s+autorizei|n[ãa]o\s+era|errad)/i.test(combinedMessage);
                 const querAbrirPastaOuArquivo =
                   !temNegacaoAbrir &&
                   !querAbrirNavegador &&
-                  ((/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem)/i.test(combinedMessage) ||
+                  ((/(?:abra|abrir|open|mostr(?:e|ar))\s+(?:a\s+|o\s+|os\s+|as\s+)?(?:pasta|arquivo|diret[oó]rio|documento|foto|imagem|gerenciador|driver|drivers|painel|regi[aã]o|dispositivo)/i.test(combinedMessage) ||
+                    /(?:abra|abrir|mostr(?:e|ar))\s+(?:os\s+|as\s+|o\s+)?(?:drivers?|dispositivos?|gerenciador|impressoras?|mouse|filas?)/i.test(combinedMessage) ||
                     /(?:abra|abrir)\s+(?:a\s+pasta\s+)?(?:de\s+imagens\s+)?(?:da\s+)?([a-zA-Z0-9_\- ]+)/i.test(combinedMessage)));
 
                 const prometeuAbrir =
@@ -987,10 +988,18 @@ export const Route = createFileRoute("/api/ai/public-chat")({
                 if (querAbrirPastaOuArquivo || prometeuAbrir) {
                   let termoAlvo = "";
 
+                  // 0. Utilitários e Consoles do Sistema Windows (Gerenciador de Dispositivos, Drivers, Impressoras)
+                  const mUtilWindows = combinedMessage.match(/(?:gerenciador\s+de\s+dispositivos|drivers?\s+(?:do\s+|da\s+)?(?:mouse|impressora|v[ií]deo)?|drivers?|dispositivos?|impressoras?|filas?\s+de\s+impress[ãa]o|painel\s+de\s+controle|gerenciador\s+de\s+tarefas)/i);
+                  if (mUtilWindows) {
+                    termoAlvo = mUtilWindows[0].trim();
+                  }
+
                   // Se o usuário falou especificamente de uma empresa/pasta (ex: Loca Tudo Ferramentas, Loca Tudo)
-                  const mLocaTudo = combinedMessage.match(/(?:loca\s+tudo(?:\s+ferramentas)?|hug|hig|agro|safra)/i);
-                  if (mLocaTudo) {
-                    termoAlvo = mLocaTudo[0].trim();
+                  if (!termoAlvo) {
+                    const mLocaTudo = combinedMessage.match(/(?:loca\s+tudo(?:\s+ferramentas)?|hug|hig|agro|safra)/i);
+                    if (mLocaTudo) {
+                      termoAlvo = mLocaTudo[0].trim();
+                    }
                   }
 
                   // 1. Aspas na mensagem da IA (ex: pasta chamada "HUG")

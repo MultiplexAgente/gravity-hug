@@ -42,6 +42,44 @@ function formatarTamanho(bytes: number): string {
 }
 
 export class DesktopFSTools {
+  public static readonly UTILITARIOS_WINDOWS: { regex: RegExp; comando: string; nomeExibicao: string }[] = [
+    {
+      regex: /(?:gerenciador\s+de\s+dispositivos|device\s+manager|devmgmt|driver[s]?\s+do\s+mouse|driver[s]?\s+da\s+impressora|driver[s]?\s+de\s+v[ií]deo|drivers?|dispositivos?|mouse\s+e\s+outros)/i,
+      comando: "devmgmt.msc",
+      nomeExibicao: "Gerenciador de Dispositivos do Windows (com drivers de mouse, impressoras e hardware)",
+    },
+    {
+      regex: /(?:impressora|impressoras|fila[s]?\s+de\s+impress[ãa]o|arquivos?\s+de\s+impress[ãa]o|printers)/i,
+      comando: "control printers",
+      nomeExibicao: "Dispositivos e Impressoras do Windows",
+    },
+    {
+      regex: /(?:propriedades\s+do\s+mouse|configura[çc][õo]es\s+do\s+mouse|cursor\s+do\s+mouse)/i,
+      comando: "main.cpl",
+      nomeExibicao: "Propriedades de Mouse do Windows",
+    },
+    {
+      regex: /(?:gerenciador\s+de\s+tarefas|task\s+manager|taskmgr|processos)/i,
+      comando: "taskmgr",
+      nomeExibicao: "Gerenciador de Tarefas do Windows",
+    },
+    {
+      regex: /(?:painel\s+de\s+controle|control\s+panel)/i,
+      comando: "control",
+      nomeExibicao: "Painel de Controle do Windows",
+    },
+    {
+      regex: /(?:desinstalar|programas\s+e\s+recursos|appwiz)/i,
+      comando: "appwiz.cpl",
+      nomeExibicao: "Programas e Recursos do Windows",
+    },
+    {
+      regex: /(?:configura[çc][õo]es\s+do\s+windows|ms-settings)/i,
+      comando: "ms-settings:",
+      nomeExibicao: "Configurações do Windows",
+    },
+  ];
+
   /**
    * 1. Busca arquivos no PC pelo nome ou termo (BFS ultra-rápido nativo em Node.js com profundidade controlada)
    */
@@ -61,6 +99,26 @@ export class DesktopFSTools {
       }
 
       const termoLower = termoLimpo.toLowerCase();
+
+      // Interceptação imediata de utilitários e consoles do sistema Windows (ex: drivers, gerenciador de dispositivos)
+      const matchUtil = DesktopFSTools.UTILITARIOS_WINDOWS.find((u) => u.regex.test(termoLower));
+      if (matchUtil) {
+        return {
+          sucesso: true,
+          acao: "buscar",
+          mensagem: `Localizado console de sistema: ${matchUtil.nomeExibicao}.`,
+          dados: [
+            {
+              nome: matchUtil.nomeExibicao,
+              caminhoCompleto: matchUtil.comando,
+              tamanhoBytes: 0,
+              tamanhoFormatado: "Sistema Windows",
+              eDiretorio: false,
+              modificadoEm: new Date().toISOString().substring(0, 19),
+            },
+          ],
+        };
+      }
 
       // Diretórios base para varredura rápida (Desktop tem prioridade máxima)
       const bases: string[] = [];
@@ -297,7 +355,27 @@ export class DesktopFSTools {
           mensagem: "Caminho não fornecido.",
         };
       }
-      let p = DesktopFSTools.normalizarCaminhoWindows(caminho);
+
+      const caminhoLimpo = caminho.trim();
+
+      // Interceptação de utilitários e consoles do sistema operacional Windows (devmgmt.msc, printers, etc.)
+      const matchUtil = DesktopFSTools.UTILITARIOS_WINDOWS.find((u) => u.regex.test(caminhoLimpo) || caminhoLimpo.toLowerCase().includes(u.comando.toLowerCase()));
+      if (matchUtil) {
+        const { exec } = await import("node:child_process");
+        try {
+          exec(`powershell.exe -NoProfile -Command "Start-Process '${matchUtil.comando}'"`);
+        } catch {
+          exec(`cmd.exe /c start "" "${matchUtil.comando}"`);
+        }
+        return {
+          sucesso: true,
+          acao: "abrir",
+          mensagem: `O ${matchUtil.nomeExibicao} foi aberto com sucesso na sua tela.`,
+          dados: { utilitario: matchUtil.comando },
+        };
+      }
+
+      let p = DesktopFSTools.normalizarCaminhoWindows(caminhoLimpo);
       if (!p) {
         return {
           sucesso: false,
